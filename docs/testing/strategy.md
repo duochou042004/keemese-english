@@ -45,7 +45,7 @@ Not used: snapshot tests of component markup (brittle, low signal), EF in-memory
 One parameterized integration test class that **discovers** every endpoint under `/api/me/**` and `/api/files/{id}`, so new endpoints can't skip it:
 1. Seed students A and B, each with sessions, tasks, attempts, materials, notes and files.
 2. For each A-owned resource ID in each route template: call as B → expect **404**.
-3. Call every `/api/me` GET as A → assert the response doesn't contain A's private note text, prep note text, `correct`/`accept`/`explanation` keys (before release), or any of B's IDs.
+3. Call every `/api/me` GET as A → assert the response doesn't contain A's private note text, prep note text, tutor-only profile values (phone, contact channels, parents, level, strengths, weaknesses, learning notes, custom fields), `correct`/`accept`/`explanation` keys or any score fields (before release), or any of B's IDs.
 4. Call every tutor endpoint as a student → **403**. Call everything except the anonymous allowlist without a cookie → **401**.
 
 A route the discovery can't fill (a new parameter name) **fails the test**, so the author has to add a fixture mapping.

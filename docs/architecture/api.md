@@ -37,6 +37,7 @@ Conventions are in [ADR-0016](../decisions/0016-minimal-apis-and-contracts.md). 
 | PATCH | `/api/students/{id}` | Edit profile and learning profile fields |
 | POST | `/api/students/{id}/archive` · `/restore` | Deactivate or reactivate (FR-AUTH-07) |
 | POST | `/api/students/{id}/reset-password` | → `{temporaryPassword}` (FR-AUTH-06) |
+| POST | `/api/students/{id}/unlock` | Clear the lockout (FR-AUTH-AC9) |
 | DELETE | `/api/students/{id}` | Permanent delete. Body `{confirmName}` must match (FR-STU-06) |
 | GET | `/api/students/{id}/overview` | Workspace header: next session, open tasks, goals summary, pinned notes |
 
@@ -83,7 +84,7 @@ Conventions are in [ADR-0016](../decisions/0016-minimal-apis-and-contracts.md). 
 | POST | `/api/activities` | Create with sections and items. Inline new questions are created in the bank |
 | GET, PUT, DELETE | `/api/activities/{id}` | Full builder save (versioned). DELETE → 409 if assigned |
 | POST | `/api/activities/{id}/duplicate` · `/archive` · `/restore` | |
-| POST | `/api/activities/{id}/assign` | `{studentIds[], availableFrom?, dueAt?, metricId?}` → creates student activities and snapshots, and grants materials |
+| POST | `/api/activities/{id}/assign` | `{studentIds[], availableFrom?, dueAt?, metricId?, metricValue?: "percent"\|"score"}` → creates student activities and snapshots, and grants materials. `metricId` must belong to each listed student, so assigning to several students with a metric means one metric per student: the client sends one request per student, or omits the metric |
 | GET | `/api/student-activities?studentId&status&activityId` | `status=submitted` is the review queue (FR-ACT-14) |
 | GET | `/api/student-activities/{id}` | With attempts summary |
 | PATCH | `/api/student-activities/{id}` | `{dueAt?, extraAttempts?}` |
@@ -135,7 +136,7 @@ Conventions are in [ADR-0016](../decisions/0016-minimal-apis-and-contracts.md). 
 | GET | `/api/me/tasks?status=todo\|overdue\|submitted\|graded` | |
 | GET | `/api/me/tasks/{studentActivityId}` | Redacted snapshot overview |
 | POST | `/api/me/tasks/{studentActivityId}/attempts` | Start → `{attemptId, deadlineAt}`. Checks availability, attempts left, and that no attempt is already open |
-| GET | `/api/me/attempts/{attemptId}` | Redacted items + saved answers + `deadlineAt` (+ results if released) |
+| GET | `/api/me/attempts/{attemptId}` | Redacted items + saved answers + `deadlineAt`. Scores, feedback and answer keys only after release ([redaction](../backend/activity-engine.md#redaction)) |
 | PUT | `/api/me/attempts/{attemptId}/answers/{itemKey}` | Autosave `{response, fileIds?}`. 409 after submit, 422 `attempts.time_expired` after deadline + 30 s |
 | POST | `/api/me/attempts/{attemptId}/submit` | Auto-grades. Releases immediately if the policy allows |
 | POST | `/api/me/files` | Answer uploads (student limits, OD-03). Files are owned by the uploader |

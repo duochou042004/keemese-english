@@ -10,7 +10,7 @@ The spec allows "JWT or cookie" (§36). The baseline forbids long-lived credenti
 - **Cookie authentication**, same origin. The production SPA is served by the API (ADR-0005); in development the Vite dev server proxies `/api` to Kestrel. **No CORS configuration exists.**
 - Cookie settings: `HttpOnly`, `Secure` (except plain-HTTP local development), `SameSite=Lax`, name `__Host-keemese` in production. Sliding expiration of 8 hours, or 30 days with "remember me".
 - **Antiforgery**: a token is issued after login in a readable `XSRF-TOKEN` cookie. The SPA sends it in an `X-XSRF-TOKEN` header. Middleware validates it on every unsafe method (POST, PUT, PATCH, DELETE) for cookie-authenticated requests.
-- Security stamp validation on every request (cached for at most 1 minute), so a password change, reset or deactivation ends existing sessions.
+- Security stamp validation on **every request** (`SecurityStampValidatorOptions.ValidationInterval = TimeSpan.Zero`), so a password change, reset or deactivation ends existing sessions on their next request. That's one indexed user lookup per request, negligible at this scale.
 - Data Protection keys persist to the data volume (`/data/keys`), so restarts don't log everyone out.
 - API returns `401` / `403` with ProblemDetails, never redirects to a login page.
 

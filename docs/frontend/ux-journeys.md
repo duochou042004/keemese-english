@@ -22,7 +22,7 @@ Personas for realistic data (invented): tutor **Cô Lan**; students **Nguyễn M
 
 Budget: **≤ 7 interactions** (FR-LES-AC1). Absent or cancelled: **2** (status + save).
 States: a save failure keeps every field and shows the error at the top of the sheet. Closing the sheet with unsaved input asks for confirmation. On a phone, the sheet is full-screen with the Save button sticky at the bottom.
-Not in the flow: navigating to the student workspace (it's reachable through a link in the sheet header).
+Not in the flow: navigating to the student workspace (it's reachable through a link in the sheet header). The same sheet also opens from the student workspace's Sessions tab, which is the spec's "Open student" path (§48). Both entry points are proposed in **OD-07**.
 
 <a id="j2"></a>
 
@@ -76,7 +76,7 @@ Student → **Plan** tab. Phases are vertical sections; items are rows with a st
 <a id="j7"></a>
 
 ## J7 — Create a lesson plan and schedule sessions · M5
-Library → Lessons → + New: title, duration, body, materials, suggested homework → Save. Calendar → click a slot (or + Schedule): student, start time (prefilled from the slot), duration (from the lesson), mode, meeting link (remembered per student) → Save. *(4 interactions from the calendar.)* OD-01 adds "Duplicate to next week" on a session.
+Library → Lessons → + New: title, duration, body, materials, suggested homework → Save. Calendar → click a slot (or + Schedule): student, start time (prefilled from the slot), duration (from the lesson), mode, meeting link (prefilled from the student’s most recent session, so no extra column) → Save. *(4 interactions from the calendar.)* OD-01 adds "Duplicate to next week" on a session.
 
 <a id="j8"></a>
 

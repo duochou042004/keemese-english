@@ -46,6 +46,8 @@ Hooks are a safety net, not the only control: CI and branch protection enforce t
 - `git commit` / `git merge` while the current branch is `master` or `develop` (merges happen through PRs after approval)
 - `Edit`/`Write` to `.env` or `.env.*` other than `.env.example`
 
+The guard matches the **raw command text**, so it also blocks harmless commands that merely contain a pattern (for example `echo "git push --force"`). That trade-off is deliberate: rephrase the command, or ask the Lead Coordinator to run it.
+
 Tests: `node --test ".claude/hooks/*.test.mjs"` (6 tests, passing on 2026-10-17; added to CI in T-003). Hooks are loaded from `.claude/settings.json` when a session starts. Check them with `/hooks` in an interactive `claude` terminal.
 
 ## Context budget and handoff

@@ -48,7 +48,7 @@ Weekly. Ecosystems: `nuget`, `npm` (`/web`), `github-actions`, `docker` (`/deplo
 - `permissions: contents: read` at the top level. Jobs that need more ask for exactly that.
 - No `pull_request_target`. Fork PRs run without secrets, and none are needed.
 - First-party `actions/*` are pinned to a major version (updated by Dependabot). **Third-party actions are pinned to a full commit SHA** with a version comment.
-- Branch protection (once on GitHub): `develop` and `master` require a PR, the `ci` checks and 1 approval, and allow no force-push or deletion. The Lead Coordinator is the approver.
+- Branch protection (once on GitHub): `develop` and `master` require a PR and the `ci` checks, with **0 required approvals** (GitHub does not let an author approve their own PR, and the owner is the only maintainer). No force-push or deletion. Agents open PRs; the Lead Coordinator records approval (review or comment) and performs the merge.
 
 ## Release procedure
 1. On `develop`, every milestone gate in [strategy.md](strategy.md#quality-gates) is green, and `progress.json` and the release notes are updated (`docs/delivery/releases.md`, created at the first release).

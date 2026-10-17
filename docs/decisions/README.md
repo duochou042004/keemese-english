@@ -42,7 +42,7 @@ Template for a new ADR: copy the shape of [0002](0002-modular-monolith.md) (Cont
 | PD-05 | No general content versioning. Assigned work is snapshotted (ADR-0009) | §32, §43 | Proposed, not objected to |
 | PD-06 | Feedback = rubric criteria scores + text comments (timestamps typed as text). No annotation UI in MVP | §20 | Proposed, not objected to |
 | PD-07 | No self-service forgot-password in MVP. The tutor resets the password and the student must change it at next login | §4.3 | **Approved** 2026-10-17 (C7) |
-| PD-08 | Navigation follows tasks: Learning plans and Progress live **inside** the student workspace rather than as top-level menus; Assignments and Assessments share one "Activities" area with a kind filter; a top-level "Review" queue is added | §41 ("can be adjusted") | Proposed in Phase 1, **needs review** with the IA doc |
+| PD-08 | *(moved to OD-09 so the owner can decide it before M1)* | — | — |
 | PD-09 | Bilingual UI: Vietnamese (default) and English | — | **Approved** 2026-10-17 |
 | PD-10 | Public GitHub repository | — | **Approved** 2026-10-17 |
 | PD-11 | Deployment target undecided. Keep it portable (single container image + PostgreSQL + volume) | — | **Approved** 2026-10-17 |
@@ -57,7 +57,10 @@ Template for a new ADR: copy the shape of [0002](0002-modular-monolith.md) (Cont
 |---|---|---|---|
 | OD-01 | Recurring lessons are Phase 2 (§43), but creating every weekly session by hand costs clicks. Add a small "Duplicate to next week" action in MVP? | Yes, as a single action, no recurrence rules | M5 |
 | OD-02 | Product display name and logo (repository: `keemese-english`) | Placeholder name from config `APP_NAME`; neutral wordmark | M1 (cosmetic) |
-| OD-03 | Upload limits | Documents and images 25 MB, audio 50 MB, video 200 MB, total per student unlimited. Values come from config | M3 |
+| OD-03 | Upload limits | Tutor: documents and images 25 MB, audio 50 MB, video 200 MB per file. Students: 25 MB per file and a **500 MB quota per student** (threat T20). All values come from config | M3 |
 | OD-04 | A student-visible lesson summary ("what we covered") next to the private note | Yes (FR-LES-05) | M5 |
 | OD-05 | Rich text editor: Tiptap (ProseMirror JSON) vs Markdown textarea with preview | Decide via a 1-day spike at the start of M3; lean Tiptap for tutor usability | M3 |
 | OD-06 | Hosting target (TLS proxy, backups, volume type) | Defer until before release 1.0 (PD-11) | R1.0 |
+| OD-07 | Spec §48 starts the after-lesson flow with "Open student". The plan (J1) also starts it from the **Today** dashboard, which saves 2 interactions | Both entry points: Today (primary, measured by E2E-J1) and the student workspace's Sessions tab | M5 |
+| OD-08 | Should students see their own learning profile (level, strengths, weaknesses)? The spec (§26) lists what students see and doesn't mention it | Hidden in MVP (it's the tutor's working notes). A per-field "visible to student" flag later if wanted | M2 |
+| OD-09 | Navigation differs from the §41 suggestion ("can be adjusted"): Learning plans and Progress live **inside** the student workspace instead of top-level menus; Assignments and Assessments share one "Activities" area with a kind filter; a top-level "Review" queue is added ([IA](../frontend/information-architecture.md)) | Accept as proposed | **M1** (AppShell) |

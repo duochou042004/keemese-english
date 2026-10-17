@@ -46,6 +46,8 @@ flowchart TB
     Infra[Infrastructure: AppDbContext, IFileStorage, IClock, CurrentUser]
   end
   Students --> Identity
+  Activities --> Students
+  Lessons --> Students
   Activities --> QuestionBank
   Activities --> Content
   Lessons --> Content
@@ -59,13 +61,15 @@ flowchart TB
 Arrows mean "calls the `Contracts` of". Notes on the less obvious dependencies:
 - Lessons → Activities: the wrap-up step assigns homework.
 - LearningPlans → Students: plan items link to goals.
+- Activities → Students: results are recorded into metrics (`IMetricRecorder`), and assignees are checked to be active students (`IStudentDirectory`).
+- Lessons → Students: the wrap-up writes the private note (`ITeacherNotes`).
 
 `Progress` reads across modules **by query only** (it has no write access), which is the one sanctioned cross-module read path (ADR-0015).
 
 | Module | Owns (tables) | Exposes (`Contracts`) |
 |---|---|---|
 | Identity | `users` (+ Identity token/claim tables), `audit_events` | `ICurrentUser`, `IAccountService` (create student login, reset, deactivate) |
-| Students | `student_profiles`, `goals`, `metrics`, `metric_readings`, `teacher_notes` | `IStudentDirectory` (exists/active, display name), `IMetricRecorder` |
+| Students | `student_profiles`, `goals`, `metrics`, `metric_readings`, `teacher_notes` | `IStudentDirectory` (exists/active, display name), `IMetricRecorder`, `ITeacherNotes` (add a note linked to a session or activity) |
 | Content | `folders`, `content_items`, `stored_files`, `content_grants` | `IContentGrants` (grant/revoke by source, can-access), `IFileService` |
 | QuestionBank | `questions`, `question_files` | `IQuestionReader` (fetch for snapshot) |
 | Activities | `activities`, `activity_sections`, `activity_items`, `activity_materials`, `student_activities`, `attempts`, `answers`, `answer_files` | `IActivityAssigner` (assign, used by Lessons wrap-up), `IStudentActivityReader` |

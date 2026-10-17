@@ -4,7 +4,7 @@ ID format: `FR-<AREA>-<nn>`. **Every feature in code must trace to an ID here or
 
 Columns: **M** = milestone ([milestones](../delivery/milestones.md)). **Spec** = section of the source spec.
 
-Acceptance criteria (AC) are written so they can become tests. Test IDs reuse the FR ID (for example `FR-STU-01-AC2`).
+Acceptance criteria (AC) are written so they can become tests. ACs are numbered **per area**, and tests and docs cite them as `FR-<AREA>-AC<n>` (for example `FR-AUTH-AC5`, `FR-LES-AC1`).
 
 ---
 
@@ -31,7 +31,8 @@ Acceptance criteria (AC) are written so they can become tests. Test IDs reuse th
 - AC5: A student with `mustChangePassword` can call only `change-password`, `me` and `logout` until they change it (API enforced, not just UI).
 - AC6: A password change or reset invalidates that user's other sessions (security stamp).
 - AC7: A reset shows the new temporary password **once** to the tutor. It is never stored in plain text or logged.
-- AC8: A deactivated student gets the generic login error, and any existing session stops working within one request.
+- AC8: A deactivated student gets the generic login error, and any existing session stops working on its next request (the security stamp is validated on every request, ADR-0004).
+- AC9: The tutor can unlock a locked-out student, and the operator reset CLI also clears the tutor's lockout (threat T19).
 
 ## STU — Students and student workspace
 
@@ -49,7 +50,8 @@ Acceptance criteria (AC) are written so they can become tests. Test IDs reuse th
 - AC1: Creating a student with just the 3 required fields succeeds in ≤ 1 form. Optional groups are collapsed by default (§40.5).
 - AC2: Usernames are unique and case-insensitive. A duplicate returns field error `students.username_taken`.
 - AC3: Searching "nguyen" matches "Nguyễn".
-- AC4: The create flow then offers (does not force) "Set a goal" and "Create learning plan" (§49).
+- AC4: The create flow then offers (does not force) the follow-up actions **that exist at that milestone**: "Schedule first session" (M5), "Set a goal" (M2), "Create learning plan" (M6) (§49). Before a feature ships, its action is hidden, not disabled. E2E-J2 asserts only the actions available at the gate being run.
+- AC6: Editing any profile field saves with optimistic concurrency. A stale edit gets `409 concurrency.conflict` and the UI offers to reload (FR-STU-02).
 - AC5: Permanent delete removes the student's rows and files. Afterwards the files return 404.
 
 ## GOAL — Goals and metrics
@@ -125,6 +127,8 @@ Acceptance criteria (AC) are written so they can become tests. Test IDs reuse th
 - AC2: The wrap-up is one transaction. On failure nothing is half-saved and the form keeps its input.
 - AC3: The student never sees preparation notes or private notes. They do see the summary.
 - AC4: Session times display in the viewer's time zone with an unambiguous date format for the current language.
+- AC5 (FR-LES-03): A student's Lessons page lists only their own upcoming sessions, soonest first, with time, mode and a Join button for online sessions. Another student's session ID → 404.
+- AC6: The student-visible summary in FR-LES-05 is subject to **OD-04**. If OD-04 is rejected, the wrap-up keeps only the private note.
 
 ## NOTE — Private teacher notes
 
@@ -196,7 +200,7 @@ Assignments (homework) and assessments (quizzes, tests, mock exams) share **one 
 
 | ID | Requirement | Spec | M |
 |---|---|---|---|
-| FR-DASH-01 | Tutor "Today": today's sessions in time order with Join and Wrap-up actions, review queue count and top items, "needs attention" (overdue work, absences, inactive students), upcoming sessions, quick actions (add student, schedule, create activity) | §27, §55 | M1 shell, M7 |
+| FR-DASH-01 | Tutor "Today": today's sessions in time order with Join and Wrap-up actions, review queue count and top items, "needs attention" (overdue work, absences, inactive students), **recent student activity** (latest submissions, starts and completions, max 10), upcoming sessions, quick actions (add student, schedule, create activity) | §27, §55 | M1 shell, M7 |
 | FR-DASH-02 | Student "Home": greeting, primary goal progress, tasks due (soonest first), next session with Join, latest released result | §26 | M1 shell, M7 |
 
 **AC**
@@ -220,7 +224,7 @@ Assignments (homework) and assessments (quizzes, tests, mock exams) share **one 
 | ID | Requirement | Verification |
 |---|---|---|
 | NFR-SEC-01 | **Student isolation:** a student can read or write only their own records and their granted content | Isolation suite on every `/api/me/**` and file endpoint |
-| NFR-SEC-02 | Private teacher data (notes, preparation notes, answer keys before release) is never exposed to students | DTO separation and API tests |
+| NFR-SEC-02 | Tutor-only data is never exposed to students: private notes, preparation notes, answer keys and per-answer scores before release, and the tutor-only profile fields (contacts, phone, parents, level, strengths, weaknesses, learning notes, custom fields; see the [visibility matrix](../architecture/domain-model.md#visibility-matrix-what-a-student-can-see)) | DTO separation, the reflection test and the isolation suite |
 | NFR-SEC-03 | Files are served only through authorized endpoints. There are no public or guessable URLs | File access tests |
 | NFR-SEC-04 | No secrets in Git. Configuration comes from environment variables. `.env.example` holds placeholders only | Secret scan in CI, review |
 | NFR-SEC-05 | Credentials never live in browser storage. Auth uses HttpOnly cookies | Review and E2E checks |

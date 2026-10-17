@@ -54,7 +54,8 @@ They are registered in a dictionary keyed by `Type`. Adding a type (Phase 2: mat
 ## Redaction
 
 `RedactForStudent(snapshot, releasedAndShowAnswers)`:
-- Before release, or when `showAnswers = never`: remove `payload` answer keys (`correct`, `accept`), `explanation`, and the per-item points detail is kept (students can see point values).
+- Before release, or when `showAnswers = never`: remove `payload` answer keys (`correct`, `accept`) and `explanation`. Item point values stay visible, since they help the student plan.
+- **Before release, no scores at all**: no per-answer `autoScore`/`manualScore`/`finalScore`, no attempt totals, no `percent`/`passed`. Otherwise the per-answer auto scores would reveal which choices were correct (threat T21). Students see "Submitted · waiting for review" until release.
 - After release with `showAnswers = after_grading`: include the answer keys and explanations.
 - Applied in one function used by **every** `/api/me` task and attempt response. The isolation suite checks for the absence of `correct` / `accept` / `explanation` keys before release.
 
@@ -64,7 +65,7 @@ They are registered in a dictionary keyed by `Type`. Adding a type (Phase 2: mat
 2. **Autosave**: `PUT answer`. Allowed while the attempt is `in_progress` and `now ≤ deadline_at + 30 s` grace. The client saves on change (debounced 800 ms) and on blur, and shows "Saved · 12:03".
 3. **Lazy expiry**: any read or write of an attempt past `deadline_at + 30 s` first auto-submits it (same path as submit, with `submitted_at = deadline_at`).
 4. **Submit**: grade every item. If **no** item needs review and `release_policy = immediate` → attempt `graded`, release now. Otherwise the attempt is `submitted` and the student activity is `submitted` (it enters the review queue).
-5. **Tutor grade**: set manual scores (0 ≤ score ≤ points) and comments, overall comment, rubric. `release: true` → attempt `graded`, `released_at` set, best-attempt recomputed, metric reading recorded if `metric_id` is set (value = `percent`, or the raw score if the metric's unit is "points"; the tutor picks this when assigning).
+5. **Tutor grade**: set manual scores (0 ≤ score ≤ points) and comments, overall comment, rubric. `release: true` → attempt `graded`, `released_at` set, best-attempt recomputed, metric reading recorded if `metric_id` is set. The value is the student activity's `percent` or its raw `score`, according to `metric_value` (`percent` | `score`), which the tutor picks when assigning.
 6. **Best attempt** (PD-13): highest `total_score` among graded attempts. Ties → the earliest attempt.
 
 ## Progress math (ADR-0015)

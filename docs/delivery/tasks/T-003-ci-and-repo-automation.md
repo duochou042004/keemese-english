@@ -15,7 +15,7 @@ Every PR to `develop`/`master` is checked on Linux within GitHub Free limits, wi
 - `.github/workflows/compat.yml` (weekly + manual + `compat` label): Windows and macOS build + unit + web checks.
 - `.github/dependabot.yml`: nuget, npm (`/web`), github-actions, docker (`/deploy`), weekly, grouped minor/patch.
 - A `docs/testing/ci.md` update if anything differs from the design (it's the source of truth for CI).
-- After the push (owner-approved): turn on branch protection for `master`/`develop` (require PR + `ci` checks + 1 approval, no force-push), secret scanning and push protection. **These are settings changes in GitHub: the owner does them, or approves each one explicitly.**
+- After the push (owner-approved): turn on branch protection for `master`/`develop` (require a PR + the `ci` checks, **0 required approvals** because GitHub does not allow approving your own PR and the owner is the only maintainer, no force-push or deletion; the Lead Coordinator approval is recorded as a PR comment or review before they merge), secret scanning and push protection. **These are settings changes in GitHub: the owner does them, or approves each one explicitly.**
 
 ## Inputs
 - docs/testing/ci.md · docs/security/threat-model.md (T15, T16) · docs/decisions/0001
