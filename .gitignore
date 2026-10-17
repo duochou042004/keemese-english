@@ -1,0 +1,40 @@
+# Secrets — never commit real values; use .env.example as the template.
+.env
+.env.*
+!.env.example
+*.pfx
+*.key
+appsettings.*.local.json
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+coverage/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+playwright-report/
+test-results/
+blob-report/
+
+# Local runtime data (uploads, db dumps)
+.data/
+*.dump
+
+# Editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Claude Code local-only settings
+.claude/settings.local.json
+.claude/worktrees/
