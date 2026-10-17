@@ -7,7 +7,7 @@ Phase 0 found a folder with two Markdown files and no Git repository, so there w
 
 ## Decision
 - Initialize Git with `master`. The first commit imports the spec unchanged. `develop` branches from it. Work happens on `feature/<topic>` and `fix/<topic>` cut from `develop`.
-- The spec files stay at the repository root, unrenamed, because they are the source of truth. All derived docs live in `docs/`.
+- The spec files live **unrenamed** in `docs/spec/`: the source-of-truth spec and the ideation notes. *(Amended 2026-10-17 at the owner's request: they moved there from the repository root. Content unchanged; `git log --follow` keeps their history.)* All derived docs live elsewhere in `docs/`. **Never edit `docs/spec/*` without an explicit product-owner request.** Changes in scope go into PD/OD entries instead.
 - Top-level layout once code exists:
   ```text
   src/Keemese.Api/            ASP.NET Core host + modules (ADR-0002)
@@ -15,7 +15,8 @@ Phase 0 found a folder with two Markdown files and no Git repository, so there w
   tests/Keemese.IntegrationTests/  Testcontainers PostgreSQL
   web/                        Vite React SPA (+ web/e2e Playwright)
   deploy/                     compose.yaml, Dockerfile
-  docs/                       documentation
+  docs/spec/                  product spec (source of truth) + ideation notes, read-only
+  docs/                       derived documentation
   .claude/ AGENTS.md CLAUDE.md progress.json
   ```
 - Merging into `develop` requires: green CI, the applicable checks from the [testing strategy](../testing/strategy.md), updated docs and `progress.json`, and **explicit approval from the Lead Coordinator**. Releases merge `develop → master` with a `vX.Y.Z` tag.

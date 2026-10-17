@@ -33,7 +33,7 @@ flowchart LR
 | **Reference docs** (on demand) | Detailed design and procedures | `docs/**` |
 | **Skills** (reusable procedures, loaded when invoked) | `handoff`, `verify-change`, `new-adr` | `.claude/skills/*/SKILL.md` |
 | **Subagents** (isolated context) | Research, specialist implementation, independent review | `.claude/agents/*.md` |
-| **Hooks** (deterministic guards, no judgment) | Block destructive git commands, direct commits to protected branches, and edits to real `.env` files | `.claude/settings.json` → `.claude/hooks/guard.mjs` |
+| **Hooks** (deterministic, no judgment) | Guard destructive commands; measure context and inject tier warnings; brief new sessions from repository state | `.claude/settings.json` → `.claude/hooks/{guard,context-monitor,session-start}.mjs` (+ `.claude/statusline.mjs`) |
 | **CI** (the final, tool-independent gate) | Build, tests, scans | `.github/workflows/*` |
 
 Hooks are a safety net, not the only control: CI and branch protection enforce the same rules on the server side.
@@ -48,15 +48,11 @@ Hooks are a safety net, not the only control: CI and branch protection enforce t
 
 The guard matches the **raw command text**, so it also blocks harmless commands that merely contain a pattern (for example `echo "git push --force"`). That trade-off is deliberate: rephrase the command, or ask the Lead Coordinator to run it.
 
-Tests: `node --test ".claude/hooks/*.test.mjs"` (6 tests, passing on 2026-10-17; added to CI in T-003). Hooks are loaded from `.claude/settings.json` when a session starts. Check them with `/hooks` in an interactive `claude` terminal.
+Tests: `node --test ".claude/hooks/*.test.mjs"` (13 tests covering guard, context tiers and session briefing; passing on 2026-10-17; added to CI in T-003). Hooks are loaded from `.claude/settings.json` when a session starts. Check them with `/hooks` in an interactive `claude` terminal.
 
 ## Context budget and handoff
 
-- **Measure, don't guess.** Claude Code exposes `context_window.used_percentage` to the status line (an optional statusline script can display it). Codex and Cursor show their own indicators in the UI. Where no reliable indicator exists, assume high usage after about 40 tool calls or about 25 large file reads and hand off early.
-- Thresholds (configurable in `progress.json` → `policy.context`): **warn at 70 %**, **stop at 80 %**.
-- At **warn**: finish the smallest safe unit (never stop mid-edit with a broken build if it can be avoided), commit on the feature branch, then run the **`handoff` skill** ([handoff.md](handoff.md)).
-- At **stop**: no new work. Only record state and hand off.
-- Keep always-loaded files small (`AGENTS.md` ≤ 150 lines; Codex's default combined limit is 32 KiB). Never paste logs, transcripts or whole docs into prompts. Reference paths instead.
+The authority is [handoff.md](handoff.md): **token-based** tiers (WARN 250k, HANDOFF 320k, HARD STOP 400k, never 500k; percentage fallback for small windows). These are measured from the real transcript by `.claude/hooks/context-monitor.mjs`, which injects warnings into the agent's context. At startup, `.claude/hooks/session-start.mjs` gives every new session a verified briefing of the repository state. Keep always-loaded files small, never paste logs, transcripts or whole docs into prompts, and reference paths instead.
 
 ## Evaluation protocol for agent work
 

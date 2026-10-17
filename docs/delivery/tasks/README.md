@@ -7,7 +7,7 @@ One file per task: `T-<milestone><nn>-<slug>.md` (M0 tasks are `T-001`…, M1 ta
 ```markdown
 # T-XXX: <title>
 
-- Milestone: Mx · Ladder level: Lx · Depends on: T-… · Branch: feature/<slug>
+- Milestone: Mx · Ladder level: Lx · Depends on: T-… · Branch: feature/<slug> · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
 - Status: not_started | in_progress | in_review | done   (mirror progress.json)
 
 ## Objective

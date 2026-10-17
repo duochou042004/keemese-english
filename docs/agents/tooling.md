@@ -8,7 +8,8 @@ All three follow the same rules (`AGENTS.md`), the same outer loop ([harness.md]
 | Subagents | `.claude/agents/*.md` (frontmatter: `name`, `description`, `tools`, `model`, `isolation`, `maxTurns`, …) | No project subagent files. Run roles as separate Codex sessions or tasks, pasting the role contract from [operating-model.md](operating-model.md) | No project subagent files. Use separate chats or background agents with the role contract |
 | Skills / reusable procedures | `.claude/skills/<name>/SKILL.md` | Not read automatically. Point at `.claude/skills/<name>/SKILL.md` in the prompt ("follow the procedure in …") | Same: reference the file, or add a manual `.mdc` rule if it's used often |
 | Deterministic hooks | `.claude/settings.json` `PreToolUse` → `guard.mjs` | None. Rely on Codex sandbox and approval modes + CI + branch protection | None. Rely on CI + branch protection |
-| Context indicator | Status line JSON `context_window.used_percentage` | Context indicator in the TUI | Context usage indicator in the UI |
+| Context indicator | Measured from the transcript by `context-monitor.mjs` hook + status line (`.claude/statusline.mjs`) | TUI "context left" (used = window − left); the human watches it | Chat context indicator; the human watches it |
+| Session start briefing | Automatic (SessionStart hook) | Run `node .claude/hooks/session-start.mjs` first | Same as Codex |
 | Worktrees | `isolation: worktree` (branches from the **default** branch); prefer manual `git worktree add … develop` | Manual `git worktree` | Manual `git worktree` |
 | Long-running commands | Background Bash/PowerShell + completion notifications | Run in the background where supported; otherwise run once and wait | Same |
 
