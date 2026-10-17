@@ -12,7 +12,7 @@ It is **not** a school LMS, marketplace, booking or payment platform, chat or vi
 
 | Area | Start here |
 |---|---|
-| Product spec (source of truth) | [personal_english_tutor_teaching_workspace_spec.md](personal_english_tutor_teaching_workspace_spec.md) |
+| Product spec (source of truth) | [docs/spec/personal_english_tutor_teaching_workspace_spec.md](docs/spec/personal_english_tutor_teaching_workspace_spec.md) |
 | Scope, requirements, traceability | [docs/product/](docs/product/) |
 | Architecture, domain, database, API | [docs/architecture/](docs/architecture/) |
 | Decisions (ADRs, product and open decisions) | [docs/decisions/README.md](docs/decisions/README.md) |

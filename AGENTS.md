@@ -3,7 +3,7 @@
 Shared instructions for every AI coding agent (Claude Code, Codex, Cursor). Keep this file short (≤ 150 lines). Details live in `docs/` and are read **on demand**.
 
 ## What this is
-A private teaching workspace for **one tutor** and the **students that tutor creates**: a flexible 1:1 LMS. Product source of truth: [`personal_english_tutor_teaching_workspace_spec.md`](personal_english_tutor_teaching_workspace_spec.md). Engineering scope: [`docs/product/scope.md`](docs/product/scope.md).
+A private teaching workspace for **one tutor** and the **students that tutor creates**: a flexible 1:1 LMS. Product source of truth: [`docs/spec/personal_english_tutor_teaching_workspace_spec.md`](docs/spec/personal_english_tutor_teaching_workspace_spec.md). Engineering scope: [`docs/product/scope.md`](docs/product/scope.md).
 
 ## Current state
 Read **`progress.json`** first: phase, current task, branch, next task. The next task's packet is in `docs/delivery/tasks/`. If the repository disagrees with `progress.json`, the repository wins: fix `progress.json`.
@@ -29,6 +29,7 @@ src/Keemese.Api/        modular monolith (Modules/<Name>/…)   docs/backend/con
 tests/                  UnitTests (no Docker), IntegrationTests (Testcontainers)
 web/                    SPA (+ web/e2e Playwright)            docs/frontend/*
 deploy/                 compose.yaml, Dockerfile              docs/operations/*
+docs/spec/              product spec (source of truth, read-only) + ideation notes
 docs/                   product, architecture, decisions, security, frontend, testing, delivery, operations, agents, handoff
 .claude/                agents, skills, hooks (Claude Code)
 ```
@@ -55,8 +56,8 @@ node --test ".claude/hooks/*.test.mjs"              # agent guard hook tests
 ## Git
 `master` = releases · `develop` = integration · `feature/*`, `fix/*` from `develop`. Conventional Commits. No force-push, no `reset --hard`, no history rewriting, no direct commits to `master`/`develop`. Merge only after approval.
 
-## Context and handoff
-Warn at **70 %** context, stop at **80 %** (use the tool's real indicator). At warn: finish the smallest safe unit, then follow [docs/agents/handoff.md](docs/agents/handoff.md) and write `docs/handoff/next-session.md` (≤ 4,000 chars, exactly one next task).
+## Context and handoff (critical: sessions start with no memory)
+Token-based tiers ([docs/agents/handoff.md](docs/agents/handoff.md)): **WARN 250k** (wrap up the current unit) · **HANDOFF 320k** (stop and hand off) · **HARD STOP 400k** (only finish the handoff) · **never 500k**. For smaller windows, the percentage fallback applies (handoff at 60 %). Claude Code measures this automatically and injects `[context-monitor]` warnings: obey them. A new session starts from the SessionStart briefing + `progress.json` + `docs/handoff/next-session.md` (≤ 4,000 chars, exactly one next task). Size tasks to fit one session, and do one task per session.
 
 ## Where to look
 | Need | Read |

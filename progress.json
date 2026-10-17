@@ -3,14 +3,40 @@
   "project": "keemese-english",
   "last_updated": "2026-10-17",
   "policy": {
-    "context": { "warn_pct": 70, "stop_pct": 80 },
+    "context": {
+      "window_tokens": 1000000,
+      "warn_tokens": 250000,
+      "warn_pct": 0.5,
+      "handoff_tokens": 320000,
+      "handoff_pct": 0.6,
+      "hard_stop_tokens": 400000,
+      "hard_stop_pct": 0.75,
+      "never_exceed_tokens": 500000,
+      "note": "Effective threshold = min(absolute, pct × window). Authority: docs/agents/handoff.md. Read by .claude/hooks/context-monitor.mjs and .claude/statusline.mjs."
+    },
     "max_parallel_subagents": 2,
     "handoff_prompt_max_chars": 4000
   },
   "phases": [
-    { "id": "P0", "name": "Read-only preflight", "status": "done", "completed": "2026-10-17" },
-    { "id": "P1", "name": "Documentation and architecture planning", "status": "done", "completed": "2026-10-17", "approval": "Lead Coordinator approved the merge into develop and the public repo + first push, 2026-10-17" },
-    { "id": "P2", "name": "Implementation M0-M7", "status": "not_started", "requires": "Lead Coordinator go-ahead to start T-001, plus OD-09 decided before M1" }
+    {
+      "id": "P0",
+      "name": "Read-only preflight",
+      "status": "done",
+      "completed": "2026-10-17"
+    },
+    {
+      "id": "P1",
+      "name": "Documentation and architecture planning",
+      "status": "done",
+      "completed": "2026-10-17",
+      "approval": "Lead Coordinator approved the merge into develop and the public repo + first push, 2026-10-17"
+    },
+    {
+      "id": "P2",
+      "name": "Implementation M0-M7",
+      "status": "not_started",
+      "requires": "Lead Coordinator go-ahead to start T-001, plus OD-09 decided before M1"
+    }
   ],
   "current_phase": "P2",
   "current_task": {
@@ -20,7 +46,10 @@
     "branch": "feature/planning-baseline (merged into develop via PR, then deleted)"
   },
   "repository": {
-    "branches": { "master": "releases", "develop": "integration" },
+    "branches": {
+      "master": "releases",
+      "develop": "integration"
+    },
     "base_commit": "adf3770",
     "remote": "https://github.com/duochou042004/keemese-english (public)",
     "remote_note": "Created 2026-10-17. Branch protection, secret scanning and push protection are not configured yet; they are part of T-003 and are owner-approved settings changes."
@@ -47,17 +76,24 @@
       "task": "P1-baseline",
       "level": "L1",
       "tool": "claude-code",
-      "commands": ["node --test \".claude/hooks/*.test.mjs\""],
+      "commands": [
+        "node --test \".claude/hooks/*.test.mjs\""
+      ],
       "result": "pass",
       "summary": "tests 6, pass 6, fail 0",
-      "not_run": ["No product code exists: no build, unit, integration or E2E tests apply", "CI: no GitHub remote yet"]
+      "not_run": [
+        "No product code exists: no build, unit, integration or E2E tests apply",
+        "CI: no GitHub remote yet"
+      ]
     },
     {
       "date": "2026-10-17",
       "task": "P1-baseline",
       "level": "L1",
       "tool": "claude-code",
-      "commands": ["echo '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git push --force\"}}' | node .claude/hooks/guard.mjs"],
+      "commands": [
+        "echo '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git push --force\"}}' | node .claude/hooks/guard.mjs"
+      ],
       "result": "pass",
       "summary": "exit 2 with reason 'force-push is not allowed'; 'git status' exits 0",
       "not_run": []
@@ -67,14 +103,25 @@
       "task": "P1-baseline",
       "level": "L1",
       "tool": "claude-code (general-purpose subagent acting as reviewer; project agents load only in new sessions)",
-      "commands": ["independent review of git diff develop...1ef94ea against the spec", "node --test \".claude/hooks/*.test.mjs\" (rerun by reviewer: 6/6 pass)"],
+      "commands": [
+        "independent review of git diff develop...1ef94ea against the spec",
+        "node --test \".claude/hooks/*.test.mjs\" (rerun by reviewer: 6/6 pass)"
+      ],
       "result": "changes_requested → fixed",
       "summary": "4 blocking + 11 other findings (coverage, consistency, missing threats T19-T21, OD entries for silent spec deviations, branch-protection approvals). All addressed in the follow-up commit. The reviewer also saw the guard hook fire in its session (it blocks on raw command text, a deliberate trade-off now documented in harness.md)",
-      "not_run": ["A second review pass after the fixes", "Spec sections the reviewer only skimmed (listed in its report)", "External version claims (rechecked by the orchestrator on 2026-10-17, not by the reviewer)"]
+      "not_run": [
+        "A second review pass after the fixes",
+        "Spec sections the reviewer only skimmed (listed in its report)",
+        "External version claims (rechecked by the orchestrator on 2026-10-17, not by the reviewer)"
+      ]
     }
   ],
   "tests": [
-    { "command": "node --test \".claude/hooks/*.test.mjs\"", "result": "pass", "date": "2026-10-17" }
+    {
+      "command": "node --test \".claude/hooks/*.test.mjs\"",
+      "result": "pass",
+      "date": "2026-10-17"
+    }
   ],
   "environment_verified": {
     "date": "2026-10-17",
@@ -91,12 +138,28 @@
     "Give the go-ahead to start T-001 (implementation phase P2)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
   ],
-  "decisions": ["ADR-0001..ADR-0016", "PD-01..PD-13 (PD-08 moved to OD-09)", "OD-01..OD-09 open"],
-  "risks": ["R-01..R-18 (docs/delivery/risks.md); top: R-01 frontend quality, R-04 student data leak, R-02 scope creep", "Threats T1-T21 (docs/security/threat-model.md)"],
+  "decisions": [
+    "ADR-0001..ADR-0016",
+    "PD-01..PD-13 (PD-08 moved to OD-09)",
+    "OD-01..OD-09 open"
+  ],
+  "risks": [
+    "R-01..R-18 (docs/delivery/risks.md); top: R-01 frontend quality, R-04 student data leak, R-02 scope creep",
+    "Threats T1-T21 (docs/security/threat-model.md)"
+  ],
   "next_task": {
     "id": "T-001",
     "title": "Backend skeleton, Compose PostgreSQL, test projects",
     "packet": "docs/delivery/tasks/T-001-backend-skeleton.md",
     "requires": "Lead Coordinator go-ahead to start P2 (Phase 1 approved 2026-10-17)"
-  }
+  },
+  "sessions": [
+    {
+      "date": "2026-10-17",
+      "tool": "claude-code",
+      "task": "P0 + P1 + docs restructure/handoff tooling",
+      "context_at_handoff": "~390k (measured by context-monitor)",
+      "outcome": "P1 merged (PR #1); handoff tooling on feature/docs-restructure-handoff (PR pending approval)"
+    }
+  ]
 }

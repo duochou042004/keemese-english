@@ -1,8 +1,8 @@
 # Product Scope
 
-> Source of truth: [`personal_english_tutor_teaching_workspace_spec.md`](../../personal_english_tutor_teaching_workspace_spec.md) (the "spec", referenced as `§n`).
+> Source of truth: [`personal_english_tutor_teaching_workspace_spec.md`](../spec/personal_english_tutor_teaching_workspace_spec.md) (the "spec", referenced as `§n`).
 > This file restates scope in engineering terms. If it ever disagrees with the spec, the spec wins and this file is a bug.
-> Background only (not normative): [`conversation_with_AI.md`](../../conversation_with_AI.md).
+> Background only (not normative): [`conversation_with_AI.md`](../spec/conversation_with_AI.md).
 
 ## One sentence
 
