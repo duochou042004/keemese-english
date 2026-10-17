@@ -9,21 +9,21 @@
   },
   "phases": [
     { "id": "P0", "name": "Read-only preflight", "status": "done", "completed": "2026-10-17" },
-    { "id": "P1", "name": "Documentation and architecture planning", "status": "awaiting_approval" },
-    { "id": "P2", "name": "Implementation M0-M7", "status": "not_started", "requires": "Lead Coordinator approval of P1" }
+    { "id": "P1", "name": "Documentation and architecture planning", "status": "done", "completed": "2026-10-17", "approval": "Lead Coordinator approved the merge into develop and the public repo + first push, 2026-10-17" },
+    { "id": "P2", "name": "Implementation M0-M7", "status": "not_started", "requires": "Lead Coordinator go-ahead to start T-001, plus OD-09 decided before M1" }
   ],
-  "current_phase": "P1",
+  "current_phase": "P2",
   "current_task": {
     "id": "P1-baseline",
     "title": "Planning baseline: docs, ADRs, agent governance",
-    "status": "in_review",
-    "branch": "feature/planning-baseline"
+    "status": "done",
+    "branch": "feature/planning-baseline (merged into develop via PR, then deleted)"
   },
   "repository": {
-    "branches": { "master": "releases", "develop": "integration", "feature/planning-baseline": "this phase" },
+    "branches": { "master": "releases", "develop": "integration" },
     "base_commit": "adf3770",
-    "remote": null,
-    "remote_note": "Public GitHub repository approved (PD-10) but not yet created or pushed; awaiting explicit go-ahead for the first push."
+    "remote": "https://github.com/duochou042004/keemese-english (public)",
+    "remote_note": "Created 2026-10-17. Branch protection, secret scanning and push protection are not configured yet; they are part of T-003 and are owner-approved settings changes."
   },
   "completed": [
     "P0 preflight report (in chat, 2026-10-17)",
@@ -88,8 +88,7 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Review and approve the Phase 1 baseline (merge feature/planning-baseline into develop)",
-    "Approve creating the public GitHub repository and the first push of master + develop",
+    "Give the go-ahead to start T-001 (implementation phase P2)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
   ],
   "decisions": ["ADR-0001..ADR-0016", "PD-01..PD-13 (PD-08 moved to OD-09)", "OD-01..OD-09 open"],
@@ -98,6 +97,6 @@
     "id": "T-001",
     "title": "Backend skeleton, Compose PostgreSQL, test projects",
     "packet": "docs/delivery/tasks/T-001-backend-skeleton.md",
-    "requires": "Approval of Phase 1"
+    "requires": "Lead Coordinator go-ahead to start P2 (Phase 1 approved 2026-10-17)"
   }
 }
