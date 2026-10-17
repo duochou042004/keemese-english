@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "project": "keemese-english",
+  "last_updated": "2026-10-17",
+  "policy": {
+    "context": { "warn_pct": 70, "stop_pct": 80 },
+    "max_parallel_subagents": 2,
+    "handoff_prompt_max_chars": 4000
+  },
+  "phases": [
+    { "id": "P0", "name": "Read-only preflight", "status": "done", "completed": "2026-10-17" },
+    { "id": "P1", "name": "Documentation and architecture planning", "status": "awaiting_approval" },
+    { "id": "P2", "name": "Implementation M0-M7", "status": "not_started", "requires": "Lead Coordinator approval of P1" }
+  ],
+  "current_phase": "P1",
+  "current_task": {
+    "id": "P1-baseline",
+    "title": "Planning baseline: docs, ADRs, agent governance",
+    "status": "in_review",
+    "branch": "feature/planning-baseline"
+  },
+  "repository": {
+    "branches": { "master": "releases", "develop": "integration", "feature/planning-baseline": "this phase" },
+    "base_commit": "adf3770",
+    "remote": null,
+    "remote_note": "Public GitHub repository approved (PD-10) but not yet created or pushed; awaiting explicit go-ahead for the first push."
+  },
+  "completed": [
+    "P0 preflight report (in chat, 2026-10-17)",
+    "git init: master (spec import adf3770), develop, feature/planning-baseline",
+    "Product scope, requirements with acceptance criteria, traceability (docs/product)",
+    "ADR-0001..0016 + product and open decision log (docs/decisions)",
+    "Architecture overview, domain model, database, API catalog (docs/architecture)",
+    "Backend conventions, activity engine (docs/backend)",
+    "Security model, threat model (docs/security)",
+    "Frontend IA, design system, UX journeys (docs/frontend)",
+    "Testing strategy, CI design (docs/testing)",
+    "Local setup, deployment, runbooks (docs/operations)",
+    "Agent operating model, harness, tooling, plugins, handoff (docs/agents)",
+    "Milestones, risk register, task packets T-001..T-003 (docs/delivery)",
+    "AGENTS.md, CLAUDE.md, README.md, .claude agents/skills/hooks, .gitattributes, .gitignore, .editorconfig"
+  ],
+  "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
+  "evidence": [
+    {
+      "date": "2026-10-17",
+      "task": "P1-baseline",
+      "level": "L1",
+      "tool": "claude-code",
+      "commands": ["node --test \".claude/hooks/*.test.mjs\""],
+      "result": "pass",
+      "summary": "tests 6, pass 6, fail 0",
+      "not_run": ["No product code exists: no build, unit, integration or E2E tests apply", "CI: no GitHub remote yet"]
+    },
+    {
+      "date": "2026-10-17",
+      "task": "P1-baseline",
+      "level": "L1",
+      "tool": "claude-code",
+      "commands": ["echo '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git push --force\"}}' | node .claude/hooks/guard.mjs"],
+      "result": "pass",
+      "summary": "exit 2 with reason 'force-push is not allowed'; 'git status' exits 0",
+      "not_run": ["Hook not yet observed firing inside a fresh Claude Code session (settings load at session start)"]
+    }
+  ],
+  "tests": [
+    { "command": "node --test \".claude/hooks/*.test.mjs\"", "result": "pass", "date": "2026-10-17" }
+  ],
+  "environment_verified": {
+    "date": "2026-10-17",
+    "os": "Windows 11",
+    "dotnet_sdk": "10.0.402",
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "docker": "29.8.2 (Desktop, compose v5.6.0)",
+    "podman": "not installed",
+    "python": "installed by owner but not on PATH in this session; not required"
+  },
+  "blockers": [],
+  "pending_owner_actions": [
+    "Review and approve the Phase 1 baseline (merge feature/planning-baseline into develop)",
+    "Approve creating the public GitHub repository and the first push of master + develop",
+    "Answer OD-01..OD-04 (see docs/decisions/README.md); OD-05/OD-06 decided later",
+    "Review PD-08 (navigation changes vs spec §41)"
+  ],
+  "decisions": ["ADR-0001..ADR-0016", "PD-01..PD-13", "OD-01..OD-06 open"],
+  "risks": ["R-01..R-18 (docs/delivery/risks.md); top: R-01 frontend quality, R-04 student data leak, R-02 scope creep"],
+  "next_task": {
+    "id": "T-001",
+    "title": "Backend skeleton, Compose PostgreSQL, test projects",
+    "packet": "docs/delivery/tasks/T-001-backend-skeleton.md",
+    "requires": "Approval of Phase 1"
+  }
+}
