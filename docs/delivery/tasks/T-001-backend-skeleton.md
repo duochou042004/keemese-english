@@ -1,7 +1,7 @@
 # T-001: Backend skeleton, Compose PostgreSQL, test projects
 
 - Milestone: M0 · Ladder level: L4 (new solution, CI-relevant pins) · Depends on: Phase 1 approval · Branch: `feature/m0-backend-skeleton` (from `develop`)
-- Status: not_started
+- Status: in_review (2026-10-19)
 
 ## Objective
 A buildable, testable .NET 10 backend that starts against PostgreSQL in Compose, applies an initial migration, and reports health. There is **no** product feature yet.
@@ -41,4 +41,11 @@ Evidence: command + summary lines in `progress.json`. Note explicitly that Podma
 Review: `reviewer` subagent (L4).
 
 ## Status / notes
-—
+- Implemented on `feature/m0-backend-skeleton`. Evidence in `progress.json`.
+- **Test runner:** xunit.v3 4.x runs only on Microsoft.Testing.Platform under the .NET 10 SDK (VSTest is rejected). `global.json` opts in (`"test": {"runner": "Microsoft.Testing.Platform"}`), so `Microsoft.NET.Test.Sdk` and `xunit.runner.visualstudio` are not needed. `dotnet test <project path>` still works.
+- **Extra pins:** `Microsoft.EntityFrameworkCore.Relational` 10.0.13 is referenced directly, because Npgsql 10.0.3 only requires EF Core 10.0.4 and the tests otherwise bind a different EF version from the app (MSB3277). `Microsoft.EntityFrameworkCore.Design` 10.0.13 is build-time only (`PrivateAssets=all`), for `dotnet ef`.
+- **snake_case:** hand-rolled in `AppDbContext` (no `EFCore.NamingConventions` package, per invariant 8). It doesn't handle owned or complex types; revisit if those appear.
+- **Placeholder auth scheme:** a bare cookie scheme (401/403 instead of redirects) exists only so the fallback policy can challenge. Identity's cookie replaces it in M1.
+- **`dotnet ef`** is not installed globally. Use `dotnet tool exec dotnet-ef@10.0.13 -- migrations add <Name> --project src/Keemese.Api --output-dir Infrastructure/Data/Migrations`.
+- **Compose needs `--env-file .env`** (Compose reads `.env` from `deploy/` otherwise). `local-setup.md` is corrected; the same fix is still needed in T-002's verification command and `runbooks.md` (outside this packet's file ownership).
+- Podman: not tested (R-08).

@@ -21,14 +21,20 @@ Status on the main development machine (Windows 11, checked 2026-10-17): .NET SD
 git clone https://github.com/<owner>/keemese-english.git
 cd keemese-english
 cp .env.example .env            # Windows PowerShell: Copy-Item .env.example .env
-docker compose -f deploy/compose.yaml up -d db     # or: podman compose -f deploy/compose.yaml up -d db
+docker compose --env-file .env -f deploy/compose.yaml up -d db     # or: podman compose --env-file .env -f deploy/compose.yaml up -d db
 dotnet run --project src/Keemese.Api               # http://localhost:5080, applies migrations
 npm ci --prefix web
 npm run dev --prefix web                           # http://localhost:5173 (proxies /api)
 ```
 Log in with `BOOTSTRAP_TUTOR_USERNAME` / `BOOTSTRAP_TUTOR_PASSWORD` from `.env`. You must change the password on first login.
 
-Full stack in containers (closest to production): `docker compose -f deploy/compose.yaml --profile app up --build` → http://localhost:8080.
+Notes (verified in T-001):
+- **`--env-file .env` is required.** With `-f deploy/compose.yaml`, Compose looks for `.env` in `deploy/`, not the repository root. Without it, `db` refuses to start (`POSTGRES_PASSWORD` is required).
+- `dotnet run` does **not** read `.env`. In `Development` it uses `src/Keemese.Api/appsettings.Development.json`, whose connection string matches the `.env.example` placeholders. If you change `POSTGRES_PASSWORD`, set `ConnectionStrings__Db` in your shell before `dotnet run`.
+- `DATA_DIR` is relative to the working directory, and `dotnet run --project` runs from the project folder, so local data lands in `src/Keemese.Api/.data/` (gitignored).
+- On the first start against an empty database, EF logs one `fail:` for `SELECT … FROM "__EFMigrationsHistory"` before it creates that table. This is expected.
+
+Full stack in containers (closest to production): `docker compose --env-file .env -f deploy/compose.yaml --profile app up --build` → http://localhost:8080.
 
 ## `.env.example` (created in T-001; placeholders only)
 
