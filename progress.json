@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "keemese-english",
-  "last_updated": "2026-10-17",
+  "last_updated": "2026-10-19",
   "policy": {
     "context": {
       "window_tokens": 1000000,
@@ -34,16 +34,19 @@
     {
       "id": "P2",
       "name": "Implementation M0-M7",
-      "status": "not_started",
-      "requires": "Lead Coordinator go-ahead to start T-001, plus OD-09 decided before M1"
+      "status": "in_progress",
+      "requires": "OD-09 decided before M1",
+      "started": "2026-10-19",
+      "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged"
     }
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "P1-baseline",
-    "title": "Planning baseline: docs, ADRs, agent governance",
-    "status": "done",
-    "branch": "feature/planning-baseline (merged into develop via PR, then deleted)"
+    "id": "T-001",
+    "title": "Backend skeleton, Compose PostgreSQL, test projects",
+    "status": "in_review",
+    "branch": "feature/m0-backend-skeleton (from develop @ 9f308b9)",
+    "packet": "docs/delivery/tasks/T-001-backend-skeleton.md"
   },
   "repository": {
     "branches": {
@@ -67,7 +70,8 @@
     "Local setup, deployment, runbooks (docs/operations)",
     "Agent operating model, harness, tooling, plugins, handoff (docs/agents)",
     "Milestones, risk register, task packets T-001..T-003 (docs/delivery)",
-    "AGENTS.md, CLAUDE.md, README.md, .claude agents/skills/hooks, .gitattributes, .gitignore, .editorconfig"
+    "AGENTS.md, CLAUDE.md, README.md, .claude agents/skills/hooks, .gitattributes, .gitignore, .editorconfig",
+    "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -114,6 +118,61 @@
         "Spec sections the reviewer only skimmed (listed in its report)",
         "External version claims (rechecked by the orchestrator on 2026-10-17, not by the reviewer)"
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "task": "T-001",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "node --test \".claude/hooks/*.test.mjs\"",
+        "dotnet build -warnaserror",
+        "dotnet test tests/Keemese.UnitTests",
+        "POSTGRES_PASSWORD=<placeholder> docker compose -f deploy/compose.yaml up -d --wait db",
+        "dotnet test tests/Keemese.IntegrationTests (background)",
+        "dotnet run --project src/Keemese.Api; curl localhost:5080 /health/live, /health/ready, /api/nope, /x"
+      ],
+      "result": "pass",
+      "summary": "hooks 13/13 pass; build 0 warnings 0 errors; unit 10/10 (module boundary incl. negative fixture, snake_case x8); compose db healthy on 127.0.0.1:5432; integration 3/3 (boot + migrate on empty PG 18.6 + f_unaccent('Tiếng Việt') = 'Tieng Viet'; ready 503 when DATA_DIR unwritable; /api/* 404 ProblemDetails code common.not_found, other paths 401); live app: /health/live 200, /health/ready 200, /api/nope 404 problem+json, /x 401",
+      "not_run": [
+        "Podman (not installed; R-08)",
+        "Readiness 503 with the DB down (code path exists, no test)",
+        "Compose up with a real .env (agents do not create .env; password passed via the shell environment)",
+        "CI (T-003)",
+        "Lock-file reproducibility on another OS"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "task": "T-001",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -warnaserror",
+        "dotnet test tests/Keemese.UnitTests",
+        "dotnet test tests/Keemese.IntegrationTests"
+      ],
+      "result": "changes_requested → fixed",
+      "summary": "All ACs pass; reran build (0/0), unit 10/10, integration 3/3. Only blocker: progress.json evidence missing (fixed). Non-blocking: local-only placeholder password in appsettings.Development.json (same value as .env.example); no DB-down 503 test",
+      "not_run": [
+        "dotnet run on 5080",
+        "Podman"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "task": "T-001",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "read-only review of git diff develop...6db3afd (no builds or tests run)"
+      ],
+      "result": "approve",
+      "summary": "Anonymous surface limited to /health/*, the /api/** 404 fallback and dev-only /openapi; placeholder cookie scheme has no sign-in path; no stack traces outside Development; only change-me placeholders committed; db bound to 127.0.0.1 with a required password; f_unaccent is search_path-safe; packages pinned with lock files from nuget.org. Low findings: L1 no test enumerating anonymous endpoints (add before M1); L2 placeholder connection string in appsettings.Development.json; L3 AllowedHosts '*' and the remaining pipeline steps (forwarded headers, HSTS, security headers, antiforgery) pending; L4 CI should restore with --locked-mode",
+      "not_run": [
+        "Builds or tests (read-only role)",
+        "Threats T1-T21 one by one (most not applicable yet)"
+      ]
     }
   ],
   "tests": [
@@ -121,22 +180,39 @@
       "command": "node --test \".claude/hooks/*.test.mjs\"",
       "result": "pass",
       "date": "2026-10-17"
+    },
+    {
+      "command": "dotnet build -warnaserror",
+      "result": "pass",
+      "date": "2026-10-19"
+    },
+    {
+      "command": "dotnet test tests/Keemese.UnitTests",
+      "result": "pass (10/10)",
+      "date": "2026-10-19"
+    },
+    {
+      "command": "dotnet test tests/Keemese.IntegrationTests",
+      "result": "pass (3/3)",
+      "date": "2026-10-19"
     }
   ],
   "environment_verified": {
-    "date": "2026-10-17",
+    "date": "2026-10-19",
     "os": "Windows 11",
     "dotnet_sdk": "10.0.402",
     "node": "24.21.0",
     "npm": "11.19.0",
     "docker": "29.8.2 (Desktop, compose v5.6.0)",
     "podman": "not installed",
-    "python": "installed by owner but not on PATH in this session; not required"
+    "python": "installed by owner but not on PATH in this session; not required",
+    "postgres_image": "docker.io/library/postgres:18.6-alpine"
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Give the go-ahead to start T-001 (implementation phase P2)",
-    "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
+    "Approve the T-001 merge (feature/m0-backend-skeleton → develop)",
+    "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
+    "Agree to fold into T-002/T-003/M1: compose --env-file fix in T-002 verification and runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI (T-003); anonymous-endpoint enumeration test and remaining pipeline steps (M1)"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",
@@ -148,10 +224,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-001",
-    "title": "Backend skeleton, Compose PostgreSQL, test projects",
-    "packet": "docs/delivery/tasks/T-001-backend-skeleton.md",
-    "requires": "Lead Coordinator go-ahead to start P2 (Phase 1 approved 2026-10-17)"
+    "id": "T-002",
+    "title": "Frontend skeleton served by the API",
+    "packet": "docs/delivery/tasks/T-002-frontend-skeleton.md",
+    "requires": "T-001 merged into develop"
   },
   "sessions": [
     {
@@ -160,6 +236,12 @@
       "task": "P0 + P1 + docs restructure/handoff tooling",
       "context_at_handoff": "~390k (measured by context-monitor)",
       "outcome": "P1 merged (PR #1); handoff tooling on feature/docs-restructure-handoff (PR pending approval)"
+    },
+    {
+      "date": "2026-10-19",
+      "tool": "claude-code",
+      "task": "T-001",
+      "outcome": "Implemented and verified (L4); in review, awaiting merge approval"
     }
   ]
 }
