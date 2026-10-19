@@ -1,34 +1,30 @@
-# Next session: T-001 Backend skeleton (after the owner approves PR #2)
+# Next session: T-002 Frontend skeleton (after the owner approves the T-001 merge)
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
-Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and docs/delivery/tasks/T-001-backend-skeleton.md. Do not rely on chat history.
+Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and docs/delivery/tasks/T-002-frontend-skeleton.md. Do not rely on chat history.
 
-## State (verified 2026-10-17)
-- `develop` = Phase 1 planning baseline (merged via PR #1, merge commit 60831a6). `master` = spec import only (adf3770). Public repo: github.com/duochou042004/keemese-english.
-- Branch `feature/docs-restructure-handoff` → **PR #2 into develop, awaiting the Lead Coordinator's approval**. It contains:
-  - spec files moved to `docs/spec/` (git renames; ADR-0001 amended)
-  - token-based handoff tiers: WARN 250k · HANDOFF 320k · HARD STOP 400k · never 500k (docs/agents/handoff.md, progress.json policy.context)
-  - hooks: `.claude/hooks/context-monitor.mjs` (injects tier warnings), `session-start.mjs` (repository briefing), plus `.claude/statusline.mjs`
-  - evidence: `node --test ".claude/hooks/*.test.mjs"` → 13/13 pass; internal link check → 0 problems; the monitor measured the previous session live (~377–390k tokens)
-- No product code exists yet. No CI yet (T-003).
+## State (verified 2026-10-19)
+- `develop` @ 9f308b9 includes PR #2 (docs restructure + handoff hooks).
+- Branch `feature/m0-backend-skeleton` (T-001, local; not pushed, no PR yet) **awaits the Lead Coordinator's merge approval**. It holds the .NET 10 API skeleton, the Initial migration (unaccent + f_unaccent), /health/live and /health/ready, ProblemDetails, the fallback auth policy, the compose `db` service, and unit and integration test projects.
+- Evidence in progress.json: build -warnaserror 0/0, unit 10/10, integration 3/3 (Testcontainers PG 18.6), live app health 200. The reviewer approved after the evidence fix; the security-reviewer approved with low findings L1–L4.
+- Tests use Microsoft.Testing.Platform (`global.json` `test.runner`); `dotnet test <project path>` works.
+- Compose needs `--env-file .env` when run with `-f deploy/compose.yaml` (it otherwise reads `deploy/.env`). local-setup.md is fixed; T-002's verification command and runbooks.md still need the flag.
 
 ## Before starting
-1. If PR #2 is not merged: ask the Lead Coordinator to approve it, and do not merge it yourself without explicit approval. Then stop.
-2. Check `pending_owner_actions` in progress.json: the go-ahead for T-001, and the OD answers (OD-09 blocks M1, not M0).
-3. Confirm that the hooks fired: your briefing should start with "# Session briefing". If not, the hooks are not loaded. Tell the user (check with `/hooks` in a `claude` terminal).
+1. If `feature/m0-backend-skeleton` is not merged into develop: ask the Lead Coordinator, and do not merge it yourself. Then stop.
+2. Check `pending_owner_actions` in progress.json (OD-09 blocks M1, not M0).
+3. Confirm that the briefing starts with "# Session briefing" (the hooks loaded).
 
 ## The one next task
-T-001: a buildable, testable .NET 10 backend skeleton (minimal API host, AppDbContext + initial migration with unaccent/f_unaccent, /health/live + /health/ready, ProblemDetails, compose `db` service on postgres:18.6-alpine, .env.example, unit and Testcontainers integration test projects with one real test each).
-Acceptance criteria, inputs and file ownership: exactly as in the packet. Branch `feature/m0-backend-skeleton` from `develop`. No packages beyond the packet; re-verify versions at install.
+T-002: Vite 8 + React 19 + TypeScript ~6.0 SPA (TanStack Router + Query, Tailwind v4 tokens, shadcn/ui Button only, i18n vi/en), served by the API in the container build and proxied by Vite in dev. Acceptance criteria, inputs and file ownership exactly as in the packet. Branch `feature/m0-frontend-skeleton` from develop. Node 24 (the move to 26 is a separate chore after 2026-10-28). Re-verify package versions at install.
+Note: Program.cs maps `/api/{**path}` → 404 ProblemDetails; the SPA fallback must not swallow `/api/*` or `/health/*`.
 
 ## Verify before building on it
-`node --test ".claude/hooks/*.test.mjs"` → 13 pass. `git log develop --oneline -3` shows the PR #2 merge.
+`dotnet build -warnaserror` and `dotnet test tests/Keemese.UnitTests` pass on develop after the merge. `node --test ".claude/hooks/*.test.mjs"` → 13 pass.
 
-## Required verification (L4)
-dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; docker compose -f deploy/compose.yaml up -d db; dotnet test tests/Keemese.IntegrationTests (background); dotnet run, then GET /health/ready → 200. Record evidence in progress.json. Note that Podman was not tested.
-
-## Follow-ups proposed (not started; fold them into T-003 if the owner agrees)
-Move the internal link checker into `scripts/check-docs.mjs` (instead of a third-party link-check action), validate progress.json against a small schema in CI, and add a PR template with the ladder level, evidence and docs checklist.
+## Carry-overs (owner to confirm the T-003/M1 placement)
+- T-003: `dotnet restore --locked-mode` in CI, scripts/check-docs.mjs, progress.json schema check, PR template.
+- M1: a test that enumerates anonymous endpoints; forwarded headers, HSTS, security headers, antiforgery; replace the placeholder cookie scheme with Identity.
 
 ## Stop conditions
-Context ≥ 320k (context-monitor says HANDOFF) → handoff per docs/agents/handoff.md. T-001 done → reviewer subagent, then ask for merge approval. Stop.
+Context ≥ 320k (context-monitor says HANDOFF) → handoff per docs/agents/handoff.md. T-002 done → reviewer (+ security-reviewer), then ask for merge approval. Stop.

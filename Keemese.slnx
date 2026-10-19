@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Keemese.Api/Keemese.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Keemese.IntegrationTests/Keemese.IntegrationTests.csproj" />
+    <Project Path="tests/Keemese.UnitTests/Keemese.UnitTests.csproj" />
+  </Folder>
+</Solution>
