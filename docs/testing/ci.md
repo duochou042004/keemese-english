@@ -5,7 +5,7 @@ Facts checked 2026-10-17 (re-check yearly):
 - Free-plan limits: **500 MB artifact storage** and **10 GB cache per repository**.
 - Artifacts are **retained 90 days by default** unless `retention-days` is set.
 - Windows and macOS runners cost more where billing applies.
-- Action versions used: `actions/checkout@v7`, `actions/setup-dotnet@v6`, `actions/setup-node@v7`, `actions/upload-artifact@v7`, `actions/cache@v6`.
+- Action versions used (latest releases re-checked 2026-10-23: checkout v7.0.1, setup-dotnet v6.0.0, setup-node v7.1.0, upload-artifact v7.0.2, gitleaks-action v3.0.0): `actions/checkout@v7`, `actions/setup-dotnet@v6`, `actions/setup-node@v7`, `actions/upload-artifact@v7`, `actions/cache@v6`.
 
 Even though the minutes are free, we keep CI lean. Fast feedback and the artifact quota matter, and the repo might become private later.
 
@@ -19,14 +19,14 @@ on:
 permissions: { contents: read }
 concurrency: { group: ci-${{ github.ref }}, cancel-in-progress: true }
 ```
-| Job | Runs when (`dorny/paths-filter` or `git diff` step) | Steps |
+| Job | Runs when (a `git diff` step against the PR base; no third-party filter action) | Steps |
 |---|---|---|
-| `changes` | always | Compute `backend`, `web`, `docs` flags |
-| `backend` | `backend` changed or push | setup-dotnet (from `global.json`, NuGet cache keyed on `**/packages.lock.json`) → `dotnet build -warnaserror` → unit tests → integration tests (Testcontainers on the ubuntu runner's Docker) → `dotnet list package --vulnerable --include-transitive` |
-| `web` | `web` changed or push | setup-node (`.nvmrc`, `cache: npm`) → `npm ci` → lint → typecheck → Vitest → build → **API types are up to date** (regenerate from the built API's OpenAPI document and `git diff --exit-code`) → `npm audit --omit=dev --audit-level=high` |
-| `e2e-smoke` | `backend` or `web` changed | Compose up (db + app image built in the job) → Playwright **Chromium**, scenarios selected per the [mapping](../frontend/ux-journeys.md#journey--e2e-mapping) (`@smoke` tag + tags for the changed areas) |
-| `secrets` | always | `gitleaks` (pinned to a commit SHA) |
-| `docs` | `docs` changed | Markdown link check (lychee, offline mode for internal links) |
+| `changes` | always | Compute `backend`, `web`, `docs` flags (all `true` on push). A change to `ci.yml` sets all three |
+| `backend` | `backend` changed or push | setup-dotnet (from `global.json`, NuGet cache keyed on `**/packages.lock.json`) → `dotnet restore --locked-mode` → `dotnet build -warnaserror` → unit tests → integration tests (Testcontainers on the ubuntu runner's Docker) → `dotnet list package --vulnerable --include-transitive` (fails the job on any hit) |
+| `web` | `web` changed or push | setup-node (`.nvmrc`, `cache: npm`) → `npm ci` → lint → typecheck → Vitest → build → `npm audit --omit=dev --audit-level=high` → guard-hook tests (`node --test ".claude/hooks/*.test.mjs"`). **API types are up to date** (regenerate from the built API's OpenAPI document and `git diff --exit-code`) is added with the first generated client in M1 |
+| `e2e-smoke` (M1, with the first E2E test) | `backend` or `web` changed | Compose up (db + app image built in the job) → Playwright **Chromium**, scenarios selected per the [mapping](../frontend/ux-journeys.md#journey--e2e-mapping) (`@smoke` tag + tags for the changed areas) |
+| `secrets` | always | `gitleaks/gitleaks-action` (pinned to a commit SHA; no license needed for a personal-account repo) with the scanner version pinned. PRs scan their own commits; pushes scan only first-parent commits, so a full-history scan (`gitleaks git`) is run locally at milestone gates and recorded as evidence. GitHub secret scanning and push protection cover the rest; PR comments and the SARIF artifact are off so `contents: read` is enough and no leaked value is re-published |
+| `docs` | `docs` changed (`*.md`, `progress.json`, `scripts/`) | the scripts' `node --test` tests → `scripts/check-docs.mjs` (internal links and anchors; external links are not checked) → `scripts/check-progress.mjs` (progress.json shape the hooks and handoff rely on). No third-party link checker |
 
 Artifacts: on **failure only**: the Playwright report and traces (`retention-days: 5`), and the `TestResults/*.trx` files (`retention-days: 5`). Never `bin/`, `obj/`, `node_modules/` or full builds. Successful runs upload nothing.
 
@@ -37,7 +37,7 @@ Artifacts: on **failure only**: the Playwright report and traces (`retention-day
 `schedule: weekly (Mon 02:00 UTC)` + `workflow_dispatch` + PR label `compat`. Matrix: `windows-latest`, `macos-latest` running **backend build + unit tests** and **web lint, typecheck, Vitest and build**. Integration tests and E2E run on Linux only (hosted macOS runners have no Docker; Windows runners can't run Linux containers). This is documented, not hidden. It catches path, casing and line-ending bugs.
 
 ### `dependabot.yml`
-Weekly. Ecosystems: `nuget`, `npm` (`/web`), `github-actions`, `docker` (`/deploy`). Minor and patch updates grouped per ecosystem; majors in separate PRs.
+Weekly. Ecosystems: `nuget`, `npm` (`/web`), `github-actions`, `docker` (`/deploy`). Minor and patch updates grouped per ecosystem; majors in separate PRs. ESLint majors are ignored until `eslint-plugin-jsx-a11y` supports ESLint 10. `deploy/Dockerfile` base images are pinned by digest, so the docker ecosystem proposes digest bumps too.
 
 ## Caching policy
 - NuGet: the setup-dotnet cache keyed on the lockfile hash. npm: the setup-node `cache: npm` keyed on `package-lock.json`.
@@ -47,7 +47,7 @@ Weekly. Ecosystems: `nuget`, `npm` (`/web`), `github-actions`, `docker` (`/deplo
 ## Security of the workflows
 - `permissions: contents: read` at the top level. Jobs that need more ask for exactly that.
 - No `pull_request_target`. Fork PRs run without secrets, and none are needed.
-- First-party `actions/*` are pinned to a major version (updated by Dependabot). **Third-party actions are pinned to a full commit SHA** with a version comment.
+- First-party `actions/*` are pinned to a major version (updated by Dependabot). Checkouts use `persist-credentials: false`. **Third-party actions are pinned to a full commit SHA** with a version comment.
 - Branch protection (once on GitHub): `develop` and `master` require a PR and the `ci` checks, with **0 required approvals** (GitHub does not let an author approve their own PR, and the owner is the only maintainer). No force-push or deletion. Agents open PRs; the Lead Coordinator records approval (review or comment) and performs the merge.
 
 ## Release procedure

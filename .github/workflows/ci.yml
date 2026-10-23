@@ -1,0 +1,125 @@
+# Design and rationale: docs/testing/ci.md (the source of truth for CI).
+name: ci
+
+on:
+  pull_request: { branches: [develop, master] }
+  push: { branches: [develop, master] }
+
+permissions: { contents: read }
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      web: ${{ steps.filter.outputs.web }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0, persist-credentials: false }
+      - id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT" != pull_request ]; then
+            printf 'backend=true\nweb=true\ndocs=true\n' >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files=$(git diff --name-only "$BASE" HEAD)
+          echo "$files"
+          has() { echo "$files" | grep -qE "$1" && echo true || echo false; }
+          {
+            echo "backend=$(has '^(src/|tests/|deploy/|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
+            echo "web=$(has '^(web/|\.nvmrc|\.editorconfig|\.claude/hooks/|\.github/workflows/ci\.yml)')"
+            echo "docs=$(has '(\.md$|^progress\.json$|^scripts/|^\.github/workflows/ci\.yml)')"
+          } >> "$GITHUB_OUTPUT"
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with: { persist-credentials: false }
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - run: dotnet restore --locked-mode
+      - run: dotnet build -warnaserror --no-restore
+      - name: Unit tests
+        run: dotnet test --project tests/Keemese.UnitTests --no-build --results-directory TestResults --report-xunit-trx
+      - name: Integration tests (Testcontainers)
+        run: dotnet test --project tests/Keemese.IntegrationTests --no-build --results-directory TestResults --report-xunit-trx
+      - name: Vulnerable packages
+        run: |
+          set -o pipefail
+          dotnet list package --vulnerable --include-transitive | tee vulnerable.txt
+          ! grep -q 'has the following vulnerable packages' vulnerable.txt
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-trx
+          path: TestResults/*.trx
+          retention-days: 5
+          if-no-files-found: ignore
+
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run: { working-directory: web }
+    steps:
+      - uses: actions/checkout@v7
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - name: Guard-hook tests
+        working-directory: .
+        run: node --test ".claude/hooks/*.test.mjs"
+
+  docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v7
+        with: { node-version-file: .nvmrc }
+      - run: node --test "scripts/*.test.mjs"
+      - run: node scripts/check-docs.mjs
+      - run: node scripts/check-progress.mjs
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pin the scanner too (the action downloads it). No PR comments (would need pull-requests: write), no SARIF artifact.
+          GITLEAKS_VERSION: 8.24.3
+          GITLEAKS_ENABLE_COMMENTS: 'false'
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'false'
