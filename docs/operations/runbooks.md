@@ -7,7 +7,7 @@
 
 ```bash
 # database (from the host running compose)
-docker compose -f deploy/compose.yaml exec -T db pg_dump -U keemese -Fc keemese > backup-$(date +%F).dump
+docker compose --env-file .env -f deploy/compose.yaml exec -T db pg_dump -U keemese -Fc keemese > backup-$(date +%F).dump
 # files: copy the appdata volume (example using a throwaway container)
 docker run --rm -v keemese_appdata:/data -v "$PWD":/backup docker.io/library/alpine tar czf /backup/data-$(date +%F).tgz -C /data .
 ```
@@ -32,7 +32,7 @@ Rotation (recommended): daily backups kept 14 days, weekly kept 8 weeks, stored 
 ## Lost tutor password
 
 There's no email reset (PD-07). With shell access to the host:
-`docker compose exec app dotnet Keemese.Api.dll --reset-tutor-password` prints a new temporary password once (implemented in M1, T-102). This is the only recovery path, and it is an intended operator capability.
+`docker compose --env-file .env -f deploy/compose.yaml exec app dotnet Keemese.Api.dll --reset-tutor-password` prints a new temporary password once (implemented in M1, T-102). This is the only recovery path, and it is an intended operator capability.
 
 ## Common problems
 
