@@ -1,0 +1,7 @@
+{
+  "common": {
+    "not_found": "The requested item was not found.",
+    "unexpected": "Something went wrong. Please try again.",
+    "network": "Cannot reach the server. Check your connection and try again."
+  }
+}

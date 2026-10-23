@@ -1,30 +1,27 @@
-# Next session: T-002 Frontend skeleton (after the owner approves the T-001 merge)
+# Next session: T-003 CI and repo automation (after the owner approves the T-002 merge)
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
-Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and docs/delivery/tasks/T-002-frontend-skeleton.md. Do not rely on chat history.
+Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and docs/delivery/tasks/T-003-ci-and-repo-automation.md. Do not rely on chat history.
 
-## State (verified 2026-10-19)
-- `develop` @ 9f308b9 includes PR #2 (docs restructure + handoff hooks).
-- Branch `feature/m0-backend-skeleton` (T-001, local; not pushed, no PR yet) **awaits the Lead Coordinator's merge approval**. It holds the .NET 10 API skeleton, the Initial migration (unaccent + f_unaccent), /health/live and /health/ready, ProblemDetails, the fallback auth policy, the compose `db` service, and unit and integration test projects.
-- Evidence in progress.json: build -warnaserror 0/0, unit 10/10, integration 3/3 (Testcontainers PG 18.6), live app health 200. The reviewer approved after the evidence fix; the security-reviewer approved with low findings L1–L4.
-- Tests use Microsoft.Testing.Platform (`global.json` `test.runner`); `dotnet test <project path>` works.
-- Compose needs `--env-file .env` when run with `-f deploy/compose.yaml` (it otherwise reads `deploy/.env`). local-setup.md is fixed; T-002's verification command and runbooks.md still need the flag.
+## State (verified 2026-10-23)
+- `develop` @ fc60f4d includes T-001 (PR #3).
+- Branch `feature/m0-frontend-skeleton` (T-002, local; not pushed, no PR yet) **awaits the Lead Coordinator's merge approval**. It holds the Vite 8 / React 19 / TS 6.0 SPA in `web/`, the API's static files + SPA fallback (`/api/*`, `/health/*` and missing file-like paths stay 404 ProblemDetails), `deploy/Dockerfile` (non-root, DATA_DIR=/data) and the compose `app` profile.
+- Evidence in progress.json: web lint/typecheck/vitest 13/13/build; build -warnaserror 0/0; unit 10/10; integration 4/4; container checks; screenshots in docs/delivery/evidence/m0/. Reviewer and security-reviewer both approved; their fixes are in.
+- ESLint is pinned to 9.39 (deprecated) until eslint-plugin-jsx-a11y supports ESLint 10.
 
 ## Before starting
-1. If `feature/m0-backend-skeleton` is not merged into develop: ask the Lead Coordinator, and do not merge it yourself. Then stop.
-2. Check `pending_owner_actions` in progress.json (OD-09 blocks M1, not M0).
+1. If `feature/m0-frontend-skeleton` is not merged into develop: ask the Lead Coordinator, and do not merge it yourself. Then stop.
+2. Check `pending_owner_actions` in progress.json (OD-09 blocks M1, not M0). T-003 needs owner-approved GitHub settings (branch protection, secret scanning).
 3. Confirm that the briefing starts with "# Session briefing" (the hooks loaded).
 
 ## The one next task
-T-002: Vite 8 + React 19 + TypeScript ~6.0 SPA (TanStack Router + Query, Tailwind v4 tokens, shadcn/ui Button only, i18n vi/en), served by the API in the container build and proxied by Vite in dev. Acceptance criteria, inputs and file ownership exactly as in the packet. Branch `feature/m0-frontend-skeleton` from develop. Node 24 (the move to 26 is a separate chore after 2026-10-28). Re-verify package versions at install.
-Note: Program.cs maps `/api/{**path}` → 404 ProblemDetails; the SPA fallback must not swallow `/api/*` or `/health/*`.
+T-003 per its packet. Branch `feature/m0-ci` from develop. Carry-overs the owner was asked to place here: `dotnet restore --locked-mode` in CI, digest-pinned base images in deploy/Dockerfile, scripts/check-docs.mjs, progress.json schema check, PR template, the `--env-file .env` fix in runbooks.md.
 
 ## Verify before building on it
-`dotnet build -warnaserror` and `dotnet test tests/Keemese.UnitTests` pass on develop after the merge. `node --test ".claude/hooks/*.test.mjs"` → 13 pass.
+`dotnet build -warnaserror`, `dotnet test tests/Keemese.UnitTests`, `npm ci --prefix web && npm run lint --prefix web && npm test --prefix web`, `node --test ".claude/hooks/*.test.mjs"` → 13 pass.
 
-## Carry-overs (owner to confirm the T-003/M1 placement)
-- T-003: `dotnet restore --locked-mode` in CI, scripts/check-docs.mjs, progress.json schema check, PR template.
-- M1: a test that enumerates anonymous endpoints; forwarded headers, HSTS, security headers, antiforgery; replace the placeholder cookie scheme with Identity.
+## M1 carry-overs (not T-003)
+Anonymous-endpoint enumeration test; forwarded headers, HSTS, antiforgery; security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the login work; Identity replaces the placeholder cookie scheme; axe + Playwright.
 
 ## Stop conditions
-Context ≥ 320k (context-monitor says HANDOFF) → handoff per docs/agents/handoff.md. T-002 done → reviewer (+ security-reviewer), then ask for merge approval. Stop.
+Context ≥ 320k (context-monitor says HANDOFF) → handoff per docs/agents/handoff.md. T-003 done → reviewer (+ security-reviewer), then ask for merge approval. Stop.

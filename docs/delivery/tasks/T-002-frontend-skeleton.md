@@ -1,7 +1,7 @@
 # T-002: Frontend skeleton served by the API
 
 - Milestone: M0 · Ladder level: L4 (router, query, shell foundations) · Depends on: T-001 merged · Branch: `feature/m0-frontend-skeleton`
-- Status: not_started
+- Status: in_review (2026-10-23)
 
 ## Objective
 A Vite + React + TypeScript SPA with the chosen foundations wired (router, query, Tailwind tokens, i18n), served by the API from one origin in the container build, and proxied by Vite in development.
@@ -31,10 +31,14 @@ Authentication, real pages, the API types generator (it arrives with the first r
 ## Verification
 ```bash
 npm ci --prefix web && npm run lint --prefix web && npm run typecheck --prefix web && npm test --prefix web && npm run build --prefix web
-docker compose -f deploy/compose.yaml --profile app up --build   # background; GET http://localhost:8080/login → SPA; /health/ready → 200
+docker compose --env-file .env -f deploy/compose.yaml --profile app up --build   # background; GET http://localhost:8080/login → SPA; /health/ready → 200
 dotnet test tests/Keemese.IntegrationTests --filter SpaFallback
 ```
 Review: `reviewer` (L4) including the visual check.
 
 ## Status / notes
-—
+- ESLint is pinned to 9.39 (npm marks it deprecated): `eslint-plugin-jsx-a11y` 6.10 does not support ESLint 10 yet. Upgrade both together when it does.
+- The Tailwind default palette, type scale and radii are reset in `theme.css`; only the semantic tokens exist, so off-system colors fail to compile into classes.
+- Integration test `SkeletonTests` no longer asserts `/anything-else` → 401: that path is now the SPA. `SpaFallbackTests` covers client routes, cache headers and `/api/*` + `/health/*` misses.
+- `deploy/Dockerfile.dockerignore` (BuildKit's per-Dockerfile ignore) keeps `bin/`, `obj/`, `node_modules/` and `.env*` out of the build context.
+- Screenshots in `docs/delivery/evidence/m0/` were captured from the container build with headless Edge over CDP (invented placeholder text only).

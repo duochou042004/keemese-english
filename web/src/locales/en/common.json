@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Keemese"
+  },
+  "language": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Your private teaching workspace",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "notReady": "Sign-in arrives in the next release."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This address does not exist or has moved.",
+    "back": "Back to sign in"
+  }
+}

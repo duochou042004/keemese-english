@@ -1,0 +1,7 @@
+{
+  "common": {
+    "not_found": "Không tìm thấy nội dung yêu cầu.",
+    "unexpected": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+    "network": "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại."
+  }
+}

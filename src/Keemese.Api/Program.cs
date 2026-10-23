@@ -47,6 +47,15 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+// The SPA build in wwwroot (ADR-0005): Vite-hashed /assets/* are immutable, everything else revalidates.
+var spaFiles = new StaticFileOptions
+{
+    OnPrepareResponse = ctx => ctx.Context.Response.Headers.CacheControl =
+        ctx.Context.Request.Path.StartsWithSegments("/assets") ? "public, max-age=31536000, immutable" : "no-cache",
+};
+app.UseStaticFiles(spaFiles);
+app.UseRouting(); // after static files, so the file fallback below only sees files that don't exist
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -58,7 +67,10 @@ if (app.Environment.IsDevelopment())
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") }).AllowAnonymous();
 
-// Unknown API paths are a 404, not a challenge or (from T-002) the SPA fallback.
+// Unknown API and health paths are a 404, never the SPA; every other path gets index.html for client routing.
 app.MapFallback("/api/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous();
+app.MapFallback("/health/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous();
+app.MapFallback("{**path:file}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous(); // missing favicon, stale asset
+app.MapFallbackToFile("index.html", spaFiles).AllowAnonymous();
 
 app.Run();

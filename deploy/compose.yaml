@@ -18,5 +18,22 @@ services:
       retries: 10
     restart: unless-stopped
 
+  app:
+    profiles: [app]
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      ConnectionStrings__Db: Host=db;Port=5432;Database=keemese;Username=keemese;Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (see .env.example)}
+    volumes:
+      - appdata:/data
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  appdata:
