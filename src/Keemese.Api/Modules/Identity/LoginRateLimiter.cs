@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.RateLimiting;
 
 namespace Keemese.Api.Modules.Identity;
@@ -13,7 +15,18 @@ public sealed class LoginRateLimiter : IDisposable
     private readonly PartitionedRateLimiter<string> _perUserName = FixedWindow(20, TimeSpan.FromHours(1));
 
     /// <param name="ip">The client IP after forwarded headers (T-101); null shares one partition.</param>
-    public bool AllowIp(string? ip) => Allow(_perIp, ip ?? "");
+    public bool AllowIp(IPAddress? ip) => Allow(_perIp, IpKey(ip));
+
+    /// <summary>IPv6 clients usually own a whole /64, so they share one partition per /64.</summary>
+    public static string IpKey(IPAddress? ip)
+    {
+        if (ip is null) return "";
+        if (ip.IsIPv4MappedToIPv6) ip = ip.MapToIPv4();
+        if (ip.AddressFamily != AddressFamily.InterNetworkV6) return ip.ToString();
+        var bytes = ip.GetAddressBytes();
+        Array.Clear(bytes, 8, 8);
+        return new IPAddress(bytes) + "/64";
+    }
 
     public bool AllowUserName(string normalizedUserName) => Allow(_perUserName, normalizedUserName);
 

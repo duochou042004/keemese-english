@@ -36,7 +36,7 @@ public sealed class IdentityService(
     /// </summary>
     public async Task<AppError?> LoginAsync(LoginRequest request, HttpContext http, CancellationToken ct)
     {
-        if (!rateLimiter.AllowIp(http.Connection.RemoteIpAddress?.ToString())) return RateLimited;
+        if (!rateLimiter.AllowIp(http.Connection.RemoteIpAddress)) return RateLimited;
         if (string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password)
             || request.UserName.Length > MaxUserNameLength || request.Password.Length > PasswordPolicy.MaxLength)
         {
