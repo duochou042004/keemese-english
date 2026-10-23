@@ -5,11 +5,11 @@ Your session briefing (SessionStart hook) shows the live repository state. Then 
 
 ## State (verified 2026-10-23)
 - M0 is closed. The M1 packets T-101…T-110 are on `develop` (PR #7, 6d3be09) and approved (T-105 option 1; `@hookform/resolvers` allowed in T-106).
-- T-101 (pipeline hardening) is done on `feature/m1-pipeline-hardening` and in review; its PR waits for the Lead Coordinator's merge approval (security change). Evidence is in progress.json.
+- T-101 (pipeline hardening) is merged into `develop` (PR #8, eb7b49d). Evidence is in progress.json.
 - T-101 left: forwarded headers only from `ForwardedHeaders__KnownProxies` / `__KnownNetworks` (none configured = forward nothing), HSTS + HTTPS redirect outside Development/Testing, `Infrastructure/Security/SecurityHeaders.cs` (OnStarting, runs right after forwarded headers), `Cache-Control: private, no-store` on `/api/**`, and `PipelineTests` incl. the anonymous-endpoint allowlist. **New anonymous endpoints (e.g. `POST /api/auth/login`) must be added to `AnonymousAllowlist` in `tests/Keemese.IntegrationTests/PipelineTests.cs` with a security review.**
 
 ## Before starting
-1. If the T-101 PR is not merged, stop and ask the Lead Coordinator; T-102 depends on it.
+1. T-101 is merged, so T-102 can start.
 2. Check `pending_owner_actions` in progress.json: branch protection on `master`/`develop`, Dependabot security updates, OD-01/02/04/07/08.
 3. Merges: within docs/agents/operating-model.md#merge-delegation only. T-102 is an authentication change: ask before merging.
 4. Routine Dependabot minor/patch PRs with green CI may be merged under the delegation.

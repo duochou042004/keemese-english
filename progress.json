@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-101",
     "title": "Request pipeline hardening and the anonymous-endpoint test",
-    "status": "in_review",
-    "branch": "feature/m1-pipeline-hardening",
+    "status": "done",
+    "branch": "feature/m1-pipeline-hardening (merged via PR #8, eb7b49d; branch deleted)",
     "packet": "docs/delivery/tasks/T-101-pipeline-hardening.md"
   },
   "repository": {
@@ -75,7 +75,8 @@
     "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)",
     "T-002 frontend skeleton merged into develop via PR #4 (fc3704e)",
     "T-003 CI merged into develop via PR #5 (bd78a4e); ci push run on develop green (https://github.com/duochou042004/keemese-english/actions/runs/39976019505): M0 closed 2026-10-23",
-    "PR #7 (M1 packets T-101..T-110) merged into develop (6d3be09)"
+    "PR #7 (M1 packets T-101..T-110) merged into develop (6d3be09)",
+    "T-101 pipeline hardening merged into develop via PR #8 (eb7b49d) with the owner's approval in chat; PR ci green (changes, backend, docs, secrets; web skipped, no web changes); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39982022014)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -460,7 +461,7 @@
     "id": "T-102",
     "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
     "packet": "docs/delivery/tasks/T-102-identity-and-login.md",
-    "requires": "T-101 merged into develop (needs the Lead Coordinator: security change)"
+    "requires": "T-101 merged into develop (done 2026-10-23, PR #8)"
   },
   "sessions": [
     {
@@ -498,7 +499,7 @@
       "date": "2026-10-23",
       "tool": "claude-code",
       "task": "T-101",
-      "outcome": "Implemented and verified (L4); reviewer approve, security-reviewer approve after the H1 fix; PR waits for the Lead Coordinator"
+      "outcome": "Implemented and verified (L4); reviewer approve, security-reviewer approve after the H1 fix; merged via PR #8 (owner approval)"
     }
   ]
 }
