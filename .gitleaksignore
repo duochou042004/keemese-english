@@ -1,0 +1,3 @@
+# Reviewed false positives only (invented test values, never real secrets). One fingerprint per line.
+# T-102: an invented password literal in a sign-up 404 test (generic-api-key).
+3d63d7a6b6aa6bc1244fda13efae2c65d9cc3252:tests/Keemese.IntegrationTests/IdentityTests.cs:generic-api-key:97

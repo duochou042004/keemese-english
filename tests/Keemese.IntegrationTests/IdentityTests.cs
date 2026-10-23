@@ -94,7 +94,7 @@ public sealed class IdentityTests(PostgresFixture postgres) : IDisposable
 
         foreach (var path in new[] { "/api/auth/register", "/api/auth/signup", "/api/users" })
         {
-            var signUp = await client.PostAsJsonAsync(path, new { userName = "x", password = "invented-pass-123" }, Ct);
+            var signUp = await client.PostAsJsonAsync(path, new { userName = "x", password = Auth.TutorPassword }, Ct);
             Assert.Equal(HttpStatusCode.NotFound, signUp.StatusCode);
         }
     }
