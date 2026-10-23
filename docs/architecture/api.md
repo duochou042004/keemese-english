@@ -14,17 +14,19 @@ Conventions are in [ADR-0016](../decisions/0016-minimal-apis-and-contracts.md). 
 - Lists: `?q=&page=1&pageSize=50` (max 200) → `{ items: [...], total }`. Small bounded lists (folders, sections, a plan) return arrays.
 - Unsafe methods require the `X-XSRF-TOKEN` header (ADR-0004).
 - Optimistic concurrency: editable resources return `version` (from `xmin`). PUT and PATCH send it back. A mismatch → `409 concurrency.conflict`.
-- Errors: `ProblemDetails` + `code` (+ `errors` for validation). Examples: `auth.invalid_credentials`, `auth.unauthenticated` (401), `auth.forbidden` (403), `auth.antiforgery_failed` (400, missing or wrong `X-XSRF-TOKEN`), `auth.locked_out`, `auth.password_change_required`, `students.username_taken`, `files.too_large`, `files.type_not_allowed`, `attempts.time_expired`, `attempts.limit_reached`, `activities.not_available_yet`, `concurrency.conflict`, `common.not_found`.
+- Errors: `ProblemDetails` + `code` (+ `errors` for validation). Examples: `auth.invalid_credentials`, `auth.unauthenticated` (401), `auth.forbidden` (403), `auth.antiforgery_failed` (400, missing or wrong `X-XSRF-TOKEN`), `auth.rate_limited` (429), `auth.password_change_required` (403), `auth.invalid_current_password` (400), `validation.failed` (400, `errors: {field: [code]}`, e.g. `newPassword: [password.too_short]`), `students.username_taken`, `files.too_large`, `files.type_not_allowed`, `attempts.time_expired`, `attempts.limit_reached`, `activities.not_available_yet`, `concurrency.conflict`, `common.not_found`.
 
 ## Auth and account (any signed-in user)
 
 | Method | Path | Body → Response | Notes |
 |---|---|---|---|
-| POST | `/api/auth/login` | `{userName, password, rememberMe}` → 204 + cookies | Rate limited (5/min/IP + lockout). Issues the `XSRF-TOKEN` cookie |
-| POST | `/api/auth/logout` | → 204 | |
-| GET | `/api/auth/me` | → `{id, role, displayName, language, mustChangePassword}` | 401 when anonymous |
-| POST | `/api/auth/change-password` | `{currentPassword, newPassword}` → 204 | Clears `mustChangePassword`. Rotates the security stamp (other sessions end) and re-issues the cookie |
-| PUT | `/api/auth/preferences` | `{language}` → 204 | |
+| POST | `/api/auth/login` | `{userName, password, rememberMe}` → 204 + cookies | Rate limited (5/min per IP, 20/h per username → 429 `auth.rate_limited`); 5 failures lock the account for 15 min. A locked account gets the generic `auth.invalid_credentials`. Fields over 256 characters → `auth.invalid_credentials`. Issues the `XSRF-TOKEN` cookie |
+| POST | `/api/auth/logout` | → 204 | Allowed while a password change is pending |
+| GET | `/api/auth/me` | → `{id, role, displayName, language, mustChangePassword}` | 401 when anonymous. Allowed while a password change is pending |
+| POST | `/api/auth/change-password` | `{currentPassword, newPassword}` → 204 | Clears `mustChangePassword`. Rotates the security stamp (other sessions end) and re-issues the cookie and `XSRF-TOKEN`. Wrong current → 400 `auth.invalid_current_password`; weak new → 400 `validation.failed` (`password.too_short`, `password.too_long`, `password.too_common`) |
+| PUT | `/api/auth/preferences` | `{language}` → 204 | `vi` or `en`, otherwise 400 `validation.failed` (`language.unsupported`) |
+
+While `mustChangePassword` is true, every other `/api` request gets `403 auth.password_change_required` (FR-AUTH-AC5).
 
 ## Tutor endpoints
 

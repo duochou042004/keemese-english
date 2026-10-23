@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,16 +48,16 @@ var cookiePrefix = builder.Environment.IsDevelopment() ? "" : "__Host-";
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
 builder.Services.AddIdentityCore<AppUser>(options =>
     {
-        // security-model.md#authentication: length only, no composition rules (the common-password list is T-103).
-        options.Password.RequiredLength = 10;
-        options.Password.RequireDigit = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = false;
+        // FR-AUTH-AC2 / T1: 5 failures → 15 minutes.
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager<AppSignInManager>()
     .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>();
+// PasswordPolicy replaces Identity's composition-rule validator (security-model.md#authentication).
+builder.Services.Replace(ServiceDescriptor.Scoped<IPasswordValidator<AppUser>, PasswordPolicy>());
+builder.Services.AddSingleton<LoginRateLimiter>();
 builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -150,7 +151,7 @@ app.UseStaticFiles(spaFiles);
 app.UseRouting(); // after static files, so the file fallback below only sees files that don't exist
 app.UseAuthentication();
 app.UseAuthorization();
-// T-103: the must-change-password gate (FR-AUTH-AC5) goes here, before antiforgery.
+app.UsePasswordChangeGate(); // FR-AUTH-AC5
 app.UseKeemeseAntiforgery();
 
 if (app.Environment.IsDevelopment())

@@ -10,15 +10,15 @@ Threats and tests: [threat-model.md](threat-model.md). Auth decision: [ADR-0004]
 | `Tutor` | `role = tutor` | All non-`/api/me`, non-`/api/auth` endpoints |
 | `Student` | `role = student` | `/api/me/**` |
 | `Anonymous` (explicit) | — | `POST /api/auth/login`, `/health/*`, SPA static files |
-| `PasswordChangePending` | Only `GET /api/auth/me`, `POST /api/auth/change-password`, `POST /api/auth/logout` | Users with `mustChangePassword` |
+| `PasswordChangePending` | Only `GET /api/auth/me`, `POST /api/auth/change-password`, `POST /api/auth/logout`; every other `/api` request → 403 `auth.password_change_required` | Users with `mustChangePassword`. Enforced by the `PasswordChangeGate` middleware after authorization (endpoints opt in with `AllowDuringPasswordChange()`), not by a policy. SPA pages still load |
 
 The role claim comes from the database at sign-in, and the security stamp is revalidated on every request (ADR-0004). Archiving a student or resetting a password therefore takes effect on the session's next request.
 
 ## Authentication
 
 - Username + password (Identity, PBKDF2 hashing with the framework's default iteration count).
-- Password policy: **≥ 10 characters**, no composition rules (NIST SP 800-63B), checked against a small embedded list of common passwords. Temporary passwords are 12 random characters from an unambiguous alphabet.
-- Lockout: 5 failures → 15 minutes. Login is rate limited to 5 per minute per IP and 20 per hour per username. Requests rejected by the rate limiter don't count toward lockout. The tutor can unlock a student, and the operator CLI (`--reset-tutor-password`) also clears the tutor's lockout (threat T19).
+- Password policy: **≥ 10 characters**, no composition rules (NIST SP 800-63B), checked against a small embedded list of common passwords (`Modules/Identity/Domain/common-passwords.txt`: 10,000 entries of ≥ 10 characters from SecLists, compared case-insensitively), at most 256 characters. `PasswordPolicy` is Identity's only password validator, so create, change and reset share it. Temporary passwords are 12 random characters from an unambiguous alphabet.
+- Lockout: 5 failures → 15 minutes. Login is rate limited to 5 per minute per IP and 20 per hour per username. Requests rejected by the rate limiter don't count toward lockout: the login service asks the limiter (`System.Threading.RateLimiting`, partitioned by the forwarded client IP and the normalized username) before the password check. The limits are in memory, per app instance. A locked-out login still runs one dummy hash, so its timing matches a wrong password. The lockout writes an `auth.locked_out` audit event. The tutor can unlock a student, and the operator CLI (`--reset-tutor-password`) also clears the tutor's lockout (threat T19).
 - The same error and similar timing for "no such user" and "wrong password".
 - Session cookie per ADR-0004. Logout clears the cookie and rotates the antiforgery token.
 - **Nothing credential-like in `localStorage` or `sessionStorage`.** Only the UI language before login (`lang`) and UI conveniences (collapsed sidebar).
