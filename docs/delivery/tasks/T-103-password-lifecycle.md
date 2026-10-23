@@ -1,7 +1,7 @@
 # T-103: Password change, must-change gate, lockout, rate limits, preferences
 
 - Milestone: M1 · Ladder level: L4 (authentication) · Depends on: T-102 merged · Branch: `feature/m1-password-lifecycle` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review
+- Status: done (merged via PR #12, cee9a58, 2026-10-24)
 
 ## Objective
 Users can change their password and save their language, a user with a pending password change can do nothing else, and brute force and lockout abuse are contained.
