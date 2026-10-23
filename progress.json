@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-003",
-    "title": "CI workflow, Dependabot, secret scan",
-    "status": "done",
-    "branch": "feature/m0-ci (merged via PR #5, bd78a4e; branch deleted)",
-    "packet": "docs/delivery/tasks/T-003-ci-and-repo-automation.md"
+    "id": "T-101",
+    "title": "Request pipeline hardening and the anonymous-endpoint test",
+    "status": "in_review",
+    "branch": "feature/m1-pipeline-hardening",
+    "packet": "docs/delivery/tasks/T-101-pipeline-hardening.md"
   },
   "repository": {
     "branches": {
@@ -74,7 +74,8 @@
     "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)",
     "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)",
     "T-002 frontend skeleton merged into develop via PR #4 (fc3704e)",
-    "T-003 CI merged into develop via PR #5 (bd78a4e); ci push run on develop green (https://github.com/duochou042004/keemese-english/actions/runs/39976019505): M0 closed 2026-10-23"
+    "T-003 CI merged into develop via PR #5 (bd78a4e); ci push run on develop green (https://github.com/duochou042004/keemese-english/actions/runs/39976019505): M0 closed 2026-10-23",
+    "PR #7 (M1 packets T-101..T-110) merged into develop (6d3be09)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -330,6 +331,65 @@
         "Integration tests and E2E (docs-only change)",
         "compat workflow"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-101",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "baseline on develop 6d3be09: dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; npm ci + lint + test --prefix web; node --test \".claude/hooks/*.test.mjs\"; node --test \"scripts/*.test.mjs\"",
+        "dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; dotnet test tests/Keemese.IntegrationTests",
+        "new PipelineTests run against the pre-fix Program.cs (git stash) to prove they fail",
+        "POSTGRES_PASSWORD=<placeholder> docker compose -f deploy/compose.yaml --profile app up --build -d --wait; curl -I localhost:8080 /login, /api/nope, /health/live (incl. spoofed X-Forwarded-Proto/-For with Host keemese.test)",
+        "node scripts/check-docs.mjs; node scripts/check-progress.mjs"
+      ],
+      "result": "pass",
+      "summary": "Baseline: build 0/0, unit 10/10, web lint clean + vitest 13/13, hooks 13/13, scripts 4/4. Final (after review fixes): build 0/0, unit 10/10, integration 9/9 (5 new PipelineTests: headers on /login, /api/nope, /health/live, /favicon.ico with the CSP equal to the doc string, no HSTS in Testing, API Cache-Control private, no-store, SPA no-cache unchanged; Production HSTS max-age=15552000 on https, spoofed X-Forwarded-Proto from an unknown IP → 307 with CSP and client IP unchanged, configured proxy 10.0.0.5 → 200 + HSTS + X-Forwarded-For honoured; no proxies configured → forwarded headers ignored even from 127.0.0.1; malformed proxy address fails startup; endpoint enumeration vs the anonymous allowlist). The two forwarded-header tests failed on the pre-fix code. Container (Production, plain http): /login 200 no-cache + CSP, nosniff, Referrer-Policy, Permissions-Policy; /api/nope 404 Cache-Control: private, no-store + headers; spoofed X-Forwarded-Proto with no proxies → 200, no HSTS; one \"Failed to determine the https port\" warning, no redirect. check-docs 0 broken, check-progress 0 problems",
+      "not_run": [
+        "A real TLS proxy in front of the container",
+        "Podman (not installed; R-08)",
+        "HSTS on a 500 response: UseHsts sets the header directly, so the exception handler clears it (known limit, accepted by security-reviewer; the four app headers use OnStarting and survive). No endpoint can throw yet, so no 500 test",
+        "The anonymous allowlist compares route text, not HTTP method",
+        "CI (runs on the PR)"
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-101",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -warnaserror",
+        "dotnet test tests/Keemese.UnitTests",
+        "dotnet test tests/Keemese.IntegrationTests"
+      ],
+      "result": "approve",
+      "summary": "All ACs met on 82efdd3; build 0/0, unit 10/10, integration 7/7. Non-blocking: the 307 redirect ran before the security headers (fixed in cc1bb6f: headers now run right after forwarded headers); the allowlist ignores HTTP method (recorded); no 500-path test (recorded)",
+      "not_run": [
+        "Compose/curl",
+        "Production on plain http",
+        "A real TLS proxy",
+        "Podman"
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-101",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...82efdd3, then 82efdd3..cc1bb6f",
+        "dotnet test tests/Keemese.IntegrationTests (7/7 on 82efdd3, 8/8 twice on cc1bb6f)",
+        "compose up + curl probes of the Production container"
+      ],
+      "result": "changes_requested → fixed → approve",
+      "summary": "H1 (high): with no proxies configured both lists were empty, which makes ForwardedHeadersMiddleware skip the address check and trust every caller (spoofed X-Forwarded-Proto earned HSTS in the container; X-Forwarded-For would defeat T19 rate limiting and the IP audit). Fixed in cc1bb6f (ForwardedHeaders.None when no proxy is configured) with a regression test; re-review approved. L1: HSTS lost on 500s (accepted as a known limit). Info: CSP TryAdd lets an endpoint set its own CSP, so file endpoints (T-105+) must be reviewed for it; AllowedHosts=* lets the Host header shape the redirect Location (documented); a malformed proxy IP throws on first read (checked by the orchestrator: it already fails startup, now covered by a test)",
+      "not_run": [
+        "A real TLS proxy",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED interaction (not set anywhere)",
+        "T8 second half (T-104)"
+      ]
     }
   ],
   "tests": [
@@ -350,7 +410,7 @@
     },
     {
       "command": "dotnet test tests/Keemese.IntegrationTests",
-      "result": "pass (4/4)",
+      "result": "pass (9/9)",
       "date": "2026-10-23"
     },
     {
@@ -397,10 +457,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-101",
-    "title": "Request pipeline hardening and the anonymous-endpoint test",
-    "packet": "docs/delivery/tasks/T-101-pipeline-hardening.md",
-    "requires": "The packets PR (chore/m1-packets) merged into develop; packets approved 2026-10-23"
+    "id": "T-102",
+    "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
+    "packet": "docs/delivery/tasks/T-102-identity-and-login.md",
+    "requires": "T-101 merged into develop (needs the Lead Coordinator: security change)"
   },
   "sessions": [
     {
@@ -432,7 +492,13 @@
       "date": "2026-10-23",
       "tool": "claude-code",
       "task": "M1 planning",
-      "outcome": "OD-09 decided; M1 packets T-101..T-110 written and approved (option 1 for T-105); packets PR from chore/m1-packets"
+      "outcome": "OD-09 decided; M1 packets T-101..T-110 written and approved (option 1 for T-105); packets PR from chore/m1-packets; merged via PR #7 (6d3be09)"
+    },
+    {
+      "date": "2026-10-23",
+      "tool": "claude-code",
+      "task": "T-101",
+      "outcome": "Implemented and verified (L4); reviewer approve, security-reviewer approve after the H1 fix; PR waits for the Lead Coordinator"
     }
   ]
 }

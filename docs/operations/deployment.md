@@ -5,7 +5,7 @@
 - **One image**: the ASP.NET Core app with the SPA in `wwwroot`. Multi-stage `deploy/Dockerfile`: a Node stage builds `web/` → an SDK stage publishes → the runtime image `mcr.microsoft.com/dotnet/aspnet:10.0`, running as a non-root user.
 - **PostgreSQL 18**: in Compose, or a managed instance.
 - **One persistent volume** at `DATA_DIR` (`/data`), holding `files/` and `keys/`.
-- **TLS termination** in front: a reverse proxy (Caddy, nginx, Traefik) or the platform's ingress. Configure `ForwardedHeaders` with the proxy's address.
+- **TLS termination** in front: a reverse proxy (Caddy, nginx, Traefik) or the platform's ingress. Configure `ForwardedHeaders__KnownProxies` (or `__KnownNetworks`) with the proxy's address, so the app sees the original scheme and client IP. Outside Development/Testing the app sends HSTS (180 days, no preload) on HTTPS responses and redirects plain HTTP to HTTPS when it knows the HTTPS port (`HTTPS_PORT`); behind the proxy the forwarded proto is already `https`, so nothing is redirected. Let the proxy redirect port 80.
 
 ## Configuration (environment only)
 
@@ -17,7 +17,9 @@
 | `ASPNETCORE_ENVIRONMENT` | — | `Production` |
 | `BOOTSTRAP_TUTOR_USERNAME` / `_PASSWORD` | first run only | Remove after the first login |
 | `Security__IpHashSalt` | ✅ | A random 32+ character string |
-| `ForwardedHeaders__KnownProxies` | if behind a proxy | |
+| `ForwardedHeaders__KnownProxies` | if behind a proxy | Comma-separated proxy IPs allowed to send `X-Forwarded-For` / `X-Forwarded-Proto`. Empty (default) = trust nobody, including loopback |
+| `ForwardedHeaders__KnownNetworks` | if behind a proxy | Comma-separated CIDR ranges, e.g. the Compose network (`172.16.0.0/12`) when the proxy IP is not fixed |
+| `AllowedHosts` | — | Default `*` until the host is known (OD-06). Set to the public host name, e.g. `app.example.com` |
 | `Uploads__MaxBytes__Document` / `__Audio` / `__Video` / `__Image` | — | OD-03 defaults |
 | `Database__MigrateOnStartup` | — | Default `true`. Set `false` to run `--migrate` manually |
 | `APP_NAME` | — | Display name (OD-02) |

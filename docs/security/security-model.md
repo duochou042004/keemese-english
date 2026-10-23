@@ -77,7 +77,7 @@ Response headers:
 ## Web security headers (app)
 
 - `Content-Security-Policy`: `default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`. The `frame-src` hosts are the embed allowlist (FR-CONT-02 embeds). Changing it requires a security review.
-- `Strict-Transport-Security` (production), `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), geolocation=()`. The microphone is denied too, until audio recording arrives in Phase 2.
+- `Strict-Transport-Security` (production), `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), geolocation=(), microphone=()` (the microphone opens up when audio recording arrives in Phase 2). `Cache-Control: private, no-store` on `/api/**` responses (T18). Implemented in `Infrastructure/Security/SecurityHeaders.cs`; `PipelineTests` holds a copy of the CSP string and fails if they drift.
 - Embeds: only allowlisted providers, converted on the server from a URL to a canonical embed URL. Arbitrary iframe HTML is never accepted.
 - Links: `meeting_url` and link items must be `https:`. They render with `rel="noopener noreferrer"`.
 
