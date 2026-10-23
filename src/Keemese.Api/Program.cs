@@ -1,9 +1,12 @@
 using Keemese.Api.Infrastructure.Data;
 using Keemese.Api.Infrastructure.Health;
+using Keemese.Api.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +37,19 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
+// Trust X-Forwarded-* only from the configured proxies (comma-separated); none configured = trust nobody.
+builder.Services.AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>((options, config) =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownProxies.Clear(); // drops the loopback default
+    options.KnownIPNetworks.Clear();
+    foreach (var proxy in List(config["ForwardedHeaders:KnownProxies"])) options.KnownProxies.Add(IPAddress.Parse(proxy));
+    foreach (var network in List(config["ForwardedHeaders:KnownNetworks"])) options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+
+    static string[] List(string? value) => value?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+});
+builder.Services.AddHsts(options => options.MaxAge = TimeSpan.FromDays(180)); // no preload, no subdomains
+
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"])
     .AddCheck<DataDirHealthCheck>("data_dir", tags: ["ready"]);
@@ -45,6 +61,13 @@ await using (var scope = app.Services.CreateAsyncScope())
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
 }
 
+app.UseForwardedHeaders();
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHsts();
+    app.UseHttpsRedirection(); // behind the TLS proxy the forwarded proto is already https, so no redirect
+}
+app.UseSecurityHeaders();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
