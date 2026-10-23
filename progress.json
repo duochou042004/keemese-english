@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-101",
-    "title": "Request pipeline hardening and the anonymous-endpoint test",
-    "status": "done",
-    "branch": "feature/m1-pipeline-hardening (merged via PR #8, eb7b49d; branch deleted)",
-    "packet": "docs/delivery/tasks/T-101-pipeline-hardening.md"
+    "id": "T-102",
+    "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
+    "status": "in_review",
+    "branch": "feature/m1-identity",
+    "packet": "docs/delivery/tasks/T-102-identity-and-login.md"
   },
   "repository": {
     "branches": {
@@ -391,6 +391,63 @@
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED interaction (not set anywhere)",
         "T8 second half (T-104)"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-102",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "dotnet tool exec dotnet-ef@10.0.13 -- migrations add Identity (ASPNETCORE_ENVIRONMENT=Development)",
+        "dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; dotnet test tests/Keemese.IntegrationTests (x3 before the review fixes, x1 after)",
+        "docker compose -f deploy/compose.yaml --profile app up --build -d --wait with placeholder env from the shell (no .env); curl login/me plain and with X-Forwarded-Proto: https via ForwardedHeaders__KnownNetworks; docker compose exec app dotnet Keemese.Api.dll --reset-tutor-password (password redacted)",
+        "node scripts/check-docs.mjs; node scripts/check-progress.mjs"
+      ],
+      "result": "pass",
+      "summary": "Build 0/0; unit 11/11 (+ temporary-password alphabet/length); integration 16/16: login ok with __Host-keemese path=/; secure; samesite=lax; httponly, session cookie without expires, rememberMe adds expires, readable XSRF-TOKEN; me profile (role tutor, language vi, mustChangePassword true); last_login_at set, UUID v7 ids, auth.login_succeeded/failed audit rows; wrong password, unknown user and deactivated user all 401 auth.invalid_credentials without a cookie; deactivation ends an open session; anonymous me 401 auth.unauthenticated; /api/auth/register, /signup, /api/users 404; POST without or with a forged X-XSRF-TOKEN 400 auth.antiforgery_failed; another session's token 400; form or text/plain login rejected (404, no cookie); logout 204 rotates XSRF-TOKEN and ends the session; bootstrap twice (second with other credentials) = one tutor; second tutor insert fails on ux_users_single_tutor; reset sets a 12-char password, clears lockout and failed count, sets must_change_password, ends the old session, audits auth.tutor_password_reset. Integration tests now use a database per factory (parallel classes raced on migrations). Container (Production): bootstrap logged \"tutor bootstrap: created\" with no values; through a simulated TLS proxy login 204 with __Host-keemese (secure; samesite=lax; httponly), __Host-keemese-af (secure; samesite=strict; httponly), XSRF-TOKEN (secure; samesite=strict); me 200; CLI exit 0, printed the password once, logged only \"tutor password reset via the operator CLI\". Plain-HTTP login in Production → 500 (antiforgery refuses a Secure cookie; fails closed, documented; nothing is saved since the review fix)",
+      "not_run": [
+        "A real TLS proxy",
+        "Podman (not installed; R-08)",
+        "Timing parity measured (code path checked: one hash per attempt)",
+        "The CLI argument path in a test (the service method is tested; the CLI ran in the container)",
+        "\"tutor already exists\" warning (no test)",
+        "CI (runs on the PR)"
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-102",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -warnaserror",
+        "dotnet test tests/Keemese.UnitTests",
+        "dotnet test tests/Keemese.IntegrationTests"
+      ],
+      "result": "approve",
+      "summary": "All ACs met on 3d63d7a; build 0/0, unit 11/11, integration 15/15. Non-blocking: no test of the CLI argument; CLI before migrations throws on a never-migrated DB; plain-HTTP 500 after the audit row was saved (fixed: token issued before saving); no test of the tutor-exists warning; occurred_at and created_at duplicate each other; no length limit on login fields (T-103 rate limiting)",
+      "not_run": [
+        "Compose/container",
+        "Timing measurement"
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-102",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...3d63d7a",
+        "dotnet build -warnaserror; unit 11/11; integration 15/15"
+      ],
+      "result": "approve",
+      "summary": "Low/Info only. Login CSRF relies on JSON-only + no CORS (test added: form and text/plain logins get no cookie); XSRF token bound to its session (test added); T-103 must still hash on the locked-out path (CheckPasswordSignInAsync returns early for locked-out users, a timing oracle once lockout is on); logout does not rotate the stamp, so a copied cookie stays valid until expiry (matches the security model); IP hash is salted SHA-256, not HMAC; the salt check rejects only an empty value; Data Protection keys unencrypted at rest (ADR-0004); login is unthrottled until T-103, so do not deploy before T-103",
+      "not_run": [
+        "Compose (relied on the orchestrator's container evidence)",
+        "Timing measurement",
+        "T2 CSP/XSS half",
+        "Isolation suite (no /api/me routes yet)"
+      ]
     }
   ],
   "tests": [
@@ -406,12 +463,12 @@
     },
     {
       "command": "dotnet test tests/Keemese.UnitTests",
-      "result": "pass (10/10)",
-      "date": "2026-10-19"
+      "result": "pass (11/11)",
+      "date": "2026-10-23"
     },
     {
       "command": "dotnet test tests/Keemese.IntegrationTests",
-      "result": "pass (9/9)",
+      "result": "pass (16/16)",
       "date": "2026-10-23"
     },
     {
@@ -458,10 +515,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-102",
-    "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
-    "packet": "docs/delivery/tasks/T-102-identity-and-login.md",
-    "requires": "T-101 merged into develop (done 2026-10-23, PR #8)"
+    "id": "T-103",
+    "title": "Password change, must-change gate, lockout, rate limits, preferences",
+    "packet": "docs/delivery/tasks/T-103-password-lifecycle.md",
+    "requires": "T-102 merged into develop (needs the Lead Coordinator: authentication)"
   },
   "sessions": [
     {
@@ -500,6 +557,12 @@
       "tool": "claude-code",
       "task": "T-101",
       "outcome": "Implemented and verified (L4); reviewer approve, security-reviewer approve after the H1 fix; merged via PR #8 (owner approval)"
+    },
+    {
+      "date": "2026-10-23",
+      "tool": "claude-code",
+      "task": "T-102 (same session as T-101, at the owner's request)",
+      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve; PR waits for the Lead Coordinator"
     }
   ]
 }

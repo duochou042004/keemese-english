@@ -20,6 +20,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     [
         "/health/live",
         "/health/ready",
+        "/api/auth/login",
         "/api/{**path}",
         "/health/{**path}",
         "{**path:file}",
@@ -42,7 +43,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     public async Task Security_headers_are_on_spa_api_and_health_responses()
     {
         await File.WriteAllTextAsync(Path.Combine(_webRoot, "index.html"), "<!doctype html><div id=root>", Ct);
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
         var client = factory.WithWebHostBuilder(b => b.UseWebRoot(_webRoot))
             .CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://keemese.test") });
 
@@ -65,7 +66,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task Production_sends_hsts_and_trusts_forwarded_proto_only_from_configured_proxies()
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir, "Production");
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir, "Production");
         var server = factory.WithWebHostBuilder(b => b
             .UseSetting("ForwardedHeaders:KnownProxies", "10.0.0.5")
             .UseSetting("https_port", "443")).Server;
@@ -89,7 +90,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task Without_configured_proxies_forwarded_headers_are_ignored()
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir, "Production");
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir, "Production");
         var server = factory.WithWebHostBuilder(b => b.UseSetting("https_port", "443")).Server;
 
         foreach (var remoteIp in new[] { "203.0.113.9", "127.0.0.1" }) // loopback is not trusted by default either
@@ -103,7 +104,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task A_malformed_proxy_address_fails_startup() // the middleware reads its options while the pipeline is built
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir, "Production");
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir, "Production");
         var bad = factory.WithWebHostBuilder(b => b.UseSetting("ForwardedHeaders:KnownProxies", "not-an-ip"));
         Assert.Throws<FormatException>(() => bad.CreateClient());
     }
@@ -111,7 +112,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task Every_endpoint_has_an_authorization_policy_or_is_an_allowlisted_anonymous_endpoint()
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
         var endpoints = factory.Services.GetRequiredService<EndpointDataSource>().Endpoints;
         Assert.NotEmpty(endpoints);
 

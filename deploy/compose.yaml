@@ -25,6 +25,13 @@ services:
       dockerfile: deploy/Dockerfile
     environment:
       ConnectionStrings__Db: Host=db;Port=5432;Database=keemese;Username=keemese;Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (see .env.example)}
+      Security__IpHashSalt: ${Security__IpHashSalt:-} # required: the app refuses to start without it
+      # The TLS proxy in front (docs/operations/deployment.md); empty = trust no forwarded headers.
+      ForwardedHeaders__KnownProxies: ${ForwardedHeaders__KnownProxies:-}
+      ForwardedHeaders__KnownNetworks: ${ForwardedHeaders__KnownNetworks:-}
+      # First run only (FR-AUTH-03); remove from .env after the first login.
+      BOOTSTRAP_TUTOR_USERNAME: ${BOOTSTRAP_TUTOR_USERNAME:-}
+      BOOTSTRAP_TUTOR_PASSWORD: ${BOOTSTRAP_TUTOR_PASSWORD:-}
     volumes:
       - appdata:/data
     ports:

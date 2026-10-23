@@ -17,7 +17,7 @@ public sealed class SkeletonTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task Boots_against_empty_postgres_applies_migrations_and_is_ready()
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
         var client = factory.CreateClient();
 
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health/live", Ct)).StatusCode);
@@ -37,7 +37,7 @@ public sealed class SkeletonTests(PostgresFixture postgres) : IDisposable
     {
         var notADirectory = Path.Combine(_dataDir, "file");
         await File.WriteAllTextAsync(notADirectory, "x", Ct);
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, notADirectory);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), notADirectory);
         var client = factory.CreateClient();
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, (await client.GetAsync("/health/ready", Ct)).StatusCode);
@@ -46,7 +46,7 @@ public sealed class SkeletonTests(PostgresFixture postgres) : IDisposable
     [Fact]
     public async Task Unknown_api_path_is_404_problem_details()
     {
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
         var client = factory.CreateClient();
 
         var api = await client.GetAsync("/api/does-not-exist", Ct);
