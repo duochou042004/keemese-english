@@ -51,10 +51,10 @@ node --test ".claude/hooks/*.test.mjs"              # agent guard hook tests
 4. Verify with the checks for that level. Long runs in the background; read exit codes.
 5. L3/L4 → independent `reviewer` (+ `security-reviewer` for auth, files, DTOs) ([operating model](docs/agents/operating-model.md)).
 6. Record evidence + update `progress.json` + affected docs.
-7. Ask the Lead Coordinator for merge approval. **Never merge, push to protected branches, or publish without approval.**
+7. Merge into `develop` yourself only within the [merge delegation](docs/agents/operating-model.md#merge-delegation) (green CI, required reviews done, evidence recorded, nothing critical); otherwise ask the Lead Coordinator. **Never push to protected branches directly or publish without approval.**
 
 ## Git
-`master` = releases · `develop` = integration · `feature/*`, `fix/*` from `develop`. Conventional Commits. No force-push, no `reset --hard`, no history rewriting, no direct commits to `master`/`develop`. Merge only after approval.
+`master` = releases · `develop` = integration · `feature/*`, `fix/*` from `develop`. Conventional Commits. No force-push, no `reset --hard`, no history rewriting, no direct commits to `master`/`develop`. Merge only through a PR, within the merge delegation or after approval.
 
 ## Context and handoff (critical: sessions start with no memory)
 Token-based tiers ([docs/agents/handoff.md](docs/agents/handoff.md)): **WARN 250k** (wrap up the current unit) · **HANDOFF 320k** (stop and hand off) · **HARD STOP 400k** (only finish the handoff) · **never 500k**. For smaller windows, the percentage fallback applies (handoff at 60 %). Claude Code measures this automatically and injects `[context-monitor]` warnings: obey them. A new session starts from the SessionStart briefing + `progress.json` + `docs/handoff/next-session.md` (≤ 4,000 chars, exactly one next task). Size tasks to fit one session, and do one task per session.

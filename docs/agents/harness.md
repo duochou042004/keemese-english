@@ -23,7 +23,7 @@ flowchart LR
 4. **Verify.** Run the required checks for the level. Long runs go in the background; wait for completion and read the exit code.
 5. **Independent evaluation.** L3 and L4: `reviewer` (and `security-reviewer` for auth, files or DTO changes) in a fresh context, given only the packet, the diff and the checklist. L1 and L2: the orchestrator self-reviews against the checklist.
 6. **Record.** Append evidence and update `progress.json` (`current_task`, `completed`, `changed_files`, `tests`, `decisions`, `risks`, `next_task`, `last_updated`). Update the docs the change affects in the same branch.
-7. **Close.** Ask the Lead Coordinator for merge approval, or hand off.
+7. **Close.** Merge within the [merge delegation](operating-model.md#merge-delegation), or ask the Lead Coordinator for merge approval; or hand off.
 
 ## Separation of mechanisms (use the right one)
 
