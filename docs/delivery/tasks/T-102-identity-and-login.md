@@ -1,7 +1,7 @@
 # T-102: Identity, login/logout, antiforgery, tutor bootstrap and reset CLI
 
 - Milestone: M1 · Ladder level: L4 (authentication) · Depends on: T-101 merged · Branch: `feature/m1-identity` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review
+- Status: done
 
 ## Objective
 ASP.NET Core Identity replaces the placeholder cookie scheme: the bootstrapped tutor can log in and out through the API, the session cookie and antiforgery follow ADR-0004, and an operator can reset the tutor's password from the CLI.

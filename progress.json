@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-102",
     "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
-    "status": "in_review",
-    "branch": "feature/m1-identity",
+    "status": "done",
+    "branch": "feature/m1-identity (merged via PR #10, 2d68d91; branch deleted)",
     "packet": "docs/delivery/tasks/T-102-identity-and-login.md"
   },
   "repository": {
@@ -76,7 +76,8 @@
     "T-002 frontend skeleton merged into develop via PR #4 (fc3704e)",
     "T-003 CI merged into develop via PR #5 (bd78a4e); ci push run on develop green (https://github.com/duochou042004/keemese-english/actions/runs/39976019505): M0 closed 2026-10-23",
     "PR #7 (M1 packets T-101..T-110) merged into develop (6d3be09)",
-    "T-101 pipeline hardening merged into develop via PR #8 (eb7b49d) with the owner's approval in chat; PR ci green (changes, backend, docs, secrets; web skipped, no web changes); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39982022014)"
+    "T-101 pipeline hardening merged into develop via PR #8 (eb7b49d) with the owner's approval in chat; PR ci green (changes, backend, docs, secrets; web skipped, no web changes); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39982022014)",
+    "T-102 identity merged into develop via PR #10 (2d68d91) with the owner's approval in chat; PR ci green on 9afce2e (changes, backend, docs, secrets; web skipped). The first secrets run failed on a gitleaks generic-api-key false positive (invented test password in 3d63d7a): line changed and that one fingerprint added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39989222670)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -518,7 +519,7 @@
     "id": "T-103",
     "title": "Password change, must-change gate, lockout, rate limits, preferences",
     "packet": "docs/delivery/tasks/T-103-password-lifecycle.md",
-    "requires": "T-102 merged into develop (needs the Lead Coordinator: authentication)"
+    "requires": "T-102 merged into develop (done 2026-10-23, PR #10)"
   },
   "sessions": [
     {
@@ -562,7 +563,7 @@
       "date": "2026-10-23",
       "tool": "claude-code",
       "task": "T-102 (same session as T-101, at the owner's request)",
-      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve; PR waits for the Lead Coordinator"
+      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve; merged via PR #10 (owner approval)"
     }
   ]
 }
