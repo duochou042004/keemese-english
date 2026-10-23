@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "keemese-english",
-  "last_updated": "2026-10-23",
+  "last_updated": "2026-10-24",
   "policy": {
     "context": {
       "window_tokens": 1000000,
@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-102",
-    "title": "Identity, login/logout, antiforgery, tutor bootstrap and reset CLI",
-    "status": "done",
-    "branch": "feature/m1-identity (merged via PR #10, 2d68d91; branch deleted)",
-    "packet": "docs/delivery/tasks/T-102-identity-and-login.md"
+    "id": "T-103",
+    "title": "Password change, must-change gate, lockout, rate limits, preferences",
+    "status": "in_review",
+    "branch": "feature/m1-password-lifecycle",
+    "packet": "docs/delivery/tasks/T-103-password-lifecycle.md"
   },
   "repository": {
     "branches": {
@@ -449,6 +449,88 @@
         "T2 CSP/XSS half",
         "Isolation suite (no /api/me routes yet)"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-103",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "baseline not rerun on develop c86d98a (the T-102 evidence of 2026-10-23 was used; the new tests include all old ones)",
+        "curl SecLists xato-net-10-million-passwords-1000000.txt (owner approved the download in chat) → filtered to 10,000 entries of 10-64 printable chars, lowercased",
+        "dotnet build -warnaserror (Debug and Release)",
+        "dotnet test tests/Keemese.UnitTests -c Release",
+        "dotnet test tests/Keemese.IntegrationTests -c Release (background)",
+        "docker run zricethezav/gitleaks:v8.24.3 dir (the list)",
+        "node scripts/check-docs.mjs; node scripts/check-progress.mjs; node --test hooks and scripts"
+      ],
+      "result": "pass",
+      "summary": "Build 0/0 (Debug and Release). Unit 27/27 (+ PasswordPolicy x11: too_short incl. null/empty/9 chars, too_common case-insensitive, too_long > 256, spaces and Vietnamese allowed; LoginRateLimiter x5: IPv4-mapped → IPv4, IPv6 keyed per /64, 6th attempt from one /64 refused). Integration 25/25: change-password 204 re-issues the session cookie, flag cleared, other session 401, caller keeps working with the new XSRF token, old password 401 / new 204; wrong current → 400 auth.invalid_current_password, too short/too common → 400 validation.failed errors.newPassword, nothing saved; gate: PUT preferences and unmapped /api 403 auth.password_change_required, me/change-password/logout reachable, after change 204/404, flag set again in DB takes effect on the open session; 5 failures from 5 IPs → lockout_end ≈ now+15 min, one auth.locked_out row, right password while locked → 401 auth.invalid_credentials without a cookie and lockout_end unchanged, lockout_end moved to the past → 204; 6th login from one IP → 429 auth.rate_limited with access_failed_count still 4, another IP 204; 21st login for one username across 21 IPs → 429; 257-char username/password → 401 auth.invalid_credentials; preferences en round-trips through me, fr → 400 validation.failed. gitleaks: no leaks in the list. check-docs 0 broken, check-progress 0 problems, hooks 13/13, scripts 4/4",
+      "not_run": [
+        "FakeTimeProvider: Identity 10 lockout reads the system clock, so the 15-minute test moves lockout_end",
+        "Debug test runs: a local Windows Application Control policy randomly blocks the Debug Keemese.Api.dll (per binary hash); tests ran in Release",
+        "Partitioning by a real forwarded client IP behind a TLS proxy",
+        "Timing parity measured",
+        "A tutor-policy route behind the gate (none before T-104)",
+        "web checks (no web changes)",
+        "CI (runs on the PR)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-103",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -warnaserror -c Release",
+        "dotnet test tests/Keemese.UnitTests -c Release",
+        "dotnet test tests/Keemese.IntegrationTests -c Release"
+      ],
+      "result": "approve",
+      "summary": "All ACs mapped to code and tests on 74581b6; build 0/0, unit 22/22, integration 25/25. Non-blocking: record evidence (done); the AppError.cs change is outside the packet file list (needs the Lead Coordinator's OK); wrong current passwords on change-password are neither limited nor audited (documented as accepted risk); a signed-in flagged user gets 403 on POST login (T-106 must log out first)",
+      "not_run": [
+        "Real proxy IP partitioning",
+        "Identity's clock source",
+        "Parallel lockout races",
+        "Limiter memory growth",
+        "Full list content"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-103",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...74581b6",
+        "dotnet build -c Release -warnaserror; unit 22/22; integration 25/25",
+        "gitleaks develop..74581b6"
+      ],
+      "result": "approve (medium/low findings → fixed or documented)",
+      "summary": "No critical/high. M1: one IP can keep a known username locked (~20 failures/h) and exhaust its 20/h budget; the CLI can't clear the in-memory limit → documented as an accepted risk with 'restart clears the limits' in security-model.md (threat-model.md T19 is outside the packet's file ownership: Lead Coordinator to confirm). L1: the wrong-password path does one extra DB write vs unknown/locked → documented. L2: per-IP key was the full IPv6 address → fixed (keyed per /64, unit-tested). Info: flag set before the save is correct but fragile; no password-change audit (not required); change-password is an unthrottled oracle given a session (documented). Verified: limiter order before the password check, dummy hash on the locked path, gate claim freshness/exemptions/ordering, stamp rotation, no secrets in the list, allowlist unchanged",
+      "not_run": [
+        "Timing on a running stack",
+        "Real proxy",
+        "Isolation suite (no /api/me routes)",
+        "UI"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-103",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent (re-review)",
+      "commands": [
+        "git diff 74581b6..d212329",
+        "dotnet build -c Release -warnaserror",
+        "dotnet test tests/Keemese.UnitTests -c Release"
+      ],
+      "result": "approve",
+      "summary": "L2 fixed at d212329 (IPv6 keyed per /64, IPv4-mapped → IPv4, null shares one bucket; unit-tested). M1, L1 and the change-password oracle recorded as accepted risks in security-model.md. Build 0/0, unit 27/27. Open for the Lead Coordinator: threat-model.md T19 still lists the per-IP limit as a mitigation without the accepted risk",
+      "not_run": [
+        "Integration rerun (orchestrator ran 25/25 on d212329)",
+        "A real IPv6 proxy"
+      ]
     }
   ],
   "tests": [
@@ -463,14 +545,14 @@
       "date": "2026-10-19"
     },
     {
-      "command": "dotnet test tests/Keemese.UnitTests",
-      "result": "pass (11/11)",
-      "date": "2026-10-23"
+      "command": "dotnet test tests/Keemese.UnitTests -c Release",
+      "result": "pass (27/27)",
+      "date": "2026-10-24"
     },
     {
-      "command": "dotnet test tests/Keemese.IntegrationTests",
-      "result": "pass (16/16)",
-      "date": "2026-10-23"
+      "command": "dotnet test tests/Keemese.IntegrationTests -c Release",
+      "result": "pass (25/25)",
+      "date": "2026-10-24"
     },
     {
       "command": "npm run lint && npm run typecheck && npm test && npm run build (--prefix web)",
@@ -501,6 +583,7 @@
   },
   "blockers": [],
   "pending_owner_actions": [
+    "T-103 (authentication): approve the merge of the T-103 PR; also confirm (a) the Shared/Errors/AppError.cs change outside the packet file list (validation.failed errors map) and (b) recording the accepted T19 lockout-abuse risk (security-model.md) in threat-model.md T19 as a follow-up",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
   ],
@@ -516,10 +599,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-103",
-    "title": "Password change, must-change gate, lockout, rate limits, preferences",
-    "packet": "docs/delivery/tasks/T-103-password-lifecycle.md",
-    "requires": "T-102 merged into develop (done 2026-10-23, PR #10)"
+    "id": "T-104",
+    "title": "see packet",
+    "packet": "docs/delivery/tasks/T-104-students-api-and-isolation-suite.md",
+    "requires": "T-103 merged into develop"
   },
   "sessions": [
     {
@@ -564,6 +647,12 @@
       "tool": "claude-code",
       "task": "T-102 (same session as T-101, at the owner's request)",
       "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve; merged via PR #10 (owner approval)"
+    },
+    {
+      "date": "2026-10-24",
+      "tool": "claude-code",
+      "task": "T-103",
+      "outcome": "Implemented and verified (L4); reviewer approve, security-reviewer approve (L2 fixed, M1/L1 documented); PR open, merge awaits the Lead Coordinator"
     }
   ]
 }
