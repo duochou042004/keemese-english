@@ -37,12 +37,15 @@ public sealed class SpaFallbackTests(PostgresFixture postgres) : IDisposable
         Assert.Equal(HttpStatusCode.OK, asset.StatusCode);
         Assert.Equal("public, max-age=31536000, immutable", asset.Headers.CacheControl?.ToString());
 
-        foreach (var path in new[] { "/api/does-not-exist", "/api", "/health/nope" })
+        foreach (var path in new[] { "/api/does-not-exist", "/api", "/health/nope", "/favicon.ico", "/assets/stale-123.js" })
         {
             var miss = await client.GetAsync(path, Ct);
             Assert.Equal(HttpStatusCode.NotFound, miss.StatusCode);
             Assert.Equal("application/problem+json", miss.Content.Headers.ContentType?.MediaType);
         }
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health/live", Ct)).StatusCode);
+
+        // The SPA fallback answers GET only; anything else still hits the deny-by-default policy.
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsync("/login", null, Ct)).StatusCode);
     }
 }

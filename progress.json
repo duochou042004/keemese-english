@@ -197,6 +197,33 @@
         "axe / Playwright (M1)",
         "CI (T-003)"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-002",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "npm ci + lint + typecheck + test + build --prefix web",
+        "dotnet build -warnaserror",
+        "dotnet test tests/Keemese.IntegrationTests --filter-method *SpaFallback*",
+        "curl the running container; viewed 4 of 8 screenshots"
+      ],
+      "result": "approve",
+      "summary": "All ACs met; vitest 13/13, build 0/0, SpaFallback 1/1, /api and /health misses 404. Non-blocking: missing file-like paths (/favicon.ico, stale asset) returned 401 instead of 404 (fixed: {**path:file} → 404, with an explicit UseRouting() after UseStaticFiles so existing files are still served; rerun: build 0/0, unit 10/10, integration 4/4, rebuilt container /favicon.ico and /assets/stale.js 404 problem+json, real hashed asset 200); no test exercised the deny-by-default policy after the 401 assertion moved (fixed: POST /login → 401 in SpaFallbackTests)",
+      "not_run": ["Live horizontal-scroll measurement", "Vite dev proxy", "Podman", "axe", "CI"]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-002",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "read-only review of git diff develop...ad5b9a6; curl probes of the anonymous surface; docker exec id; lock-file registry/integrity scan; npm audit --omit=dev"
+      ],
+      "result": "approve",
+      "summary": "Anonymous surface = SPA GET pages, /health/live|ready, /api and /health 404s; config/dll/.env paths not served; bundle has no source maps or secrets; container uid 1654 with read-only /app; 461 lock entries all from registry.npmjs.org with integrity; only `lang` in localStorage. Findings: M1 (medium) fallback-policy test removed (fixed, see reviewer entry); L2 no CSP/frame-ancestors/nosniff/Referrer-Policy (carry-over, must land before M1 login); L3 dockerignore .env patterns root-only (fixed: **/.env*); L4 base images pinned by tag, not digest (carry-over to T-003)",
+      "not_run": ["gitleaks over history", "Full bundle audit beyond a secrets grep"]
     }
   ],
   "tests": [
@@ -241,7 +268,7 @@
   "pending_owner_actions": [
     "Approve the T-002 merge (feature/m0-frontend-skeleton → develop)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
-    "Agree to fold into T-003/M1 (the T-002 packet's compose command already has --env-file): the same fix in runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI (T-003); anonymous-endpoint enumeration test and remaining pipeline steps (M1)"
+    "Agree to fold into T-003/M1 (the T-002 packet's compose command already has --env-file): the same fix in runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI and digest-pinned base images (T-003); anonymous-endpoint enumeration test and remaining pipeline steps incl. security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the M1 login work"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",

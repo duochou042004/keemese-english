@@ -55,6 +55,7 @@ var spaFiles = new StaticFileOptions
         ctx.Context.Request.Path.StartsWithSegments("/assets") ? "public, max-age=31536000, immutable" : "no-cache",
 };
 app.UseStaticFiles(spaFiles);
+app.UseRouting(); // after static files, so the file fallback below only sees files that don't exist
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -69,6 +70,7 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = c => c
 // Unknown API and health paths are a 404, never the SPA; every other path gets index.html for client routing.
 app.MapFallback("/api/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous();
 app.MapFallback("/health/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous();
+app.MapFallback("{**path:file}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound)).AllowAnonymous(); // missing favicon, stale asset
 app.MapFallbackToFile("index.html", spaFiles).AllowAnonymous();
 
 app.Run();
