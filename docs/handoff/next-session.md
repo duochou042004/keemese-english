@@ -6,11 +6,11 @@ Your session briefing (SessionStart hook) shows the live repository state. Then 
 ## State (verified 2026-10-23)
 - M0 is closed (`develop` 5341aa4; ci push run 39976019505 green).
 - OD-09 (navigation) was accepted as proposed on 2026-10-23 and is now PD-08.
-- The M1 packets T-101…T-110 are on `chore/m1-packets` (index and order: docs/delivery/tasks/README.md#index). **They need Lead Coordinator approval and the packets PR merged into `develop` before any implementation.** Open owner questions in the packets: T-105 option 1 (build-time `Microsoft.Extensions.ApiDescription.Server`) vs option 2 (no package); T-106 adding `@hookform/resolvers`.
+- The M1 packets T-101…T-110 are on `chore/m1-packets` (index and order: docs/delivery/tasks/README.md#index). The Lead Coordinator approved them on 2026-10-23, choosing T-105 option 1 (build-time `Microsoft.Extensions.ApiDescription.Server`) and allowing `@hookform/resolvers` in T-106. Start once the packets PR is merged into `develop`.
 
 ## Before starting
-1. Check `pending_owner_actions` in progress.json: packet approval, branch protection on `master`/`develop` and Dependabot security updates (owner settings), OD-01/02/04/07/08.
-2. If the packets PR is not merged yet, ask the Lead Coordinator; don't start T-101 on an unapproved packet.
+1. Check `pending_owner_actions` in progress.json: branch protection on `master`/`develop` and Dependabot security updates (owner settings), OD-01/02/04/07/08.
+2. If the packets PR is not merged yet, merge it under the delegation (docs only, green CI) or ask the Lead Coordinator.
 3. Merges: within docs/agents/operating-model.md#merge-delegation only. T-101 is a security change: ask before merging.
 4. Routine Dependabot minor/patch PRs with green CI may be merged under the delegation.
 

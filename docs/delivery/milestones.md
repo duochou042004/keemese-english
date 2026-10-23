@@ -30,7 +30,7 @@ M2 and M3 can run in parallel (disjoint modules) once M1 lands. Everything else 
 | **M6** | Learning plans | FR-PLAN-01..05 | Keyboard reordering works · student read-only view · plan independence test |
 | **M7** | Progress, dashboards, release hardening → **v1.0.0** | FR-PROG-01..03, FR-GOAL-05, FR-DASH-01/02 (complete), NFR-PERF-01, NFR-OPS-01 | Progress math tests incl. zero-data · dashboard answers §55 without scrolling at 1440×900 · full E2E on 3 browsers · compat workflow green · ASVS L1 pass · backup/restore drill · OD-06 decided · release notes |
 
-M1 packets: T-101…T-110 ([task index](tasks/README.md#index)), awaiting Lead Coordinator approval (2026-10-23).
+M1 packets: T-101…T-110 ([task index](tasks/README.md#index)), approved by the Lead Coordinator on 2026-10-23.
 
 ## Phase 2 backlog (not scheduled; from the scope doc)
 Learning plan templates (PD-01) · notifications (PD-02) · vocabulary (PD-03) · matching, ordering and audio-recording question types (PD-04) · versioning (PD-05) · annotation feedback (PD-06) · email password reset (PD-07) · recurring lessons · analytics. Each needs a product decision before it gets a packet.
