@@ -1,7 +1,7 @@
 # T-101: Request pipeline hardening and the anonymous-endpoint test
 
 - Milestone: M1 · Ladder level: L4 (security pipeline) · Depends on: M0 closed · Branch: `feature/m1-pipeline-hardening` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review
+- Status: done
 
 ## Objective
 Before any login code exists, the app sends the security headers, trusts forwarded headers only from configured proxies, uses HSTS outside development, and has a test that fails when an endpoint has no explicit authorization decision.
