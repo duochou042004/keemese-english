@@ -54,7 +54,7 @@ Scope values: **MVP** · **P2** (Phase 2) · **FUT** (Phase 3 / Future) · **NON
 | 38 | File management, not a Drive clone | FR-CONT-03, -04, -06, -07, ADR-0007 | Content (Files) | M3 | MVP |
 | 39 | Notifications | PD-02 (dashboards instead) | — | — | P2 |
 | 40 | UX principles | FR-UX-01..05, [design system](../frontend/design-system.md) | web | all | MVP |
-| 41 | Information architecture | [IA](../frontend/information-architecture.md) (adjustments pending OD-09) | web | M1 | MVP |
+| 41 | Information architecture | [IA](../frontend/information-architecture.md) (adjustments accepted as PD-08) | web | M1 | MVP |
 | 42 | MVP list | This table, the MVP rows | — | M0–M7 | MVP |
 | 43 | Phase 2 list | PD-01..07, scope doc | — | — | P2 |
 | 44 | Phase 3 list | Scope doc | — | — | FUT |
@@ -100,4 +100,3 @@ These came up during planning. They are **OPTIONAL / FUTURE / REQUIRES PRODUCT D
 - Student-visible lesson summary (proposed as part of FR-LES-05) — OD-04 confirms
 - After-lesson entry from the Today dashboard as well as from the student (§48) — OD-07
 - Learning profile hidden from students — OD-08
-- Navigation adjustments to §41 — OD-09
