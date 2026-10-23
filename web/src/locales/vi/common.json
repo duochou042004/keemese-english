@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Keemese"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "subtitle": "Không gian dạy học riêng của bạn",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "submit": "Đăng nhập",
+    "notReady": "Tính năng đăng nhập sẽ có ở bản tiếp theo."
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Đường dẫn này không tồn tại hoặc đã bị chuyển đi.",
+    "back": "Về trang đăng nhập"
+  }
+}

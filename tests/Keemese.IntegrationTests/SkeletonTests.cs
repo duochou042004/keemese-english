@@ -44,7 +44,7 @@ public sealed class SkeletonTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
-    public async Task Unknown_api_path_is_404_problem_details_and_other_paths_require_auth()
+    public async Task Unknown_api_path_is_404_problem_details()
     {
         await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
         var client = factory.CreateClient();
@@ -54,7 +54,5 @@ public sealed class SkeletonTests(PostgresFixture postgres) : IDisposable
         Assert.Equal("application/problem+json", api.Content.Headers.ContentType?.MediaType);
         using var problem = JsonDocument.Parse(await api.Content.ReadAsStringAsync(Ct));
         Assert.Equal("common.not_found", problem.RootElement.GetProperty("code").GetString());
-
-        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/anything-else", Ct)).StatusCode);
     }
 }

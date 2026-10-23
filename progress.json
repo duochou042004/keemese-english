@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "keemese-english",
-  "last_updated": "2026-10-19",
+  "last_updated": "2026-10-23",
   "policy": {
     "context": {
       "window_tokens": 1000000,
@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-001",
-    "title": "Backend skeleton, Compose PostgreSQL, test projects",
+    "id": "T-002",
+    "title": "Frontend skeleton served by the API",
     "status": "in_review",
-    "branch": "feature/m0-backend-skeleton (from develop @ 9f308b9)",
-    "packet": "docs/delivery/tasks/T-001-backend-skeleton.md"
+    "branch": "feature/m0-frontend-skeleton (from develop @ fc60f4d)",
+    "packet": "docs/delivery/tasks/T-002-frontend-skeleton.md"
   },
   "repository": {
     "branches": {
@@ -71,7 +71,8 @@
     "Agent operating model, harness, tooling, plugins, handoff (docs/agents)",
     "Milestones, risk register, task packets T-001..T-003 (docs/delivery)",
     "AGENTS.md, CLAUDE.md, README.md, .claude agents/skills/hooks, .gitattributes, .gitignore, .editorconfig",
-    "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)"
+    "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)",
+    "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -173,6 +174,29 @@
         "Builds or tests (read-only role)",
         "Threats T1-T21 one by one (most not applicable yet)"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-002",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; node --test \".claude/hooks/*.test.mjs\" (baseline on develop fc60f4d)",
+        "npm install -E (versions re-verified on npm 2026-10-23), then npm run lint/typecheck/test/build --prefix web",
+        "dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; dotnet test tests/Keemese.IntegrationTests (background)",
+        "POSTGRES_PASSWORD=<placeholder> docker compose -f deploy/compose.yaml --profile app up --build -d --wait (background)",
+        "curl localhost:8080 /login, /t/x, /health/ready, /api/nope, /health/nope, /assets/<hash>.js; docker exec keemese-app-1 id",
+        "headless Edge over CDP: /login at 1440/1024/768/390 in vi and en (screenshots + scrollWidth); browser pane: /t redirect, language switch + reload, 404 route"
+      ],
+      "result": "pass",
+      "summary": "Baseline: build 0/0, unit 10/10, hooks 13/13. Web: eslint + prettier clean, tsc clean, vitest 13/13 (catalog parity, no empty strings, resolveLanguage x7, apiFetch x4), vite build ok; lint rule against dangerouslySetInnerHTML proven with a probe file. API: build 0/0, unit 10/10, integration 4/4 incl. SpaFallback. Container: app healthy, runs as uid 1654 (app); /login and /t/x 200 text/html no-cache; hashed asset 'public, max-age=31536000, immutable'; /health/ready 200; /api/nope and /health/nope 404 problem+json. Visual: no horizontal scroll at any of the 8 size/language combinations, Inter loaded, diacritics legible; /t → /login; saved lang 'vi' beats navigator en-US after reload; unknown route shows the localized 404",
+      "not_run": [
+        "Vite dev proxy against a running API on 5080 (config only)",
+        "Compose with a real .env (agents do not create .env; password passed via the shell)",
+        "Podman (not installed; R-08)",
+        "axe / Playwright (M1)",
+        "CI (T-003)"
+      ]
     }
   ],
   "tests": [
@@ -193,8 +217,13 @@
     },
     {
       "command": "dotnet test tests/Keemese.IntegrationTests",
-      "result": "pass (3/3)",
-      "date": "2026-10-19"
+      "result": "pass (4/4)",
+      "date": "2026-10-23"
+    },
+    {
+      "command": "npm run lint && npm run typecheck && npm test && npm run build (--prefix web)",
+      "result": "pass (vitest 13/13)",
+      "date": "2026-10-23"
     }
   ],
   "environment_verified": {
@@ -210,9 +239,9 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Approve the T-001 merge (feature/m0-backend-skeleton → develop)",
+    "Approve the T-002 merge (feature/m0-frontend-skeleton → develop)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
-    "Agree to fold into T-002/T-003/M1: compose --env-file fix in T-002 verification and runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI (T-003); anonymous-endpoint enumeration test and remaining pipeline steps (M1)"
+    "Agree to fold into T-003/M1 (the T-002 packet's compose command already has --env-file): the same fix in runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI (T-003); anonymous-endpoint enumeration test and remaining pipeline steps (M1)"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",
@@ -224,10 +253,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-002",
-    "title": "Frontend skeleton served by the API",
-    "packet": "docs/delivery/tasks/T-002-frontend-skeleton.md",
-    "requires": "T-001 merged into develop"
+    "id": "T-003",
+    "title": "CI workflow, Dependabot, secret scan",
+    "packet": "docs/delivery/tasks/T-003-ci-and-repo-automation.md",
+    "requires": "T-002 merged into develop"
   },
   "sessions": [
     {
@@ -241,6 +270,12 @@
       "date": "2026-10-19",
       "tool": "claude-code",
       "task": "T-001",
+      "outcome": "Implemented and verified (L4); merged via PR #3"
+    },
+    {
+      "date": "2026-10-23",
+      "tool": "claude-code",
+      "task": "T-002",
       "outcome": "Implemented and verified (L4); in review, awaiting merge approval"
     }
   ]
