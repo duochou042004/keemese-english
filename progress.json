@@ -35,7 +35,7 @@
       "id": "P2",
       "name": "Implementation M0-M7",
       "status": "in_progress",
-      "requires": "OD-09 decided before M1",
+      "requires": "M1 packets T-101..T-110 approved by the Lead Coordinator 2026-10-23 (OD-09 decided the same day → PD-08)",
       "started": "2026-10-19",
       "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged. M0 closed 2026-10-23 (CI green on develop after T-003)."
     }
@@ -314,6 +314,22 @@
       "not_run": [
         "Branch protection (owner setting, still pending)"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "M1-planning",
+      "level": "L1",
+      "tool": "claude-code",
+      "commands": [
+        "baseline on develop 5341aa4: dotnet build -warnaserror; dotnet test tests/Keemese.UnitTests; npm ci + lint + test --prefix web; node --test \".claude/hooks/*.test.mjs\"; node --test \"scripts/*.test.mjs\"",
+        "node scripts/check-docs.mjs; node scripts/check-progress.mjs (after writing the packets)"
+      ],
+      "result": "pass",
+      "summary": "Baseline: build 0 warnings 0 errors, unit 10/10, web lint clean, vitest 13/13, hooks 13/13, scripts 4/4. OD-09 accepted by the owner in chat (→ PD-08). Packets T-101..T-110 written; docs updated for the decision",
+      "not_run": [
+        "Integration tests and E2E (docs-only change)",
+        "compat workflow"
+      ]
     }
   ],
   "tests": [
@@ -367,13 +383,13 @@
   "blockers": [],
   "pending_owner_actions": [
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
-    "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
-    "M1 carry-overs: anonymous-endpoint enumeration test; forwarded headers, HSTS, antiforgery; security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the login work; Identity replaces the placeholder cookie scheme; axe + Playwright; API-types-up-to-date CI step and e2e-smoke job"
+    "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",
-    "PD-01..PD-13 (PD-08 moved to OD-09)",
-    "OD-01..OD-09 open",
+    "PD-01..PD-13 (PD-08 = navigation, approved 2026-10-23 from OD-09)",
+    "OD-01..OD-08 open; OD-09 decided 2026-10-23 (accepted as proposed)",
+    "M1 packets T-101..T-110 approved 2026-10-23, with T-105 option 1 (build-time Microsoft.Extensions.ApiDescription.Server) and T-106 adding @hookform/resolvers",
     "Merge delegation (Lead Coordinator, 2026-10-23): the orchestrator merges develop PRs itself under the conditions in docs/agents/operating-model.md#merge-delegation"
   ],
   "risks": [
@@ -381,10 +397,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "M1",
-    "title": "First M1 task packet (to be written; OD-09 decides navigation first)",
-    "packet": "docs/delivery/milestones.md",
-    "requires": "T-003 merged into develop and CI green on GitHub (closes M0); OD-09 answered"
+    "id": "T-101",
+    "title": "Request pipeline hardening and the anonymous-endpoint test",
+    "packet": "docs/delivery/tasks/T-101-pipeline-hardening.md",
+    "requires": "The packets PR (chore/m1-packets) merged into develop; packets approved 2026-10-23"
   },
   "sessions": [
     {
@@ -411,6 +427,12 @@
       "tool": "claude-code",
       "task": "T-003",
       "outcome": "Implemented and verified (L4); merged via PR #5; M0 closed"
+    },
+    {
+      "date": "2026-10-23",
+      "tool": "claude-code",
+      "task": "M1 planning",
+      "outcome": "OD-09 decided; M1 packets T-101..T-110 written and approved (option 1 for T-105); packets PR from chore/m1-packets"
     }
   ]
 }

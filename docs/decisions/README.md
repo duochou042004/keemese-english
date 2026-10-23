@@ -42,7 +42,7 @@ Template for a new ADR: copy the shape of [0002](0002-modular-monolith.md) (Cont
 | PD-05 | No general content versioning. Assigned work is snapshotted (ADR-0009) | §32, §43 | Proposed, not objected to |
 | PD-06 | Feedback = rubric criteria scores + text comments (timestamps typed as text). No annotation UI in MVP | §20 | Proposed, not objected to |
 | PD-07 | No self-service forgot-password in MVP. The tutor resets the password and the student must change it at next login | §4.3 | **Approved** 2026-10-17 (C7) |
-| PD-08 | *(moved to OD-09 so the owner can decide it before M1)* | — | — |
+| PD-08 | Navigation per the [IA](../frontend/information-architecture.md): Learning plans and Progress inside the student workspace; one Activities area (kind filter) for assignments and assessments; a top-level Review queue | §41 | **Approved** 2026-10-23 (was OD-09, accepted as proposed) |
 | PD-09 | Bilingual UI: Vietnamese (default) and English | — | **Approved** 2026-10-17 |
 | PD-10 | Public GitHub repository | — | **Approved** 2026-10-17 |
 | PD-11 | Deployment target undecided. Keep it portable (single container image + PostgreSQL + volume) | — | **Approved** 2026-10-17 |
@@ -63,4 +63,4 @@ Template for a new ADR: copy the shape of [0002](0002-modular-monolith.md) (Cont
 | OD-06 | Hosting target (TLS proxy, backups, volume type) | Defer until before release 1.0 (PD-11) | R1.0 |
 | OD-07 | Spec §48 starts the after-lesson flow with "Open student". The plan (J1) also starts it from the **Today** dashboard, which saves 2 interactions | Both entry points: Today (primary, measured by E2E-J1) and the student workspace's Sessions tab | M5 |
 | OD-08 | Should students see their own learning profile (level, strengths, weaknesses)? The spec (§26) lists what students see and doesn't mention it | Hidden in MVP (it's the tutor's working notes). A per-field "visible to student" flag later if wanted | M2 |
-| OD-09 | Navigation differs from the §41 suggestion ("can be adjusted"): Learning plans and Progress live **inside** the student workspace instead of top-level menus; Assignments and Assessments share one "Activities" area with a kind filter; a top-level "Review" queue is added ([IA](../frontend/information-architecture.md)) | Accept as proposed | **M1** (AppShell) |
+| OD-09 | Navigation differs from the §41 suggestion ("can be adjusted"): Learning plans and Progress live **inside** the student workspace instead of top-level menus; Assignments and Assessments share one "Activities" area with a kind filter; a top-level "Review" queue is added ([IA](../frontend/information-architecture.md)) | **Decided 2026-10-23: accepted as proposed → PD-08** | — |

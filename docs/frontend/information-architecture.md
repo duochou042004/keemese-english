@@ -1,6 +1,6 @@
 # Frontend Information Architecture
 
-Spec §41 proposes a menu "to be adjusted after UX research" and says "menu must reflect user tasks, not entities". The adjustments below are open decision **OD-09** ([decisions](../decisions/README.md#open-decisions)). They must be accepted before the M1 AppShell is built.
+Spec §41 proposes a menu "to be adjusted after UX research" and says "menu must reflect user tasks, not entities". The adjustments below were open decision OD-09; the product owner accepted them as proposed on 2026-10-23, and they are now **PD-08** ([decisions](../decisions/README.md#product-decisions)).
 
 ## Tutor navigation (7 items)
 

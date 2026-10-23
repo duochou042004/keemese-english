@@ -15,4 +15,4 @@ The spec's assignment fields (§17: title, description, instructions, deadline, 
 - Separate Assignment and Assessment modules: about twice the code, the same behavior, and the two would drift apart.
 
 ## Consequences
-- "Assignments" and "Assessments" appear in the UI as two filters of one Activities area (proposed in OD-09).
+- "Assignments" and "Assessments" appear in the UI as two filters of one Activities area (PD-08, formerly OD-09).
