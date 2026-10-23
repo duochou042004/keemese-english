@@ -41,7 +41,7 @@ One sentence: the outcome.
 | [T-001](T-001-backend-skeleton.md) | Backend skeleton, Compose PostgreSQL, test projects | M0 | done |
 | [T-002](T-002-frontend-skeleton.md) | Frontend skeleton served by the API, i18n, tokens | M0 | done |
 | [T-003](T-003-ci-and-repo-automation.md) | CI workflow, Dependabot, secret scan | M0 | done |
-| [T-101](T-101-pipeline-hardening.md) | Request pipeline hardening and the anonymous-endpoint test | M1 | not_started |
+| [T-101](T-101-pipeline-hardening.md) | Request pipeline hardening and the anonymous-endpoint test | M1 | in_review |
 | [T-102](T-102-identity-and-login.md) | Identity, login/logout, antiforgery, tutor bootstrap and reset CLI | M1 | not_started |
 | [T-103](T-103-password-lifecycle.md) | Password change, must-change gate, lockout, rate limits, preferences | M1 | not_started |
 | [T-104](T-104-students-api-and-isolation-suite.md) | Students API, account actions, isolation and authorization suites | M1 | not_started |

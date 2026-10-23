@@ -1,7 +1,7 @@
 # T-101: Request pipeline hardening and the anonymous-endpoint test
 
 - Milestone: M1 · Ladder level: L4 (security pipeline) · Depends on: M0 closed · Branch: `feature/m1-pipeline-hardening` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review
 
 ## Objective
 Before any login code exists, the app sends the security headers, trusts forwarded headers only from configured proxies, uses HSTS outside development, and has a test that fails when an endpoint has no explicit authorization decision.
@@ -39,4 +39,4 @@ Evidence: test counts, the `curl -I` header lines from the container, and `not_r
 Review: `reviewer` + `security-reviewer` (L4). Merge needs the Lead Coordinator (security change, see merge delegation).
 
 ## Status / notes
-—
+- 2026-10-23: implemented on `feature/m1-pipeline-hardening`; reviewer approve, security-reviewer approve after fixing H1 (empty proxy lists trusted everyone → now `ForwardedHeaders.None`). Security headers run right after forwarded headers so the HTTPS redirect carries them. Known limits: HSTS is lost on a 500 (the proxy can add it); the anonymous allowlist matches route text, not method. Evidence: progress.json.

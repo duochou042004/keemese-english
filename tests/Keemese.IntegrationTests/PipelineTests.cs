@@ -101,6 +101,14 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
+    public async Task A_malformed_proxy_address_fails_startup() // the middleware reads its options while the pipeline is built
+    {
+        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir, "Production");
+        var bad = factory.WithWebHostBuilder(b => b.UseSetting("ForwardedHeaders:KnownProxies", "not-an-ip"));
+        Assert.Throws<FormatException>(() => bad.CreateClient());
+    }
+
+    [Fact]
     public async Task Every_endpoint_has_an_authorization_policy_or_is_an_allowlisted_anonymous_endpoint()
     {
         await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
