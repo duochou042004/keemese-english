@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-002",
-    "title": "Frontend skeleton served by the API",
+    "id": "T-003",
+    "title": "CI workflow, Dependabot, secret scan",
     "status": "in_review",
-    "branch": "feature/m0-frontend-skeleton (from develop @ fc60f4d)",
-    "packet": "docs/delivery/tasks/T-002-frontend-skeleton.md"
+    "branch": "feature/m0-ci (from develop @ fc3704e)",
+    "packet": "docs/delivery/tasks/T-003-ci-and-repo-automation.md"
   },
   "repository": {
     "branches": {
@@ -55,7 +55,7 @@
     },
     "base_commit": "adf3770",
     "remote": "https://github.com/duochou042004/keemese-english (public)",
-    "remote_note": "Created 2026-10-17. Branch protection, secret scanning and push protection are not configured yet; they are part of T-003 and are owner-approved settings changes."
+    "remote_note": "Created 2026-10-17. Secret scanning and push protection are on. Branch protection is pending (owner action, T-003)."
   },
   "completed": [
     "P0 preflight report (in chat, 2026-10-17)",
@@ -72,7 +72,8 @@
     "Milestones, risk register, task packets T-001..T-003 (docs/delivery)",
     "AGENTS.md, CLAUDE.md, README.md, .claude agents/skills/hooks, .gitattributes, .gitignore, .editorconfig",
     "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)",
-    "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)"
+    "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)",
+    "T-002 frontend skeleton merged into develop via PR #4 (fc3704e)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -211,7 +212,13 @@
       ],
       "result": "approve",
       "summary": "All ACs met; vitest 13/13, build 0/0, SpaFallback 1/1, /api and /health misses 404. Non-blocking: missing file-like paths (/favicon.ico, stale asset) returned 401 instead of 404 (fixed: {**path:file} → 404, with an explicit UseRouting() after UseStaticFiles so existing files are still served; rerun: build 0/0, unit 10/10, integration 4/4, rebuilt container /favicon.ico and /assets/stale.js 404 problem+json, real hashed asset 200); no test exercised the deny-by-default policy after the 401 assertion moved (fixed: POST /login → 401 in SpaFallbackTests)",
-      "not_run": ["Live horizontal-scroll measurement", "Vite dev proxy", "Podman", "axe", "CI"]
+      "not_run": [
+        "Live horizontal-scroll measurement",
+        "Vite dev proxy",
+        "Podman",
+        "axe",
+        "CI"
+      ]
     },
     {
       "date": "2026-10-23",
@@ -223,7 +230,10 @@
       ],
       "result": "approve",
       "summary": "Anonymous surface = SPA GET pages, /health/live|ready, /api and /health 404s; config/dll/.env paths not served; bundle has no source maps or secrets; container uid 1654 with read-only /app; 461 lock entries all from registry.npmjs.org with integrity; only `lang` in localStorage. Findings: M1 (medium) fallback-policy test removed (fixed, see reviewer entry); L2 no CSP/frame-ancestors/nosniff/Referrer-Policy (carry-over, must land before M1 login); L3 dockerignore .env patterns root-only (fixed: **/.env*); L4 base images pinned by tag, not digest (carry-over to T-003)",
-      "not_run": ["gitleaks over history", "Full bundle audit beyond a secrets grep"]
+      "not_run": [
+        "gitleaks over history",
+        "Full bundle audit beyond a secrets grep"
+      ]
     }
   ],
   "tests": [
@@ -266,9 +276,10 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Approve the T-002 merge (feature/m0-frontend-skeleton → develop)",
+    "Approve the T-003 merge (PR #5, feature/m0-ci → develop)",
+    "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
-    "Agree to fold into T-003/M1 (the T-002 packet's compose command already has --env-file): the same fix in runbooks.md; scripts/check-docs.mjs; progress.json schema check; PR template; `dotnet restore --locked-mode` in CI and digest-pinned base images (T-003); anonymous-endpoint enumeration test and remaining pipeline steps incl. security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the M1 login work"
+    "M1 carry-overs: anonymous-endpoint enumeration test; forwarded headers, HSTS, antiforgery; security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the login work; Identity replaces the placeholder cookie scheme; axe + Playwright; API-types-up-to-date CI step and e2e-smoke job"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",
@@ -280,10 +291,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-003",
-    "title": "CI workflow, Dependabot, secret scan",
-    "packet": "docs/delivery/tasks/T-003-ci-and-repo-automation.md",
-    "requires": "T-002 merged into develop"
+    "id": "M1",
+    "title": "First M1 task packet (to be written; OD-09 decides navigation first)",
+    "packet": "docs/delivery/milestones.md",
+    "requires": "T-003 merged into develop and CI green on GitHub (closes M0); OD-09 answered"
   },
   "sessions": [
     {
@@ -303,7 +314,13 @@
       "date": "2026-10-23",
       "tool": "claude-code",
       "task": "T-002",
-      "outcome": "Implemented and verified (L4); in review, awaiting merge approval"
+      "outcome": "Implemented and verified (L4); merged via PR #4"
+    },
+    {
+      "date": "2026-10-23",
+      "tool": "claude-code",
+      "task": "T-003",
+      "outcome": "Implemented; CI green on PR #5; in review, awaiting merge approval"
     }
   ]
 }
