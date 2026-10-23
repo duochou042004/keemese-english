@@ -14,7 +14,7 @@ Conventions are in [ADR-0016](../decisions/0016-minimal-apis-and-contracts.md). 
 - Lists: `?q=&page=1&pageSize=50` (max 200) → `{ items: [...], total }`. Small bounded lists (folders, sections, a plan) return arrays.
 - Unsafe methods require the `X-XSRF-TOKEN` header (ADR-0004).
 - Optimistic concurrency: editable resources return `version` (from `xmin`). PUT and PATCH send it back. A mismatch → `409 concurrency.conflict`.
-- Errors: `ProblemDetails` + `code` (+ `errors` for validation). Examples: `auth.invalid_credentials`, `auth.locked_out`, `auth.password_change_required`, `students.username_taken`, `files.too_large`, `files.type_not_allowed`, `attempts.time_expired`, `attempts.limit_reached`, `activities.not_available_yet`, `concurrency.conflict`, `common.not_found`.
+- Errors: `ProblemDetails` + `code` (+ `errors` for validation). Examples: `auth.invalid_credentials`, `auth.unauthenticated` (401), `auth.forbidden` (403), `auth.antiforgery_failed` (400, missing or wrong `X-XSRF-TOKEN`), `auth.locked_out`, `auth.password_change_required`, `students.username_taken`, `files.too_large`, `files.type_not_allowed`, `attempts.time_expired`, `attempts.limit_reached`, `activities.not_available_yet`, `concurrency.conflict`, `common.not_found`.
 
 ## Auth and account (any signed-in user)
 

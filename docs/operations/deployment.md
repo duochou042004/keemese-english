@@ -5,7 +5,7 @@
 - **One image**: the ASP.NET Core app with the SPA in `wwwroot`. Multi-stage `deploy/Dockerfile`: a Node stage builds `web/` → an SDK stage publishes → the runtime image `mcr.microsoft.com/dotnet/aspnet:10.0`, running as a non-root user.
 - **PostgreSQL 18**: in Compose, or a managed instance.
 - **One persistent volume** at `DATA_DIR` (`/data`), holding `files/` and `keys/`.
-- **TLS termination** in front: a reverse proxy (Caddy, nginx, Traefik) or the platform's ingress. Configure `ForwardedHeaders__KnownProxies` (or `__KnownNetworks`) with the proxy's address, so the app sees the original scheme and client IP. Outside Development/Testing the app sends HSTS (180 days, no preload) on HTTPS responses and redirects plain HTTP to HTTPS when it knows the HTTPS port (`HTTPS_PORT`); behind the proxy the forwarded proto is already `https`, so nothing is redirected. Let the proxy redirect port 80.
+- **TLS termination** in front: a reverse proxy (Caddy, nginx, Traefik) or the platform's ingress. Configure `ForwardedHeaders__KnownProxies` (or `__KnownNetworks`) with the proxy's address, so the app sees the original scheme and client IP. Outside Development/Testing the app sends HSTS (180 days, no preload) on HTTPS responses and redirects plain HTTP to HTTPS when it knows the HTTPS port (`HTTPS_PORT`); behind the proxy the forwarded proto is already `https`, so nothing is redirected. Let the proxy redirect port 80. Outside Development the session and antiforgery cookies are `Secure`, so the app must see HTTPS (directly or through a trusted proxy): a plain-HTTP login fails with a 500 instead of issuing cookies.
 
 ## Configuration (environment only)
 

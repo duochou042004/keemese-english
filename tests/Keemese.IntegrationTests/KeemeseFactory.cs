@@ -10,5 +10,6 @@ public sealed class KeemeseFactory(string connectionString, string dataDir, stri
         builder.UseEnvironment(environment);
         builder.UseSetting("ConnectionStrings:Db", connectionString);
         builder.UseSetting("DATA_DIR", dataDir);
+        builder.UseSetting("Security:IpHashSalt", "invented-test-salt");
     }
 }

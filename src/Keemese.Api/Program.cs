@@ -1,24 +1,33 @@
 using Keemese.Api.Infrastructure.Data;
 using Keemese.Api.Infrastructure.Health;
 using Keemese.Api.Infrastructure.Security;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
+using Keemese.Api.Modules.Identity;
+using Keemese.Api.Modules.Identity.Domain;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>((sp, options) => options.UseNpgsql(
-    sp.GetRequiredService<IConfiguration>().GetConnectionString("Db")
-    ?? throw new InvalidOperationException("ConnectionStrings:Db is not configured.")));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<AuditInterceptor>();
+builder.Services.AddDbContext<AppDbContext>((sp, options) => options
+    .UseNpgsql(sp.GetRequiredService<IConfiguration>().GetConnectionString("Db")
+        ?? throw new InvalidOperationException("ConnectionStrings:Db is not configured."))
+    .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
 
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ctx =>
 {
     if (ctx.ProblemDetails.Extensions.ContainsKey("code")) return;
     var code = ctx.ProblemDetails.Status switch
     {
+        StatusCodes.Status401Unauthorized => "auth.unauthenticated",
+        StatusCodes.Status403Forbidden => "auth.forbidden",
         StatusCodes.Status404NotFound => "common.not_found",
         StatusCodes.Status500InternalServerError => "common.unexpected",
         _ => null,
@@ -27,15 +36,51 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
 });
 builder.Services.AddOpenApi();
 
-// Placeholder scheme so the fallback policy can challenge with 401; Identity's cookie replaces it in M1.
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+// Data Protection keys on the data volume, so a restart doesn't log everyone out (ADR-0004).
+builder.Services.AddDataProtection().SetApplicationName("keemese");
+builder.Services.AddOptions<KeyManagementOptions>().Configure<IConfiguration, ILoggerFactory>((options, config, loggers) =>
+    options.XmlRepository = new FileSystemXmlRepository(new DirectoryInfo(Path.Combine(config["DATA_DIR"]!, "keys")), loggers));
+
+// ADR-0004: Identity's cookie, same origin. Plain-HTTP cookies only in Development.
+var cookieSecurity = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+var cookiePrefix = builder.Environment.IsDevelopment() ? "" : "__Host-";
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+builder.Services.AddIdentityCore<AppUser>(options =>
     {
-        options.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
-        options.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
-    });
-builder.Services.AddAuthorizationBuilder()
-    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        // security-model.md#authentication: length only, no composition rules (the common-password list is T-103).
+        options.Password.RequiredLength = 10;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddSignInManager<AppSignInManager>()
+    .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>();
+builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = cookiePrefix + "keemese";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = cookieSecurity;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
+    // ProblemDetails (auth.unauthenticated / auth.forbidden) come from the status code pages, never a redirect.
+    options.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
+    options.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
+});
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = AntiforgeryMiddleware.HeaderName;
+    options.Cookie.Name = cookiePrefix + "keemese-af";
+    options.Cookie.SecurePolicy = cookieSecurity;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
+builder.Services.AddAuthorizationBuilder().AddKeemesePolicies();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IdentityService>();
 
 // Trust X-Forwarded-* only from the configured proxies (comma-separated); none configured = trust nobody.
 builder.Services.AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>((options, config) =>
@@ -59,9 +104,30 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+if (string.IsNullOrEmpty(app.Configuration["Security:IpHashSalt"]))
+{
+    throw new InvalidOperationException("Security:IpHashSalt is not configured (Security__IpHashSalt).");
+}
+
+// Operator CLI (FR-AUTH-AC9): reset the tutor's password and exit without starting the web host.
+if (args.Contains("--reset-tutor-password"))
+{
+    await using var cliScope = app.Services.CreateAsyncScope();
+    var password = await cliScope.ServiceProvider.GetRequiredService<IdentityService>().ResetTutorPasswordAsync(CancellationToken.None);
+    if (password is null)
+    {
+        Console.Error.WriteLine("No tutor exists yet; set BOOTSTRAP_TUTOR_USERNAME and BOOTSTRAP_TUTOR_PASSWORD and start the app.");
+        Environment.ExitCode = 1;
+        return;
+    }
+    Console.WriteLine($"New temporary tutor password (shown once; change it at the next login): {password}");
+    return;
+}
+
 await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<IdentityService>().BootstrapTutorAsync(CancellationToken.None);
 }
 
 app.UseForwardedHeaders();
@@ -84,11 +150,15 @@ app.UseStaticFiles(spaFiles);
 app.UseRouting(); // after static files, so the file fallback below only sees files that don't exist
 app.UseAuthentication();
 app.UseAuthorization();
+// T-103: the must-change-password gate (FR-AUTH-AC5) goes here, before antiforgery.
+app.UseKeemeseAntiforgery();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi().AllowAnonymous();
 }
+
+app.MapIdentityEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") }).AllowAnonymous();

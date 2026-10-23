@@ -22,7 +22,7 @@ public sealed class SpaFallbackTests(PostgresFixture postgres) : IDisposable
         await File.WriteAllTextAsync(Path.Combine(_webRoot, "index.html"), "<!doctype html><div id=root>", Ct);
         Directory.CreateDirectory(Path.Combine(_webRoot, "assets"));
         await File.WriteAllTextAsync(Path.Combine(_webRoot, "assets", "index-abc123.js"), "1", Ct);
-        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir);
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
         var client = factory.WithWebHostBuilder(b => b.UseWebRoot(_webRoot)).CreateClient();
 
         foreach (var path in new[] { "/", "/login", "/t/students/42", "/s" })
