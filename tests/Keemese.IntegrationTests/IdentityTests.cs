@@ -123,6 +123,27 @@ public sealed class IdentityTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
+    public async Task An_xsrf_token_works_only_for_its_own_session_and_login_accepts_only_json()
+    {
+        await using var app = NewApp();
+        var a = await app.AsTutor();
+        var b = await app.AsTutor();
+        b.DefaultRequestHeaders.Remove("X-XSRF-TOKEN");
+        b.DefaultRequestHeaders.Add("X-XSRF-TOKEN", a.DefaultRequestHeaders.GetValues("X-XSRF-TOKEN").Single());
+        Assert.Equal(HttpStatusCode.BadRequest, (await b.PostAsync("/api/auth/logout", null, Ct)).StatusCode);
+
+        // Login is anonymous, so no XSRF check: a cross-site form post must fail on the content type instead (no CORS).
+        var form = new StringContent($"userName={Auth.TutorUserName}&password={Auth.TutorPassword}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+        var text = new StringContent($$"""{"userName":"{{Auth.TutorUserName}}","password":"{{Auth.TutorPassword}}"}""", System.Text.Encoding.UTF8, "text/plain");
+        foreach (var body in new HttpContent[] { form, text })
+        {
+            var login = await app.CreateHttpsClient().PostAsync("/api/auth/login", body, Ct);
+            Assert.NotEqual(HttpStatusCode.NoContent, login.StatusCode); // 404: no endpoint matches a non-JSON body
+            Assert.Null(Auth.SetCookie(login, "__Host-keemese"));
+        }
+    }
+
+    [Fact]
     public async Task Bootstrap_creates_one_tutor_and_the_database_rejects_a_second()
     {
         var database = postgres.NewDatabase();

@@ -1,7 +1,7 @@
 # T-102: Identity, login/logout, antiforgery, tutor bootstrap and reset CLI
 
 - Milestone: M1 · Ladder level: L4 (authentication) · Depends on: T-101 merged · Branch: `feature/m1-identity` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review
 
 ## Objective
 ASP.NET Core Identity replaces the placeholder cookie scheme: the bootstrapped tutor can log in and out through the API, the session cookie and antiforgery follow ADR-0004, and an operator can reset the tutor's password from the CLI.
@@ -42,4 +42,4 @@ Evidence: counts, cookie flags seen, CLI output **without the password value**, 
 Review: `reviewer` + `security-reviewer`. Merge needs the Lead Coordinator (authentication).
 
 ## Status / notes
-—
+- 2026-10-23: implemented on `feature/m1-identity`; reviewer and security-reviewer approve (Low/Info only). Password options are length ≥ 10 with no composition rules (Identity's defaults would reject the bootstrap and temporary passwords); the common-password list stays in T-103. "Active" is enforced in `AppSignInManager.ValidateSecurityStampAsync` (every request). Integration tests use a database per factory. **For T-103:** hash on the locked-out path too (`CheckPasswordSignInAsync` returns early when locked out); add login field length limits with rate limiting. Evidence: progress.json.

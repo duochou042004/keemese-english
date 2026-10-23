@@ -46,15 +46,15 @@ public sealed class IdentityService(
         }
 
         var now = clock.GetUtcNow();
-        user.LastLoginAt = now;
-        await AuditAsync("auth.login_succeeded", actor: user.Id, target: user.Id, http, ct); // saves LastLoginAt too
         await signIn.SignInAsync(user, new AuthenticationProperties
         {
             IsPersistent = request.RememberMe,
             ExpiresUtc = request.RememberMe ? now.AddDays(30) : null, // otherwise the cookie's sliding 8 h
         });
         http.User = await signIn.CreateUserPrincipalAsync(user); // the XSRF token must belong to the new session
-        AntiforgeryMiddleware.IssueToken(http);
+        AntiforgeryMiddleware.IssueToken(http); // throws over plain HTTP outside Development, before anything is saved
+        user.LastLoginAt = now;
+        await AuditAsync("auth.login_succeeded", actor: user.Id, target: user.Id, http, ct); // saves LastLoginAt too
         return null;
     }
 
