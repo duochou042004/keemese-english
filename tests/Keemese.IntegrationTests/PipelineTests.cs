@@ -77,10 +77,27 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
         var spoofed = await ViaProxy(server, "203.0.113.9");
         Assert.Equal(StatusCodes.Status307TemporaryRedirect, spoofed.Response.StatusCode);
         Assert.Equal("https://keemese.test/health/live", spoofed.Response.Headers.Location.ToString());
+        Assert.Equal(Csp, spoofed.Response.Headers.ContentSecurityPolicy.ToString()); // the redirect carries the headers too
+        Assert.Equal("203.0.113.9", spoofed.Connection.RemoteIpAddress?.ToString());
 
         var proxied = await ViaProxy(server, "10.0.0.5");
         Assert.Equal(StatusCodes.Status200OK, proxied.Response.StatusCode);
         Assert.Equal("max-age=15552000", proxied.Response.Headers.StrictTransportSecurity.ToString());
+        Assert.Equal("198.51.100.7", proxied.Connection.RemoteIpAddress?.ToString()); // X-Forwarded-For honoured
+    }
+
+    [Fact]
+    public async Task Without_configured_proxies_forwarded_headers_are_ignored()
+    {
+        await using var factory = new KeemeseFactory(postgres.ConnectionString, _dataDir, "Production");
+        var server = factory.WithWebHostBuilder(b => b.UseSetting("https_port", "443")).Server;
+
+        foreach (var remoteIp in new[] { "203.0.113.9", "127.0.0.1" }) // loopback is not trusted by default either
+        {
+            var spoofed = await ViaProxy(server, remoteIp);
+            Assert.Equal(StatusCodes.Status307TemporaryRedirect, spoofed.Response.StatusCode);
+            Assert.Equal(remoteIp, spoofed.Connection.RemoteIpAddress?.ToString());
+        }
     }
 
     [Fact]
@@ -106,7 +123,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
         }
     }
 
-    // A plain-http request that claims X-Forwarded-Proto: https, as a TLS proxy would send it.
+    // A plain-http request with the X-Forwarded-* headers a TLS proxy would send.
     private static Task<HttpContext> ViaProxy(TestServer server, string remoteIp) => server.SendAsync(ctx =>
     {
         ctx.Connection.RemoteIpAddress = IPAddress.Parse(remoteIp);
@@ -114,6 +131,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
         ctx.Request.Host = new HostString("keemese.test");
         ctx.Request.Path = "/health/live";
         ctx.Request.Headers["X-Forwarded-Proto"] = "https";
+        ctx.Request.Headers["X-Forwarded-For"] = "198.51.100.7";
     }, Ct);
 
     // The raw value as sent; the typed accessors re-serialize (Cache-Control comes back reordered).
