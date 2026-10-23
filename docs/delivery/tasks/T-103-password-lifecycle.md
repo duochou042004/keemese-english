@@ -1,7 +1,7 @@
 # T-103: Password change, must-change gate, lockout, rate limits, preferences
 
 - Milestone: M1 · Ladder level: L4 (authentication) · Depends on: T-102 merged · Branch: `feature/m1-password-lifecycle` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review
 
 ## Objective
 Users can change their password and save their language, a user with a pending password change can do nothing else, and brute force and lockout abuse are contained.
@@ -37,4 +37,5 @@ Evidence: counts per area, `not_run` (e.g. real proxy IP partitioning).
 Review: `reviewer` + `security-reviewer`. Merge needs the Lead Coordinator (authentication).
 
 ## Status / notes
-—
+- 2026-10-24: implemented on `feature/m1-password-lifecycle`. Deviations: the limiter is `System.Threading.RateLimiting` called inside `LoginAsync` (the username partition needs the parsed body, and it must run before the password check), not the RateLimiter middleware; the 15-minute test moves `lockout_end` instead of using `FakeTimeProvider` (Identity 10 reads the system clock for lockout); no tutor route exists before T-104, so the gate is tested on `PUT /api/auth/preferences` and an unmapped `/api` path; `Shared/Errors/AppError.cs` gained the `validation.failed` `errors` map (outside the file list).
+- Local Windows note: an Application Control policy randomly blocks the Debug `Keemese.Api.dll` (per binary hash); `-c Release` test runs load. Not a code issue.

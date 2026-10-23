@@ -16,10 +16,18 @@ public static class IdentityEndpoints
         {
             await service.LogoutAsync(http);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization().AllowDuringPasswordChange();
 
         auth.MapGet("/me", async (IdentityService service, ICurrentUser currentUser, HttpContext http, CancellationToken ct) =>
             await service.GetMeAsync(currentUser.UserId, http, ct) is { } me ? Results.Ok(me) : Results.NotFound())
+            .RequireAuthorization().AllowDuringPasswordChange();
+
+        auth.MapPost("/change-password", async (ChangePasswordRequest request, IdentityService service, ICurrentUser currentUser, HttpContext http, CancellationToken ct) =>
+            await service.ChangePasswordAsync(currentUser.UserId, request, http, ct) is { } error ? error.ToResult() : Results.NoContent())
+            .RequireAuthorization().AllowDuringPasswordChange();
+
+        auth.MapPut("/preferences", async (PreferencesRequest request, IdentityService service, ICurrentUser currentUser, CancellationToken ct) =>
+            await service.SetPreferencesAsync(currentUser.UserId, request, ct) is { } error ? error.ToResult() : Results.NoContent())
             .RequireAuthorization();
     }
 }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Keemese.Api.Infrastructure.Security;
 using Keemese.Api.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,7 @@ public sealed class AppSignInManager(
         await base.ValidateSecurityStampAsync(principal) is { IsActive: true } user ? user : null;
 }
 
-/// <summary>Adds the role claim the Tutor/Student policies check.</summary>
+/// <summary>Adds the role claim the Tutor/Student policies check, and the must-change-password flag for the gate.</summary>
 public sealed class AppClaimsPrincipalFactory(UserManager<AppUser> userManager, IOptions<IdentityOptions> optionsAccessor)
     : UserClaimsPrincipalFactory<AppUser>(userManager, optionsAccessor)
 {
@@ -29,6 +30,7 @@ public sealed class AppClaimsPrincipalFactory(UserManager<AppUser> userManager, 
     {
         var identity = await base.GenerateClaimsAsync(user);
         identity.AddClaim(new Claim(Options.ClaimsIdentity.RoleClaimType, user.Role));
+        if (user.MustChangePassword) identity.AddClaim(new Claim(PasswordChangeGate.ClaimType, "true"));
         return identity;
     }
 }

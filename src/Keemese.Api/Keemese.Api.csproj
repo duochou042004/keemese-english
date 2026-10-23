@@ -7,4 +7,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Modules/Identity/Domain/common-passwords.txt" LogicalName="Keemese.Api.common-passwords.txt" />
+  </ItemGroup>
 </Project>

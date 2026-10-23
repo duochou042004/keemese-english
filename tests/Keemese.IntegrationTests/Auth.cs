@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Keemese.IntegrationTests;
 
@@ -16,6 +19,32 @@ public static class Auth
         factory.WithWebHostBuilder(b => b
             .UseSetting("BOOTSTRAP_TUTOR_USERNAME", TutorUserName)
             .UseSetting("BOOTSTRAP_TUTOR_PASSWORD", TutorPassword));
+
+    public const string ClientIpHeader = "X-Test-Client-Ip";
+
+    /// <summary>The app with each request's client IP taken from <see cref="ClientIpHeader"/> (TestServer has none), for the per-IP rate limit.</summary>
+    public static WebApplicationFactory<Program> WithClientIps(this WebApplicationFactory<Program> factory) =>
+        factory.WithWebHostBuilder(b => b.ConfigureServices(s => s.AddSingleton<IStartupFilter, ClientIpFilter>()));
+
+    public static HttpClient FromIp(this HttpClient client, string ip)
+    {
+        client.DefaultRequestHeaders.Remove(ClientIpHeader);
+        client.DefaultRequestHeaders.Add(ClientIpHeader, ip);
+        return client;
+    }
+
+    private sealed class ClientIpFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use((context, nextMiddleware) =>
+            {
+                if (context.Request.Headers.TryGetValue(ClientIpHeader, out var ip)) context.Connection.RemoteIpAddress = IPAddress.Parse(ip!);
+                return nextMiddleware(context);
+            });
+            next(app);
+        };
+    }
 
     /// <summary>HTTPS, because the session cookies are Secure outside Development.</summary>
     public static HttpClient CreateHttpsClient(this WebApplicationFactory<Program> factory) =>
