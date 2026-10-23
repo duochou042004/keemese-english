@@ -34,8 +34,8 @@ jobs:
           echo "$files"
           has() { echo "$files" | grep -qE "$1" && echo true || echo false; }
           {
-            echo "backend=$(has '^(src/|tests/|deploy/|global\.json|Directory\.|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
-            echo "web=$(has '^(web/|\.nvmrc|\.claude/hooks/|\.github/workflows/ci\.yml)')"
+            echo "backend=$(has '^(src/|tests/|deploy/|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
+            echo "web=$(has '^(web/|\.nvmrc|\.editorconfig|\.claude/hooks/|\.github/workflows/ci\.yml)')"
             echo "docs=$(has '(\.md$|^progress\.json$|^scripts/|^\.github/workflows/ci\.yml)')"
           } >> "$GITHUB_OUTPUT"
 
@@ -60,6 +60,7 @@ jobs:
         run: dotnet test --project tests/Keemese.IntegrationTests --no-build --results-directory TestResults --report-xunit-trx
       - name: Vulnerable packages
         run: |
+          set -o pipefail
           dotnet list package --vulnerable --include-transitive | tee vulnerable.txt
           ! grep -q 'has the following vulnerable packages' vulnerable.txt
       - if: failure()
@@ -118,6 +119,7 @@ jobs:
       - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No PR comments (would need pull-requests: write) and no SARIF artifact (it would hold the leaked value).
+          # Pin the scanner too (the action downloads it). No PR comments (would need pull-requests: write), no SARIF artifact.
+          GITLEAKS_VERSION: 8.24.3
           GITLEAKS_ENABLE_COMMENTS: 'false'
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'false'

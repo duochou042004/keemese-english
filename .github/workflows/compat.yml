@@ -11,7 +11,8 @@ on:
 permissions: { contents: read }
 
 concurrency:
-  group: compat-${{ github.ref }}
+  # Include the label state so an unrelated label or push doesn't cancel a real compat run and then skip itself.
+  group: compat-${{ github.ref }}-${{ contains(github.event.pull_request.labels.*.name, 'compat') }}
   cancel-in-progress: true
 
 jobs:

@@ -62,7 +62,8 @@ export function check(root, files) {
       const [rawPath, hash] = target.split('#');
       const dest = rawPath ? path.resolve(path.dirname(file), decodeURIComponent(rawPath)) : file;
       const where = `${rel}:${line}`;
-      if (!dest.startsWith(path.resolve(root))) errors.push(`${where}: ${target} leaves the repository`);
+      const inside = path.relative(root, dest);
+      if (inside.startsWith('..') || path.isAbsolute(inside)) errors.push(`${where}: ${target} leaves the repository`);
       else if (!fs.existsSync(dest)) errors.push(`${where}: ${target} → missing file`);
       else if (hash && dest.endsWith('.md') && !anchors(dest).has(decodeURIComponent(hash).toLowerCase()) && !anchors(dest).has(decodeURIComponent(hash)))
         errors.push(`${where}: ${target} → missing anchor #${hash}`);
