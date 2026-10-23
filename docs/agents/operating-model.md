@@ -7,7 +7,7 @@ How AI agents (Claude Code, Codex, Cursor) work on this repository. The outer co
 | Role | Who | Owns | Must not |
 |---|---|---|---|
 | **Lead Coordinator** | The human product owner | Scope, priorities, approvals (merges into `develop`/`master`, new dependencies of consequence, PD/OD decisions, anything public or irreversible) | — |
-| **Orchestrator** | The main agent session | Task selection from `progress.json`, the task packet, delegation, integration, **independent verification of subagent claims**, `progress.json` and evidence, the handoff | Merge without approval. Mark work done without evidence. Expand scope |
+| **Orchestrator** | The main agent session | Task selection from `progress.json`, the task packet, delegation, integration, **independent verification of subagent claims**, `progress.json` and evidence, the handoff | Merge outside the [merge delegation](#merge-delegation). Mark work done without evidence. Expand scope |
 | **Researcher** | Subagent `researcher` (read-only) | Bounded questions: docs lookups, codebase exploration, version checks. Returns findings with file or URL references | Edit files |
 | **Backend specialist** | Subagent `backend-dev` | Changes in `src/`, `tests/` for the assigned module | Touch `web/`, CI, or files outside the packet's ownership list |
 | **Frontend specialist** | Subagent `frontend-dev` | Changes in `web/` for the assigned area | Touch `src/`, CI, or shared UI (`components/ui`, AppShell) unless the packet says so |
@@ -71,7 +71,26 @@ The reviewer answers each with ✅ / ❌ + evidence (file:line or command output
 9. Minimal: no speculative abstractions, no unjustified dependencies, the smallest diff that fully solves the task.
 10. Docs, `progress.json` and the API types are updated.
 
-Verdict: `APPROVE` / `CHANGES REQUESTED` (with a numbered list). The reviewer never approves its own work, and the orchestrator never treats a reviewer verdict as a substitute for the Lead Coordinator's approval to merge.
+Verdict: `APPROVE` / `CHANGES REQUESTED` (with a numbered list). The reviewer never approves its own work. A reviewer verdict alone is not merge approval: merges follow the [merge delegation](#merge-delegation).
+
+<a id="merge-delegation"></a>
+
+## Merge delegation (Lead Coordinator, 2026-10-23)
+
+The orchestrator may merge a PR into `develop` itself, without waiting for the Lead Coordinator, when **all** of these hold:
+- CI is green on the PR's latest commit.
+- The review its ladder level requires is done (reviewer for L3/L4, plus security-reviewer where required), and every blocking finding is fixed.
+- Evidence is recorded in `progress.json`.
+
+This also covers routine Dependabot minor and patch updates with green CI. Merge with a merge commit (`gh pr merge --merge`), post a PR comment that cites this delegation, then delete the branch.
+
+**Still ask first** for anything highly critical:
+- changes to authentication, authorization or student isolation;
+- merges into `master` or releases;
+- GitHub settings changes;
+- new runtime dependencies;
+- Dependabot major updates with breaking changes;
+- anything irreversible or public beyond the PR itself.
 
 ## Git rules for agents
 

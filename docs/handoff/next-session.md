@@ -1,17 +1,17 @@
-# Next session: close M0, then plan M1 (after the owner approves the T-003 merge)
+# Next session: plan M1 (M0 is closed)
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
 Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and docs/delivery/milestones.md (M1 row). Do not rely on chat history.
 
 ## State (verified 2026-10-23)
-- `develop` @ fc3704e includes T-001 (PR #3) and T-002 (PR #4).
-- T-003 is on `feature/m0-ci`, PR #5 → develop, **awaiting the Lead Coordinator's merge approval**. It adds `.github/workflows/ci.yml` (changes, backend, web, docs, secrets), `compat.yml` (Windows/macOS; weekly, manual, or the `compat` PR label), `dependabot.yml`, the PR template, `scripts/check-docs.mjs` + `scripts/check-progress.mjs` (+ node tests), digest-pinned Dockerfile bases and the runbooks `--env-file` fix.
+- `develop` includes T-001 (PR #3), T-002 (PR #4) and T-003 (PR #5, bd78a4e). **M0 is closed**: the ci push run on develop is green (run 39976019505).
+- T-003 added `.github/workflows/ci.yml` (changes, backend, web, docs, secrets), `compat.yml` (Windows/macOS; weekly, manual, or the `compat` PR label), `dependabot.yml`, the PR template, `scripts/check-docs.mjs` + `scripts/check-progress.mjs` (+ node tests), digest-pinned Dockerfile bases and the runbooks `--env-file` fix.
 - Evidence in progress.json: ci green on PR #5 (run 39974366296), compat green on Windows and macOS (run 39974389861), the failure-only TRX artifact proven with a reverted failing test (5-day retention), gitleaks full history clean. Reviewer and security-reviewer done; their fixes are in.
 
 ## Before starting
-1. If PR #5 is not merged into develop: ask the Lead Coordinator, and do not merge it yourself. Then stop.
-2. After the merge, delete `feature/m0-ci` locally and on origin.
-3. Owner settings still pending (owner does them or approves each): branch protection on `master` and `develop` (require a PR + the ci checks `changes`, `backend`, `web`, `docs`, `secrets`; 0 required approvals; no force-push or deletion) and Dependabot security updates. Secret scanning and push protection are already on. M0 closes when CI is green on develop after the merge: check the push run.
+1. Merges: the orchestrator may merge develop PRs itself within docs/agents/operating-model.md#merge-delegation; ask first for anything critical listed there.
+2. Owner settings still pending (owner does them or approves each): branch protection on `master` and `develop` (require a PR + the ci checks `changes`, `backend`, `web`, `docs`, `secrets`; 0 required approvals; no force-push or deletion) and Dependabot security updates. Secret scanning and push protection are already on.
+3. Routine Dependabot minor/patch PRs with green CI may be merged under the delegation.
 4. OD-09 (navigation) blocks M1. Check `pending_owner_actions`.
 
 ## The one next task

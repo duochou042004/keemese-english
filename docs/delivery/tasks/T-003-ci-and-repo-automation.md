@@ -1,7 +1,7 @@
 # T-003: CI workflow, Dependabot, secret scan
 
 - Milestone: M0 · Ladder level: L4 (CI) · Depends on: T-001, T-002 merged; **the GitHub repository exists** (owner action, PD-10) · Branch: `feature/m0-ci`
-- Status: in_review (PR #5)
+- Status: done (PR #5, merged 2026-10-23 as bd78a4e)
 
 ## Objective
 Every PR to `develop`/`master` is checked on Linux within GitHub Free limits, with weekly Windows and macOS compatibility runs. **M0 closes when CI is green on GitHub.**

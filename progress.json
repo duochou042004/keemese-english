@@ -37,15 +37,15 @@
       "status": "in_progress",
       "requires": "OD-09 decided before M1",
       "started": "2026-10-19",
-      "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged"
+      "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged. M0 closed 2026-10-23 (CI green on develop after T-003)."
     }
   ],
   "current_phase": "P2",
   "current_task": {
     "id": "T-003",
     "title": "CI workflow, Dependabot, secret scan",
-    "status": "in_review",
-    "branch": "feature/m0-ci (from develop @ fc3704e)",
+    "status": "done",
+    "branch": "feature/m0-ci (merged via PR #5, bd78a4e; branch deleted)",
     "packet": "docs/delivery/tasks/T-003-ci-and-repo-automation.md"
   },
   "repository": {
@@ -74,7 +74,7 @@
     "PR #2 (docs restructure + handoff tooling) merged into develop (9f308b9)",
     "T-001 backend skeleton merged into develop via PR #3 (fc60f4d)",
     "T-002 frontend skeleton merged into develop via PR #4 (fc3704e)",
-    "T-003 CI implemented; ci and compat green on PR #5 (awaiting merge approval)"
+    "T-003 CI merged into develop via PR #5 (bd78a4e); ci push run on develop green (https://github.com/duochou042004/keemese-english/actions/runs/39976019505): M0 closed 2026-10-23"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -298,6 +298,22 @@
         "compat on Windows/macOS (run afterwards by the orchestrator: green)",
         "Threats outside T15/T16 (no app code changed)"
       ]
+    },
+    {
+      "date": "2026-10-23",
+      "task": "T-003",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "gh pr checks 5 (head 8c9f738)",
+        "gh pr merge 5 --merge (owner approval in chat)",
+        "gh run watch 39976019505 (push to develop)"
+      ],
+      "result": "pass",
+      "summary": "All 7 PR checks green on 8c9f738 (ci: changes, backend, web, docs, secrets; compat: windows, macos). Merged as bd78a4e. Push ci run on develop green (all 5 jobs). M0 exit criterion \"CI green on GitHub\" met",
+      "not_run": [
+        "Branch protection (owner setting, still pending)"
+      ]
     }
   ],
   "tests": [
@@ -350,7 +366,6 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Approve the T-003 merge (PR #5, feature/m0-ci → develop)",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-09 (navigation; blocks M1), and OD-01, OD-02, OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
     "M1 carry-overs: anonymous-endpoint enumeration test; forwarded headers, HSTS, antiforgery; security headers (CSP frame-ancestors, nosniff, Referrer-Policy) before the login work; Identity replaces the placeholder cookie scheme; axe + Playwright; API-types-up-to-date CI step and e2e-smoke job"
@@ -358,7 +373,8 @@
   "decisions": [
     "ADR-0001..ADR-0016",
     "PD-01..PD-13 (PD-08 moved to OD-09)",
-    "OD-01..OD-09 open"
+    "OD-01..OD-09 open",
+    "Merge delegation (Lead Coordinator, 2026-10-23): the orchestrator merges develop PRs itself under the conditions in docs/agents/operating-model.md#merge-delegation"
   ],
   "risks": [
     "R-01..R-18 (docs/delivery/risks.md); top: R-01 frontend quality, R-04 student data leak, R-02 scope creep",
@@ -394,7 +410,7 @@
       "date": "2026-10-23",
       "tool": "claude-code",
       "task": "T-003",
-      "outcome": "Implemented and verified (L4); ci + compat green on PR #5; reviewer and security-reviewer done; awaiting merge approval"
+      "outcome": "Implemented and verified (L4); merged via PR #5; M0 closed"
     }
   ]
 }
