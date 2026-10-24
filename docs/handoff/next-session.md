@@ -1,26 +1,25 @@
-# Next session: T-106, login, forced password change, session guards, Playwright + axe, e2e-smoke
+# Next session: T-107, AppShell (tutor and student) and the Today / Home shells
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
-Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-106-login-flow-and-e2e-harness.md. Do not rely on chat history.
+Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-107-appshell-and-dashboard-shells.md. Do not rely on chat history.
 
-## State (verified 2026-10-24)
-- M0 closed. T-101..T-104 and T-105 (PR #16, 23cc0cc) are merged into `develop`. Evidence is in progress.json.
-- T-105 left: `web/src/api/openapi.json` (written by `dotnet build` through `Microsoft.Extensions.ApiDescription.Server`) and the generated `schema.d.ts` (`npm run api:types --prefix web`); never hand-edit either. After changing an endpoint or DTO: build, `api:types`, commit both. CI `backend` fails "API types are up to date" otherwise. New endpoints need `.Produces<T>()` or the document has no response type (docs/testing/ci.md#api-types-t-105).
-- `web/src/api/client.ts`: `apiFetch` (XSRF header on unsafe methods, JSON `body`, ProblemDetails → `ApiError.code`) and a typed `api(method, path, { params, query, body })`. A 401 (except login/me) calls the handler registered in `web/src/main.tsx` (clears the query cache, navigates to `/login?redirect=`). `web/src/lib/redirect.ts`: `safeRedirect(target, role)` for the login page.
-- `openapi-typescript` 7.13.0 needs an npm `overrides` for its `typescript ^5.x` peer (TS 6.0.3 pinned); recheck on updates.
-- gitleaks flags invented password literals assigned to `*Password` names. Avoid them or add the reviewed fingerprint to `.gitleaksignore`.
-- Windows: a local Application Control policy blocks native binaries at random (Debug/Release test exes, rolldown's `.node` for vitest). Run checks in Linux containers when blocked: web `MSYS_NO_PATHCONV=1 docker run --rm -v "D:/keemese-english:/repo" -v keemese-web-nm:/repo/web/node_modules -w /repo/web node:24-alpine sh -c "npm ci && npm run lint && npm run typecheck && npm test && npm run build"`; .NET in `mcr.microsoft.com/dotnet/sdk:10.0` on a copied tree (exclude bin/obj/node_modules), Testcontainers via `-v /var/run/docker.sock:/var/run/docker.sock -e TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal --add-host host.docker.internal:host-gateway`.
-- The guard hook blocked a subagent's `docker run --rm …` as a recursive delete (reported to the owner).
+## State (verified 2026-10-24, develop at d047d5a)
+- T-101..T-106 are merged into `develop`. T-106 (PR #18) added the login flow and the E2E harness. Evidence is in progress.json.
+- Web auth pieces: `web/src/lib/guard.ts` (`meQuery` = `['me']`, `requireRole`, `requireSignedIn`, `redirectHome`; the `me` fetch applies the account language), `web/src/components/{AuthLayout,FormField,SignOutButton,LanguageSwitcher}.tsx` (the switcher saves the language via `PUT /api/auth/preferences` when signed in), `web/src/lib/errors.ts` (`useErrorText`), `web/src/features/auth/*`. `web/src/components/TemporaryShell.tsx` is the stopgap `/t` and `/s` header. T-107 replaces it with the AppShell and moves Sign out into the account menu.
+- E2E: `npm run e2e:reset --prefix web` starts a fresh `keemese-e2e` Compose project (stop other stacks first: ports 5432/8080). `npm run e2e --prefix web` runs Playwright. Both read the repository `.env` (BOOTSTRAP_TUTOR_*, POSTGRES_PASSWORD, Security__IpHashSalt). Without a `.env`, export those values in the shell. Rules are in docs/testing/ci.md#e2e-stack-t-106: one worker, no retries, reset before every rerun, at most 5 logins per minute from one IP. Call `expectAccessible(page)` (`web/e2e/fixtures/axe.ts`) after every page visit. Tests generate new passwords at run time. The account language is `vi`, the browser's is `en`: pick selectors from the locale JSON.
+- CI `e2e-smoke` runs Chromium `@smoke` whenever backend or web changes.
+- Windows: the local Application Control policy blocks rolldown (vite/vitest) and openssl. Run web checks in Linux: `MSYS_NO_PATHCONV=1 docker run --rm -v "D:/keemese-english:/repo" -v keemese-web-nm:/repo/web/node_modules -w /repo/web node:24-alpine sh -c "npm ci && npm run lint && npm run typecheck && npm test && npm run build"`. The container build also regenerates `src/routeTree.gen.ts`: commit it. Playwright and Chromium do run on Windows.
+- gitleaks flags invented password literals assigned to `*Password` names: avoid them.
 
 ## Before starting
-1. Check `pending_owner_actions` in progress.json.
-2. Merges: docs/agents/operating-model.md#merge-delegation only. T-106 is authentication UI + CI (L4): ask before merging.
+1. Check `pending_owner_actions` in progress.json (new: add `e2e-smoke` to the required checks).
+2. Merges: docs/agents/operating-model.md#merge-delegation only. T-107 is a shared layout (L4): ask before merging.
 
 ## The one next task
-T-106 on `feature/m1-login-flow` from `develop`. Follow the packet: login page (React Hook Form + Zod + `@hookform/resolvers`, approved), forced change-password, guards replacing `requireSession`, logout, Playwright + axe, the `e2e-smoke` job. Then reviewer + security-reviewer, evidence in progress.json, PR, and ask the Lead Coordinator to merge.
+T-107 on `feature/m1-appshell` from `develop`. Follow the packet: OD-09 navigation (unshipped items hidden), the layout shells at 4 widths, the account menu (Settings or Account, Log out), the Today and Home shells with empty states, `PageHeader`/`EmptyState`, Vitest for the nav config, E2E-AUTH extended to cover the shells, axe on /t, /t/settings, /s, /s/account, and screenshots in docs/delivery/evidence/m1/. Then reviewer + security-reviewer, evidence, PR, and ask the Lead Coordinator to merge.
 
 ## Verify before building on it
-`dotnet build -warnaserror` → 0/0, unit 27, integration 37, web vitest 44 (Linux container, 2026-10-24), `node --test ".claude/hooks/*.test.mjs"` → 13, `node --test "scripts/*.test.mjs"` → 4.
+Web vitest 68/68 (Linux container) and E2E-AUTH 3/3 on a fresh stack, both 2026-10-24. Hooks 13/13, scripts 4/4.
 
 ## Stop conditions
-Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-106 in review with evidence recorded → ask for merge approval. Stop.
+Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-107 in review with evidence recorded → ask for merge approval. Stop.
