@@ -34,7 +34,7 @@ Notes (verified in T-001):
 - `DATA_DIR` is relative to the working directory, and `dotnet run --project` runs from the project folder, so local data lands in `src/Keemese.Api/.data/` (gitignored).
 - On the first start against an empty database, EF logs one `fail:` for `SELECT … FROM "__EFMigrationsHistory"` before it creates that table. This is expected.
 
-Full stack in containers (closest to production): `docker compose --env-file .env -f deploy/compose.yaml --profile app up --build` → http://localhost:8080.
+Full stack in containers (closest to production): `docker compose --env-file .env -f deploy/compose.yaml --profile app up --build` → http://localhost:8080. The container runs as Production, so first replace `Security__IpHashSalt` in `.env` with a random 32+ character value (for example `node -e "console.log(crypto.randomBytes(24).toString('base64url'))"`): the app refuses to start with a `change-me` placeholder outside Development.
 
 ## `.env.example` (created in T-001; placeholders only)
 
@@ -44,6 +44,7 @@ ConnectionStrings__Db=Host=localhost;Port=5432;Database=keemese;Username=keemese
 DATA_DIR=./.data
 BOOTSTRAP_TUTOR_USERNAME=tutor
 BOOTSTRAP_TUTOR_PASSWORD=change-me-on-first-login
+# Replace with a random 32+ character value before running the app container (--profile app, E2E): outside Development the app refuses change-me placeholders.
 Security__IpHashSalt=change-me-random-string
 APP_NAME=Keemese
 ```

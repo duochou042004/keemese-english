@@ -42,11 +42,12 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-109",
-    "title": "Student workspace shell, profile editing and account actions",
-    "status": "done",
-    "branch": "feature/m1-student-workspace (merged via PR #25, bfd8df6; branch deleted)",
-    "packet": "docs/delivery/tasks/T-109-student-workspace-and-account-actions.md"
+    "id": "T-110",
+    "title": "M1 milestone gate",
+    "status": "in_review",
+    "branch": "chore/m1-gate",
+    "packet": "docs/delivery/tasks/T-110-m1-gate.md",
+    "note": "Evidence complete (docs/delivery/evidence/m1.md); M1 closes only after the Lead Coordinator approves"
   },
   "repository": {
     "branches": {
@@ -918,6 +919,69 @@
       "not_run": [
         "Push ci run on develop after the merge (runs on GitHub; check it at the start of T-110)"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-110",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "gh run list --branch develop (push run after bfd8df6)",
+        "dotnet build -c Release -warnaserror; dotnet test tests/Keemese.UnitTests -c Release; dotnet test tests/Keemese.IntegrationTests -c Release",
+        "docker run node:24-alpine: npm ci, lint, typecheck, test, build (web)",
+        "npm run e2e:reset --prefix web (fresh keemese-e2e stack, generated throwaway env), wait /health/ready, npm run e2e --prefix web",
+        "scratchpad Playwright sweep: 10 M1 screens x 1440/1024/768/390 x en/vi, scrollWidth + html lang + axe serious/critical + screenshot",
+        "docker compose -p keemese-e2e exec -T app dotnet Keemese.Api.dll --reset-tutor-password (scratchpad script, password never printed)",
+        "docker run zricethezav/gitleaks:v8.24.3 git /repo --redact (full history)",
+        "node --test hooks and scripts; node scripts/check-docs.mjs; node scripts/check-progress.mjs"
+      ],
+      "result": "pass",
+      "summary": "Develop push ci after the T-109 merge green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40092943167; the bfd8df6 run was cancelled by the next merge). Build 0/0; unit 27/27; integration 37/37, then 38/38 with the salt fix; web lint/Prettier/tsc clean, vitest 122/122, build ok; E2E 5/5 on a fresh stack (E2E-AUTH x3, E2E-J2, E2E-ISO, axe on every visit). Sweep: 80 captures (login, change-password, today, students-list, student-new, workspace-overview, workspace-profile, settings, home, account), overflow 0, axe serious/critical 0, html lang matches. CLI: stdout prints a 12-char temporary password once; the old session and old password get 401; the new password logs in with mustChangePassword true; audit row auth.tutor_password_reset; a second run completed change-password 204 (stderr libgssapi_krb5 notice from Npgsql, cosmetic). gitleaks: no leaks, 64 commits = 66 non-merge minus 2 with no added lines. Hooks 13/13, scripts 4/4, check-docs 0 broken, check-progress 0 problems. Small fixes: placeholder IpHashSalt refused outside Development (+ PipelineTests regression test, fails without the fix); task index statuses for T-108/T-109. Traceability: Implementation status section for the M1 requirements",
+      "not_run": [
+        "Firefox/WebKit E2E, compat workflow, backup/restore drill (release gate)",
+        "Podman (not installed; R-08)",
+        "Compose with a real .env",
+        "Live production TLS proxy",
+        "Local Windows vitest/vite (Application Control; Linux container used)",
+        "CI on this branch (recorded in the PR)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-110",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "read-only review of git diff 5341aa4...develop (whole M1)",
+        "dotnet list package --vulnerable --include-transitive",
+        "npm audit --omit=dev; npm audit (web)"
+      ],
+      "result": "pass (low finding fixed)",
+      "summary": "PASS. Threats T1-T6, T8, T9, T14-T19 checked: no /api/me routes in M1, /api/students behind the Tutor policy with tutor-only DTOs, the isolation suite discovers new /api/me routes automatically, only lang in localStorage, dangerouslySetInnerHTML lint-banned, safeRedirect safe, logout clears the cache, CI contents: read and gitleaks pinned by SHA; no vulnerable NuGet or npm packages. Low: the change-me IpHashSalt placeholder was accepted (fixed in this branch). Info: own password change not audited (not required by T14; left); public E2E failure traces hold only per-run throwaway values (accepted)",
+      "not_run": [
+        "Live behaviour behind a real TLS proxy",
+        "Full read of IdentityTests, PasswordLifecycleTests, StudentsTests (names and audit assertions only)",
+        "schema.d.ts/openapi.json, migrations, Dockerfile"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-110",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -c Release -warnaserror",
+        "dotnet test tests/Keemese.IntegrationTests -c Release --no-build --filter-class *PipelineTests",
+        "node scripts/check-docs.mjs",
+        "node scripts/check-progress.mjs",
+        "grep of every cited test name"
+      ],
+      "result": "changes_requested → fixed → approve",
+      "summary": "All 26 cited integration tests, unit classes, 9 vitest files and 3 E2E titles exist; every M1 exit criterion has evidence; traceability matches milestones.md M1; salt check safe for Development, Testing, CI and the OpenAPI generator. Blocking: a .env copied unchanged from .env.example no longer starts the Production app container (--profile app, local E2E) and m1.md claimed nothing was affected → fixed: .env.example comment, local-setup.md, ci.md, deployment.md, m1.md. Second pass approved; PipelineTests 6/6, build 0/0, check-docs 0 broken, check-progress 0 problems",
+      "not_run": [
+        "Full unit/integration rerun, web, E2E, gitleaks, CLI (orchestrator ran them)",
+        "Compose stack with the new docs"
+      ]
     }
   ],
   "tests": [
@@ -1000,6 +1064,21 @@
       "command": "GitHub ci on PR #25 (incl. e2e-smoke)",
       "result": "pass",
       "date": "2026-10-24"
+    },
+    {
+      "command": "dotnet test tests/Keemese.IntegrationTests -c Release",
+      "result": "pass (38/38)",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "npm run e2e --prefix web (full, fresh stack)",
+      "result": "pass (5/5, axe clean)",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "gitleaks v8.24.3 full history",
+      "result": "no leaks (64 commits)",
+      "date": "2026-10-24"
     }
   ],
   "environment_verified": {
@@ -1015,6 +1094,7 @@
   },
   "blockers": [],
   "pending_owner_actions": [
+    "T-110: review the M1 gate PR and evidence (docs/delivery/evidence/m1.md) and approve closing M1; after that the next task is writing the M2/M3 packets (M2 needs OD-08; M3 needs OD-03 and OD-05)",
     "Follow-up from T-103: record the accepted T19 lockout-abuse risk (docs/security/security-model.md) in docs/security/threat-model.md T19 (outside T-103 file ownership; owner to approve the doc change)",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
@@ -1124,6 +1204,12 @@
       "tool": "claude-code",
       "task": "T-109",
       "outcome": "Implemented and verified (L4); reviewer changes_requested → fixed, security-reviewer approve (low finding fixed); E2E found and fixed a Chromium scrollIntoView crash; merged via PR #25 (owner approval); context ~300k at handoff"
+    },
+    {
+      "date": "2026-10-24",
+      "tool": "claude-code",
+      "task": "T-110",
+      "outcome": "M1 gate evidence collected (all exit criteria + standard gate); security-reviewer PASS, low finding fixed; PR opened for the Lead Coordinator"
     }
   ]
 }

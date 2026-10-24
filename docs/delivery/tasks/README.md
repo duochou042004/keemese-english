@@ -48,8 +48,8 @@ One sentence: the outcome.
 | [T-105](T-105-api-types-and-fetch-wrapper.md) | Generated API types, CI freshness check, auth-aware fetch wrapper | M1 | done |
 | [T-106](T-106-login-flow-and-e2e-harness.md) | Login, forced password change, guards, Playwright + axe, e2e-smoke | M1 | done |
 | [T-107](T-107-appshell-and-dashboard-shells.md) | AppShell (tutor and student) and the Today / Home shells | M1 | done |
-| [T-108](T-108-students-list-and-add-student.md) | Student list and Add student (J2) | M1 | not_started |
-| [T-109](T-109-student-workspace-and-account-actions.md) | Student workspace shell, profile editing and account actions | M1 | not_started |
-| [T-110](T-110-m1-gate.md) | M1 milestone gate | M1 | not_started |
+| [T-108](T-108-students-list-and-add-student.md) | Student list and Add student (J2) | M1 | done |
+| [T-109](T-109-student-workspace-and-account-actions.md) | Student workspace shell, profile editing and account actions | M1 | done |
+| [T-110](T-110-m1-gate.md) | M1 milestone gate | M1 | awaiting Lead Coordinator approval |
 
 M1 order: T-101 → T-102 → T-103 → T-104 (backend chain; they share `Program.cs` and `Infrastructure/Security`). T-105 can run beside T-103 in its own worktree once T-102 is merged. Then T-106 (needs T-103 + T-105) → T-107 → T-108 (also needs T-104) → T-109 → T-110.
