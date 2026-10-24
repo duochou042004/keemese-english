@@ -24,7 +24,8 @@ async function studentPage(browser: Browser, userName: string, password: string)
   })
   const page = await context.newPage()
   await page.goto('/login')
-  await signIn(page, userName, password, vi)
+  // A fresh browser has no saved language: the login page is in English, then the account's vi applies.
+  await signIn(page, userName, password)
   await changePassword(page, password, newPassword(), vi)
   await expect(page).toHaveURL(/\/s$/)
   return page
@@ -61,7 +62,7 @@ test('a student cannot reach another student’s workspace; the tutor edits, arc
 
   // Tutor: the workspace header and tabs, then Overview.
   await page.goto('/login')
-  await signIn(page, tutor.userName, tutor.password, vi)
+  await signIn(page, tutor.userName, tutor.password)
   await expect(page).toHaveURL(/\/t$/)
   await page.goto(workspace)
   await expect(page.getByRole('heading', { level: 1, name: a!.fullName })).toBeVisible()

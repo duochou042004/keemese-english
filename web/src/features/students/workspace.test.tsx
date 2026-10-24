@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import type { ReactNode } from 'react'
@@ -181,6 +181,31 @@ describe('Profile form', () => {
     fireEvent.click(button('Save changes'))
     expect(await screen.findByText('Saved')).toBeTruthy()
     expect(versions).toEqual([7, 8])
+  })
+
+  it('keeps the loaded version when the student is refetched in the background (AC6)', async () => {
+    let version: unknown
+    server.use(
+      http.patch(`/api/students/${ID}`, async ({ request }) => {
+        version = ((await request.json()) as { version: unknown }).version
+        return problem(409, 'concurrency.conflict')
+      }),
+    )
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    client.setQueryData(['students', ID], student())
+    render(
+      <QueryClientProvider client={client}>
+        <StudentProfile id={ID} />
+      </QueryClientProvider>,
+    )
+    fireEvent.change(field('Full name'), { target: { value: 'Thảo' } })
+    // Another tab saved; a window-focus refetch brings its version into the cache.
+    act(() => {
+      client.setQueryData(['students', ID], student({ version: 8 }))
+    })
+    fireEvent.click(button('Save changes'))
+    expect((await screen.findByRole('alert')).textContent).toContain('changed somewhere else')
+    expect(version).toBe(7)
   })
 
   it('puts API field codes under their fields', async () => {

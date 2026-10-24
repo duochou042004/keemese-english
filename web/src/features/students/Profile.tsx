@@ -56,6 +56,8 @@ function ProfileForm({ student }: { student: Student }) {
   const [formError, setFormError] = useState<string>()
   const [conflict, setConflict] = useState(false)
   const [saved, setSaved] = useState(false)
+  // The version these values came from, not the live query's: a background refetch must not hide a conflict (AC6).
+  const [version, setVersion] = useState(student.version)
   const form = useForm({ resolver: zodResolver(detailsSchema), defaultValues: toValues(student) })
   const {
     register,
@@ -74,7 +76,7 @@ function ProfileForm({ student }: { student: Student }) {
       const updated = await api('patch', '/api/students/{id}', {
         params: { id: student.id },
         body: {
-          version: student.version,
+          version,
           fullName: v.fullName,
           email: v.email,
           phone: v.phone,
@@ -85,6 +87,7 @@ function ProfileForm({ student }: { student: Student }) {
       queryClient.setQueryData(studentQuery(student.id).queryKey, updated)
       void queryClient.invalidateQueries({ queryKey: ['students'], refetchType: 'none' })
       reset(toValues(updated))
+      setVersion(updated.version)
       setSaved(true)
     } catch (e) {
       if (e instanceof ApiError && e.code === 'concurrency.conflict') return setConflict(true)
@@ -96,6 +99,7 @@ function ProfileForm({ student }: { student: Student }) {
   const reload = async () => {
     const fresh = await queryClient.fetchQuery({ ...studentQuery(student.id), staleTime: 0 })
     reset(toValues(fresh))
+    setVersion(fresh.version)
     setConflict(false)
   }
 

@@ -5,5 +5,6 @@ export const Route = createFileRoute('/t/students/$studentId/profile')({ compone
 
 function Profile() {
   const { studentId } = Route.useParams()
-  return <StudentProfile id={studentId} />
+  // Keyed: another student's profile starts fresh (form values, a shown temporary password).
+  return <StudentProfile key={studentId} id={studentId} />
 }
