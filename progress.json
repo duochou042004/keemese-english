@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-106",
-    "title": "Login, forced password change, session guards, Playwright + axe and the e2e-smoke job",
-    "status": "done",
-    "branch": "feature/m1-login-flow (merged via PR #18, d047d5a; branch deleted)",
-    "packet": "docs/delivery/tasks/T-106-login-flow-and-e2e-harness.md"
+    "id": "T-107",
+    "title": "AppShell (tutor and student) and the Today / Home shells",
+    "status": "in_review",
+    "branch": "feature/m1-appshell",
+    "packet": "docs/delivery/tasks/T-107-appshell-and-dashboard-shells.md"
   },
   "repository": {
     "branches": {
@@ -744,6 +744,63 @@
         "Backend suites (no backend change)",
         "HSTS behind a real proxy"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-107",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "docker run node:24-alpine: npm ci, lint (+ Prettier), typecheck, test, build",
+        "npm run e2e:reset (fresh keemese-e2e stack, throwaway env exported in the shell, no .env) then npm run e2e (Windows Chromium)",
+        "scratchpad Playwright script on a second fresh stack: /t, /t/settings, /s, /s/account at 1440/1024/768/390 x vi/en (+ drawer, account menu, rail tooltip), scrollWidth - innerWidth",
+        "node --test hooks and scripts; node scripts/check-docs.mjs; node scripts/check-progress.mjs; docker run zricethezav/gitleaks:v8.24.3 git --log-opts=develop..HEAD"
+      ],
+      "result": "pass",
+      "summary": "Web: lint + Prettier clean, tsc clean, build ok, vitest 77/77 (+9: nav config x6 = IA order for both roles, M1 visible items today+students / home, every unshipped item hidden, each role inside its area, labels in vi and en; sign-out x3 = 204 and 401 clear the cache and go to /login, 500 keeps the cache, stays and shows an alert). E2E-AUTH 3/3 on a fresh stack, axe serious/critical = 0 on every visit incl. /t, /t/settings, /s, /s/account: tutor Today heading, Add student action, both empty states, nav shows only Today + Students with aria-current on Today and no Calendar/Review/Activities/Question bank/Library links; account menu → Settings → language en saved (PUT preferences 204); account menu → Sign out → /login, back → /login?redirect=%2Ft%2Fsettings; student Home greeting with the display name, both empty states, nav only Home (aria-current), account menu → /s/account. Visual QA: 32 page captures, horizontal overflow 0 in all; 42 screenshots in docs/delivery/evidence/m1/ (invented data: lan.tutor, Nguyễn Thị Phương Thảo). Hooks 13/13, scripts 4/4, check-docs 0 broken, check-progress 0 problems, gitleaks no leaks",
+      "not_run": [
+        "Firefox/WebKit (release workflow)",
+        "Podman",
+        "Local Windows vitest/vite (Application Control blocks rolldown; Linux container used)",
+        ".NET build and suites (no backend change)",
+        "CI (runs on the PR)",
+        "Keyboard/Esc focus return checked only through Radix defaults and axe, not a scripted keyboard walk"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-107",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "npm ci, lint, typecheck, vitest, build (node:24-alpine, own node_modules volume)",
+        "viewed 9 screenshots"
+      ],
+      "result": "approve",
+      "summary": "All packet ACs met on 241d0bf; vitest 77/77, build ok. Required: record evidence (done). Non-blocking: Students and Add student reach the root 404 (\"Back to sign in\") until T-108 merges; the phone top bar shows the app name, not the page title (IA); at 1024 the rail tooltip overlaps the wordmark (cosmetic); change-password from Settings has no in-page way back (existing)",
+      "not_run": [
+        "E2E/axe",
+        "Live keyboard focus and Esc",
+        "Hooks, check-docs, gitleaks"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-107",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...feature/m1-appshell",
+        "package.json/lock unchanged check",
+        "vitest in node:24-alpine (74/74 at 023176f)"
+      ],
+      "result": "approve",
+      "summary": "No regression. T18 logout logic unchanged (moved into useSignOut), error shown outside the closed menu; new routes sit under the existing requireRole guards and read only meQuery; no dangerouslySetInnerHTML, React escapes the interpolated display name; only lang in localStorage; no new requests or dependencies; screenshots show invented data only. Low: no unit test for the logout failure path (fixed in 241d0bf)",
+      "not_run": [
+        "E2E",
+        "gitleaks (relied on the orchestrator)",
+        "Backend suites (no backend change)"
+      ]
     }
   ],
   "tests": [
@@ -795,6 +852,16 @@
     {
       "command": "GitHub ci on PR #18 and the push to develop (incl. e2e-smoke)",
       "result": "pass",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "npm run lint && npm run typecheck && npm test && npm run build (--prefix web)",
+      "result": "pass (vitest 77/77, Linux container)",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "npm run e2e --prefix web (E2E-AUTH incl. shells, Chromium)",
+      "result": "pass (3/3, axe clean)",
       "date": "2026-10-24"
     }
   ],
@@ -902,6 +969,12 @@
       "tool": "claude-code",
       "task": "T-106",
       "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (findings fixed); CI green + deliberate E2E red run; merged via PR #18 (owner approval)"
+    },
+    {
+      "date": "2026-10-24",
+      "tool": "claude-code",
+      "task": "T-107",
+      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (low finding fixed); PR open, waiting for the Lead Coordinator merge approval"
     }
   ]
 }

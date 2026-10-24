@@ -14,6 +14,10 @@ import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SRouteImport } from './routes/s'
 import { Route as TRouteImport } from './routes/t'
+import { Route as SIndexRouteImport } from './routes/s/index'
+import { Route as SAccountRouteImport } from './routes/s/account'
+import { Route as TIndexRouteImport } from './routes/t/index'
+import { Route as TSettingsRouteImport } from './routes/t/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,43 +44,99 @@ const TRoute = TRouteImport.update({
   path: '/t',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SIndexRoute = SIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SRoute,
+} as any)
+const SAccountRoute = SAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => SRoute,
+} as any)
+const TIndexRoute = TIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TRoute,
+} as any)
+const TSettingsRoute = TSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => TRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
-  '/s': typeof SRoute
-  '/t': typeof TRoute
+  '/s': typeof SRouteWithChildren
+  '/t': typeof TRouteWithChildren
+  '/s/account': typeof SAccountRoute
+  '/t/settings': typeof TSettingsRoute
+  '/s/': typeof SIndexRoute
+  '/t/': typeof TIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
-  '/s': typeof SRoute
-  '/t': typeof TRoute
+  '/s/account': typeof SAccountRoute
+  '/t/settings': typeof TSettingsRoute
+  '/s': typeof SIndexRoute
+  '/t': typeof TIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
-  '/s': typeof SRoute
-  '/t': typeof TRoute
+  '/s': typeof SRouteWithChildren
+  '/t': typeof TRouteWithChildren
+  '/s/account': typeof SAccountRoute
+  '/t/settings': typeof TSettingsRoute
+  '/s/': typeof SIndexRoute
+  '/t/': typeof TIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/change-password' | '/login' | '/s' | '/t'
+  fullPaths:
+    | '/'
+    | '/change-password'
+    | '/login'
+    | '/s'
+    | '/t'
+    | '/s/account'
+    | '/t/settings'
+    | '/s/'
+    | '/t/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/change-password' | '/login' | '/s' | '/t'
-  id: '__root__' | '/' | '/change-password' | '/login' | '/s' | '/t'
+  to:
+    | '/'
+    | '/change-password'
+    | '/login'
+    | '/s/account'
+    | '/t/settings'
+    | '/s'
+    | '/t'
+  id:
+    | '__root__'
+    | '/'
+    | '/change-password'
+    | '/login'
+    | '/s'
+    | '/t'
+    | '/s/account'
+    | '/t/settings'
+    | '/s/'
+    | '/t/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
   LoginRoute: typeof LoginRoute
-  SRoute: typeof SRoute
-  TRoute: typeof TRoute
+  SRoute: typeof SRouteWithChildren
+  TRoute: typeof TRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -116,15 +176,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/s/': {
+      id: '/s/'
+      path: '/'
+      fullPath: '/s/'
+      preLoaderRoute: typeof SIndexRouteImport
+      parentRoute: typeof SRoute
+    }
+    '/s/account': {
+      id: '/s/account'
+      path: '/account'
+      fullPath: '/s/account'
+      preLoaderRoute: typeof SAccountRouteImport
+      parentRoute: typeof SRoute
+    }
+    '/t/': {
+      id: '/t/'
+      path: '/'
+      fullPath: '/t/'
+      preLoaderRoute: typeof TIndexRouteImport
+      parentRoute: typeof TRoute
+    }
+    '/t/settings': {
+      id: '/t/settings'
+      path: '/settings'
+      fullPath: '/t/settings'
+      preLoaderRoute: typeof TSettingsRouteImport
+      parentRoute: typeof TRoute
+    }
   }
 }
+
+interface SRouteChildren {
+  SAccountRoute: typeof SAccountRoute
+  SIndexRoute: typeof SIndexRoute
+}
+
+const SRouteChildren: SRouteChildren = {
+  SAccountRoute: SAccountRoute,
+  SIndexRoute: SIndexRoute,
+}
+
+const SRouteWithChildren = SRoute._addFileChildren(SRouteChildren)
+
+interface TRouteChildren {
+  TSettingsRoute: typeof TSettingsRoute
+  TIndexRoute: typeof TIndexRoute
+}
+
+const TRouteChildren: TRouteChildren = {
+  TSettingsRoute: TSettingsRoute,
+  TIndexRoute: TIndexRoute,
+}
+
+const TRouteWithChildren = TRoute._addFileChildren(TRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChangePasswordRoute: ChangePasswordRoute,
   LoginRoute: LoginRoute,
-  SRoute: SRoute,
-  TRoute: TRoute,
+  SRoute: SRouteWithChildren,
+  TRoute: TRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

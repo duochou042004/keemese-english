@@ -33,5 +33,46 @@
     "title": "Page not found",
     "body": "This address does not exist or has moved.",
     "back": "Back to sign in"
+  },
+  "nav": {
+    "label": "Main",
+    "today": "Today",
+    "students": "Students",
+    "calendar": "Calendar",
+    "review": "Review",
+    "activities": "Activities",
+    "questions": "Question bank",
+    "library": "Library",
+    "home": "Home",
+    "tasks": "Tasks",
+    "lessons": "Lessons",
+    "materials": "Materials",
+    "progress": "Progress"
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "accountMenu": "Account menu: {{name}}",
+    "settings": "Settings",
+    "account": "Account"
+  },
+  "settings": {
+    "languageHint": "Used on every device you sign in on.",
+    "passwordHint": "Change the password you use to sign in."
+  },
+  "today": {
+    "title": "Today",
+    "addStudent": "Add student",
+    "sessions": "Today’s lessons",
+    "sessionsEmpty": "Lessons you schedule for today will appear here, ready to join and wrap up.",
+    "review": "Review queue",
+    "reviewEmpty": "Homework your students hand in will wait here for grading, oldest first."
+  },
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "tasks": "Your tasks",
+    "tasksEmpty": "Tasks from your tutor will appear here, the soonest due first.",
+    "nextSession": "Next lesson",
+    "nextSessionEmpty": "Your next lesson will appear here once it is scheduled."
   }
 }

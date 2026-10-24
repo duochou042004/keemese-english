@@ -33,5 +33,46 @@
     "title": "Không tìm thấy trang",
     "body": "Đường dẫn này không tồn tại hoặc đã bị chuyển đi.",
     "back": "Về trang đăng nhập"
+  },
+  "nav": {
+    "label": "Điều hướng chính",
+    "today": "Hôm nay",
+    "students": "Học viên",
+    "calendar": "Lịch",
+    "review": "Chấm bài",
+    "activities": "Hoạt động",
+    "questions": "Ngân hàng câu hỏi",
+    "library": "Thư viện",
+    "home": "Trang chủ",
+    "tasks": "Bài tập",
+    "lessons": "Buổi học",
+    "materials": "Tài liệu",
+    "progress": "Tiến độ"
+  },
+  "shell": {
+    "skipToContent": "Chuyển đến nội dung chính",
+    "openMenu": "Mở menu",
+    "accountMenu": "Menu tài khoản: {{name}}",
+    "settings": "Cài đặt",
+    "account": "Tài khoản"
+  },
+  "settings": {
+    "languageHint": "Áp dụng trên mọi thiết bị bạn đăng nhập.",
+    "passwordHint": "Đổi mật khẩu bạn dùng để đăng nhập."
+  },
+  "today": {
+    "title": "Hôm nay",
+    "addStudent": "Thêm học viên",
+    "sessions": "Buổi học hôm nay",
+    "sessionsEmpty": "Các buổi học bạn lên lịch cho hôm nay sẽ hiện ở đây, sẵn sàng để vào lớp và tổng kết.",
+    "review": "Bài chờ chấm",
+    "reviewEmpty": "Bài tập học viên nộp sẽ chờ chấm ở đây, bài cũ nhất trước."
+  },
+  "home": {
+    "greeting": "Chào {{name}}",
+    "tasks": "Bài tập của bạn",
+    "tasksEmpty": "Bài tập giáo viên giao sẽ hiện ở đây, bài gần hạn nhất trước.",
+    "nextSession": "Buổi học tiếp theo",
+    "nextSessionEmpty": "Buổi học tiếp theo sẽ hiện ở đây khi được lên lịch."
   }
 }

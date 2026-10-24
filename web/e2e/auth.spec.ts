@@ -18,6 +18,27 @@ async function signIn(page: Page, userName: string, password: string, ui: Ui = e
   await page.getByRole('button', { name: ui.login.submit }).click()
 }
 
+// The avatar button is named "<prefix>: <display name>"; Playwright matches the prefix as a substring.
+const accountMenu = (page: Page, ui: Ui) =>
+  page.getByRole('button', { name: ui.shell.accountMenu.split('{{')[0] })
+
+async function openFromAccountMenu(page: Page, ui: Ui, item: string) {
+  await accountMenu(page, ui).click()
+  await page.getByRole('menuitem', { name: item }).click()
+}
+
+/** OD-09: only shipped items are in the nav, and the current one is marked. */
+async function expectNav(page: Page, ui: Ui, shown: string[], hidden: string[], current: string) {
+  const nav = page.getByRole('navigation', { name: ui.nav.label })
+  for (const name of shown) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible()
+  for (const name of hidden)
+    await expect(nav.getByRole('link', { name, exact: true })).toHaveCount(0)
+  await expect(nav.getByRole('link', { name: current, exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+}
+
 async function changePassword(page: Page, current: string, next: string, ui: Ui) {
   await page.getByLabel(ui.changePassword.current, { exact: true }).fill(current)
   await page.getByLabel(ui.changePassword.new, { exact: true }).fill(next)
@@ -25,7 +46,7 @@ async function changePassword(page: Page, current: string, next: string, ui: Ui)
   await page.getByRole('button', { name: ui.changePassword.submit }).click()
 }
 
-test('tutor: bootstrap login, forced change, /t, language saved, logout, back stays out @smoke', async ({
+test('tutor: bootstrap login, forced change, Today shell, language saved in settings, logout, back stays out @smoke', async ({
   page,
 }) => {
   await page.goto('/t')
@@ -43,21 +64,38 @@ test('tutor: bootstrap login, forced change, /t, language saved, logout, back st
   await changePassword(page, tutor.bootstrapPassword, next, vi)
   await expect(page).toHaveURL(/\/t$/)
   tutorPassword = next
+  await expect(page.getByRole('heading', { level: 1, name: vi.today.title })).toBeVisible()
+  await expect(page.getByRole('link', { name: vi.today.addStudent })).toBeVisible()
+  await expect(page.getByText(vi.today.sessionsEmpty)).toBeVisible()
+  await expect(page.getByText(vi.today.reviewEmpty)).toBeVisible()
+  await expectNav(
+    page,
+    vi,
+    [vi.nav.today, vi.nav.students],
+    [vi.nav.calendar, vi.nav.review, vi.nav.activities, vi.nav.questions, vi.nav.library],
+    vi.nav.today,
+  )
+  await expectAccessible(page)
+
+  await openFromAccountMenu(page, vi, vi.shell.settings)
+  await expect(page).toHaveURL(/\/t\/settings$/)
+  await expect(page.getByRole('link', { name: vi.changePassword.title })).toBeVisible()
   await expectAccessible(page)
 
   const saved = page.waitForResponse((r) => r.url().endsWith('/api/auth/preferences'))
   await page.getByRole('button', { name: en.language.en }).click()
   expect((await saved).status()).toBe(204)
+  await expect(page.getByRole('heading', { level: 1, name: en.shell.settings })).toBeVisible()
 
   // T18: after logout the back button must not show the tutor area again.
-  await page.getByRole('button', { name: en.auth.signOut }).click()
+  await openFromAccountMenu(page, en, en.auth.signOut)
   await expect(page).toHaveURL(/\/login$/)
   await page.goBack()
-  await expect(page).toHaveURL(/\/login\?redirect=%2Ft$/)
+  await expect(page).toHaveURL(/\/login\?redirect=%2Ft%2Fsettings$/)
   await expect(page.getByRole('button', { name: en.login.submit })).toBeVisible()
 })
 
-test('student: created via the API, login, forced change, /s, kept out of /t @smoke', async ({
+test('student: created via the API, login, forced change, Home shell, account page, kept out of /t @smoke', async ({
   page,
 }) => {
   const student = await createStudent(tutorPassword, 'Trần Gia Bảo')
@@ -68,7 +106,26 @@ test('student: created via the API, login, forced change, /s, kept out of /t @sm
   await expectAccessible(page)
   await changePassword(page, student.temporaryPassword, newPassword(), vi)
   await expect(page).toHaveURL(/\/s$/)
-  await expect(page.getByText('Trần Gia Bảo')).toBeVisible()
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: vi.home.greeting.replace('{{name}}', 'Trần Gia Bảo'),
+    }),
+  ).toBeVisible()
+  await expect(page.getByText(vi.home.tasksEmpty)).toBeVisible()
+  await expect(page.getByText(vi.home.nextSessionEmpty)).toBeVisible()
+  await expectNav(
+    page,
+    vi,
+    [vi.nav.home],
+    [vi.nav.tasks, vi.nav.lessons, vi.nav.materials, vi.nav.progress],
+    vi.nav.home,
+  )
+  await expectAccessible(page)
+
+  await openFromAccountMenu(page, vi, vi.shell.account)
+  await expect(page).toHaveURL(/\/s\/account$/)
+  await expect(page.getByRole('heading', { level: 1, name: vi.shell.account })).toBeVisible()
   await expectAccessible(page)
 
   await page.goto('/t')
