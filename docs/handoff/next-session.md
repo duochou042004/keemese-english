@@ -1,26 +1,26 @@
-# Next session: T-109, Student workspace, profile editing and account actions
+# Next session: T-110, M1 milestone gate
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
-The SessionStart briefing shows live state. Read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-109-student-workspace-and-account-actions.md. Do not rely on chat history.
+The SessionStart briefing shows live state. Read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-110-m1-gate.md. Do not rely on chat history.
 
 ## State (verified 2026-10-24)
-- T-101..T-108 are merged into `develop`. T-108 (PR #23, b0ef86d) added `/t/students` (search, Active/Archived filter, Load more) and `/t/students/new` (J2 form, success panel). Evidence is in progress.json.
-- Student UI: `web/src/features/students/` (`StudentList.tsx`, `AddStudent.tsx`, `credentials.ts`, `students.test.tsx`). `StudentLink` in StudentList.tsx and the success panel's Open workspace use a `shortcut:` string path to `/t/students/$studentId`: T-109 adds that route; then make the link type-checked with `params`. The AppShell `NavLink` cast stays until the last nav item ships.
-- Patterns: forms use React Hook Form + Zod, API codes land on fields via `ApiError.errors`; `useErrorText` maps codes to errors.json; list states (delayed skeleton, ErrorState with Retry + traceId) live in StudentList.tsx: reuse them within the packet's ownership.
-- E2E: `npm run e2e:reset --prefix web` (fresh `keemese-e2e` stack; stop other stacks first: ports 5432/8080), then `npm run e2e --prefix web`. Without a repository `.env`, export throwaway BOOTSTRAP_TUTOR_USERNAME, BOOTSTRAP_TUTOR_PASSWORD, POSTGRES_PASSWORD and Security__IpHashSalt in the same shell for both. Wait for /health/ready after a reset. Rules: docs/testing/ci.md#e2e-stack-t-106 (one worker, no retries, reset before every rerun, at most 5 logins per minute per IP). Shared helpers: `e2e/fixtures/ui.ts` (signIn, changePassword, openFromAccountMenu, expectNav), `fixtures/seed.ts` (`tutor.password` = the post-E2E-AUTH password, `ensureTutor(lang, headers)`, `createStudent(name)`). A new spec file signs in from its own `X-Forwarded-For` address (see students.spec.ts). CI greps `@smoke` only: tag new scenarios `@smoke` plus their area tag. Call `expectAccessible(page)` after every page visit.
-- Screenshots: a scratchpad Playwright script (API login, language via PUT /api/auth/preferences, scrollWidth check); save `<page>-<lang>-<width>.png` in docs/delivery/evidence/m1/ (git-ignored, never commit images).
-- Windows: Application Control blocks rolldown. Run web checks in Linux: `MSYS_NO_PATHCONV=1 docker run --rm -v "D:/keemese-english:/repo" -v keemese-web-nm:/repo/web/node_modules -w /repo/web node:24-alpine sh -c "npm ci && npm run lint && npm run typecheck && npm test && npm run build"`. The build regenerates `src/routeTree.gen.ts`: commit it. Give subagents their own node_modules volume. Playwright runs on Windows.
+- T-101..T-109 are merged into `develop`. T-109 (PR #25, bfd8df6) added `/t/students/$studentId` (Overview, Profile tabs), profile editing with `version` + 409 Reload, parents, and account actions (reset, unlock, archive with Undo, restore, delete with typed name). Evidence is in progress.json.
+- Student UI: `web/src/features/students/` (Workspace, Profile, AccountActions, StudentFields shared with AddStudent, toast.tsx = a `shortcut:` store instead of sonner). E2E: `web/e2e/{auth,students,workspace}.spec.ts` = E2E-AUTH (3), E2E-J2, E2E-ISO, all `@smoke`.
+- E2E: `npm run e2e:reset --prefix web` (fresh `keemese-e2e` stack; ports 5432/8080), then `npm run e2e --prefix web`. Without a repository `.env`, export throwaway BOOTSTRAP_TUTOR_USERNAME, BOOTSTRAP_TUTOR_PASSWORD, POSTGRES_PASSWORD and Security__IpHashSalt in the same shell for both (and for any scratchpad script that logs in). Wait for /health/ready. Rules: docs/testing/ci.md#e2e-stack-t-106 (one worker, no retries, reset before every rerun, ≤ 5 logins per minute per IP). A fresh browser context starts in English: sign in with the en labels.
+- Screenshots: scratchpad Playwright script (API login, PUT /api/auth/preferences for the language, scrollWidth check), `<page>-<lang>-<width>.png` in docs/delivery/evidence/m1/ (git-ignored, never commit images). T-106..T-109 captures are already there.
+- Windows: Application Control blocks rolldown and sometimes Debug .NET binaries. Web checks in Linux: `MSYS_NO_PATHCONV=1 docker run --rm -v "D:/keemese-english:/repo" -v keemese-web-nm:/repo/web/node_modules -w /repo/web node:24-alpine sh -c "npm ci && npm run lint && npm run typecheck && npm test && npm run build"`. .NET tests in Release. Playwright on Windows. Subagents get their own node_modules volume.
 - gitleaks flags password-like literals next to `*Password` keys, also in tests: generate the value instead.
 
 ## Before starting
-1. Check `pending_owner_actions` in progress.json (e2e-smoke as a required check is still open).
-2. T-109 is **L4** (destructive actions, isolation in the UI): reviewer **and** security-reviewer. Merge delegation (docs/agents/operating-model.md#merge-delegation) excludes changes to authorization or student isolation: ask the owner before merging if the change touches them.
+1. Check the push ci run on develop after bfd8df6 (not checked at handoff).
+2. Check `pending_owner_actions` in progress.json (branch protection, e2e-smoke as a required check, T19 doc, OD answers).
+3. T-110 is an **L4 gate**: `security-reviewer` over the whole M1 diff (`git diff <M0 close>...develop`) plus a gitleaks full-history scan run locally. M1 closes only after the Lead Coordinator approves.
 
 ## The one next task
-T-109 on `feature/m1-student-workspace` from `develop`. Follow the packet: workspace route (Overview, Profile tabs only), profile editing with `version` and the 409 Reload offer, parents, account actions (archive with Undo, restore, reset password, unlock, delete with typed name), tests, E2E, axe, screenshots. Then reviewers, evidence, PR.
+T-110 on `chore/m1-gate` from `develop`. Follow the packet: evidence for every M1 exit criterion in docs/delivery/milestones.md (J2 ≤ 2, forced change + lockout, isolation + authorization enumeration, E2E green in CI, AppShell 4 widths × 2 languages, the tutor-password reset CLI against the container), the standard gate (full backend + frontend tests, full E2E, axe, visual QA), `docs/delivery/evidence/m1.md`, traceability updated. Small fixes in the branch; larger ones become `fix/*` packets and block the gate. Then PR and the owner's approval.
 
 ## Verify before building on it
-Web vitest 106/106 (Linux container), E2E 4/4 on a fresh stack and PR #23 CI green incl. e2e-smoke, all 2026-10-24. Hooks 13/13, scripts 4/4.
+Web vitest 122/122 (Linux container), E2E 5/5 on a fresh stack and PR #25 CI green incl. e2e-smoke, all 2026-10-24. .NET unit 27/27, integration 37/37 (T-104/T-105). Hooks 13/13, scripts 4/4.
 
 ## Stop conditions
-Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-109 merged and recorded → stop.
+Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-110 PR open with evidence and the owner asked to close M1 → stop.
