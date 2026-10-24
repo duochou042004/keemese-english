@@ -12,5 +12,6 @@ export default defineConfig({
   plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { proxy: { '/api': api, '/health': api } },
-  test: { environment: 'node' },
+  // e2e/ is Playwright's.
+  test: { environment: 'node', include: ['src/**/*.test.{ts,tsx}'] },
 })

@@ -13,7 +13,21 @@
     "username": "Tên đăng nhập",
     "password": "Mật khẩu",
     "submit": "Đăng nhập",
-    "notReady": "Tính năng đăng nhập sẽ có ở bản tiếp theo."
+    "rememberMe": "Ghi nhớ đăng nhập trên thiết bị này"
+  },
+  "auth": {
+    "signOut": "Đăng xuất"
+  },
+  "changePassword": {
+    "title": "Đổi mật khẩu",
+    "subtitle": "Nhập mật khẩu hiện tại, rồi chọn mật khẩu mới.",
+    "forcedTitle": "Chọn mật khẩu mới",
+    "forcedSubtitle": "Bạn đã đăng nhập bằng mật khẩu tạm. Hãy chọn mật khẩu của riêng bạn trước khi tiếp tục.",
+    "current": "Mật khẩu hiện tại",
+    "new": "Mật khẩu mới",
+    "confirm": "Nhập lại mật khẩu mới",
+    "policy": "Ít nhất 10 ký tự. Tránh các mật khẩu phổ biến.",
+    "submit": "Lưu mật khẩu mới"
   },
   "notFound": {
     "title": "Không tìm thấy trang",

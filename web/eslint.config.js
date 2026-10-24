@@ -6,19 +6,32 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
-  { ignores: ['dist', 'src/routeTree.gen.ts', 'src/api/schema.d.ts'] },
+  {
+    ignores: [
+      'dist',
+      'playwright-report',
+      'test-results',
+      'src/routeTree.gen.ts',
+      'src/api/schema.d.ts',
+    ],
+  },
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
       globals: globals.browser,
       parserOptions: {
-        projectService: { allowDefaultProject: ['eslint.config.js'] },
+        projectService: { allowDefaultProject: ['eslint.config.js', 'e2e/reset.mjs'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },
   },
   { files: ['eslint.config.js'], extends: [tseslint.configs.disableTypeChecked] },
+  {
+    files: ['e2e/reset.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { globals: globals.node },
+  },
   reactHooks.configs.flat.recommended,
   jsxA11y.flatConfigs.recommended,
   {

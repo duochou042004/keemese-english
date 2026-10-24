@@ -3,3 +3,5 @@ package-lock.json
 src/routeTree.gen.ts
 src/api/openapi.json
 src/api/schema.d.ts
+playwright-report
+test-results
