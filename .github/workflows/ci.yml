@@ -34,7 +34,7 @@ jobs:
           echo "$files"
           has() { echo "$files" | grep -qE "$1" && echo true || echo false; }
           {
-            echo "backend=$(has '^(src/|tests/|deploy/|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
+            echo "backend=$(has '^(src/|tests/|deploy/|web/src/api/|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
             echo "web=$(has '^(web/|\.nvmrc|\.editorconfig|\.claude/hooks/|\.github/workflows/ci\.yml)')"
             echo "docs=$(has '(\.md$|^progress\.json$|^scripts/|^\.github/workflows/ci\.yml)')"
           } >> "$GITHUB_OUTPUT"
@@ -53,7 +53,17 @@ jobs:
           cache: true
           cache-dependency-path: '**/packages.lock.json'
       - run: dotnet restore --locked-mode
-      - run: dotnet build -warnaserror --no-restore
+      - run: dotnet build -warnaserror --no-restore # also writes web/src/api/openapi.json (T-105)
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: API types are up to date
+        run: |
+          npm ci --prefix web --ignore-scripts --no-audit --no-fund
+          npm run api:types --prefix web
+          git diff --exit-code web/src/api
       - name: Unit tests
         run: dotnet test --project tests/Keemese.UnitTests --no-build --results-directory TestResults --report-xunit-trx
       - name: Integration tests (Testcontainers)
