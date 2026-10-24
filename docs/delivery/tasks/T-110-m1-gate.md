@@ -1,7 +1,7 @@
 # T-110: M1 milestone gate
 
 - Milestone: M1 · Ladder level: L4 (gate) · Depends on: T-101…T-109 merged · Branch: `chore/m1-gate` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: awaiting Lead Coordinator approval (evidence: docs/delivery/evidence/m1.md)
+- Status: done (merged via PR #27, ecce50e, 2026-10-24; M1 closed with the Lead Coordinator's approval; evidence: docs/delivery/evidence/m1.md)
 
 ## Objective
 Prove every M1 exit criterion on `develop` with recorded evidence, so the Lead Coordinator can close M1 and M2/M3 packets can be written.
