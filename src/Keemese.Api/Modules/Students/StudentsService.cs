@@ -15,7 +15,7 @@ public sealed class StudentsService(AppDbContext db, IAccountService accounts, T
     private static readonly AppError Conflict = new("concurrency.conflict", StatusCodes.Status409Conflict);
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
-    public async Task<(PageDto<StudentListItemDto>? Page, AppError? Error)> ListAsync(
+    public async Task<(PageDto<TutorStudentListItemDto>? Page, AppError? Error)> ListAsync(
         string? q, string? status, int? page, int? pageSize, CancellationToken ct)
     {
         if (status is not (null or "active" or "archived")) return (null, AppError.Validation("status", "status.unsupported"));
@@ -29,7 +29,7 @@ public sealed class StudentsService(AppDbContext db, IAccountService accounts, T
         {
             // FR-STU-AC3: f_unaccent(lower(...)) on both sides, so "nguyen" matches "Nguyễn".
             var pattern = "%" + EscapeLike(q.Trim().Normalize().ToLowerInvariant()) + "%";
-            query = query.Where(x => EF.Functions.Like(AppDbContext.Unaccent(x.Profile.FullName.ToLower()), AppDbContext.Unaccent(pattern)));
+            query = query.Where(x => EF.Functions.Like(AppDbContext.Unaccent(x.Profile.FullName.ToLower()), AppDbContext.Unaccent(pattern), @"\"));
         }
 
         var size = Math.Clamp(pageSize ?? 50, 1, 200);
@@ -38,12 +38,12 @@ public sealed class StudentsService(AppDbContext db, IAccountService accounts, T
         var items = await query
             .OrderBy(x => x.Profile.FullName).ThenBy(x => x.Profile.UserId)
             .Skip(skip).Take(size)
-            .Select(x => new StudentListItemDto(x.Profile.UserId, x.Profile.FullName, x.Account.UserName, x.Account.IsActive, x.Account.MustChangePassword, x.Account.LastLoginAt))
+            .Select(x => new TutorStudentListItemDto(x.Profile.UserId, x.Profile.FullName, x.Account.UserName, x.Account.IsActive, x.Account.MustChangePassword, x.Account.LastLoginAt))
             .ToListAsync(ct);
-        return (new PageDto<StudentListItemDto>(items, total), null);
+        return (new PageDto<TutorStudentListItemDto>(items, total), null);
     }
 
-    public async Task<StudentDto?> GetAsync(Guid id, CancellationToken ct)
+    public async Task<TutorStudentDto?> GetAsync(Guid id, CancellationToken ct)
     {
         var row = await (from p in db.StudentProfiles.AsNoTracking()
                          join a in accounts.Students on p.UserId equals a.Id
@@ -81,7 +81,7 @@ public sealed class StudentsService(AppDbContext db, IAccountService accounts, T
     }
 
     /// <summary>FR-STU-02 / AC6: the edit applies only to the <c>version</c> it was made from.</summary>
-    public async Task<(StudentDto? Student, AppError? Error)> UpdateAsync(Guid id, UpdateStudentRequest request, CancellationToken ct)
+    public async Task<(TutorStudentDto? Student, AppError? Error)> UpdateAsync(Guid id, UpdateStudentRequest request, CancellationToken ct)
     {
         if (request.Version is not { } version) return (null, AppError.Validation("version", "version.required"));
         var profile = await db.StudentProfiles.SingleOrDefaultAsync(p => p.UserId == id, ct);
@@ -127,7 +127,7 @@ public sealed class StudentsService(AppDbContext db, IAccountService accounts, T
         return await accounts.DeleteAsync(id, ct) ? null : NotFound;
     }
 
-    private StudentDto ToDto(StudentProfile p, StudentAccount a) => new(
+    private TutorStudentDto ToDto(StudentProfile p, StudentAccount a) => new(
         p.UserId, p.FullName, a.UserName, a.Email, p.Phone,
         Read<ContactChannelDto>(p.ContactChannels), Read<ParentDto>(p.Parents),
         a.IsActive, a.MustChangePassword, a.LockoutEnd > clock.GetUtcNow(), a.LastLoginAt, p.CreatedAt, p.Version);

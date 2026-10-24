@@ -32,6 +32,9 @@ public sealed class AuthorizationSuiteTests(PostgresFixture postgres) : IDisposa
         var tutorRoutes = routes.Where(r => r.Policies.Contains(Policies.Tutor)).ToList();
         Assert.Contains(tutorRoutes, r => r.Template == "/api/students/"); // MapGroup + "" keeps the trailing slash in RawText
 
+        // Skipping anonymous routes below is safe only because each one is on the reviewed allowlist.
+        Assert.All(routes.Where(r => r.Anonymous), r => Assert.Contains(r.Template, PipelineTests.AnonymousAllowlist));
+
         foreach (var route in routes.Where(r => !r.Anonymous))
         {
             var path = Routes.Fill(route.Template, values);

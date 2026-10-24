@@ -32,9 +32,9 @@ public sealed record TemporaryPasswordDto(string TemporaryPassword);
 
 public sealed record PageDto<T>(IReadOnlyList<T> Items, int Total);
 
-public sealed record StudentListItemDto(Guid Id, string FullName, string UserName, bool IsActive, bool MustChangePassword, DateTimeOffset? LastLoginAt);
+public sealed record TutorStudentListItemDto(Guid Id, string FullName, string UserName, bool IsActive, bool MustChangePassword, DateTimeOffset? LastLoginAt);
 
-public sealed record StudentDto(
+public sealed record TutorStudentDto(
     Guid Id,
     string FullName,
     string UserName,

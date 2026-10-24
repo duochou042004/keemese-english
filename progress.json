@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-103",
-    "title": "Password change, must-change gate, lockout, rate limits, preferences",
-    "status": "done",
-    "branch": "feature/m1-password-lifecycle (merged via PR #12, cee9a58; branch deleted)",
-    "packet": "docs/delivery/tasks/T-103-password-lifecycle.md"
+    "id": "T-104",
+    "title": "Students API, account actions, isolation and authorization suites",
+    "status": "in_review",
+    "branch": "feature/m1-students-api",
+    "packet": "docs/delivery/tasks/T-104-students-api-and-isolation-suite.md"
   },
   "repository": {
     "branches": {
@@ -532,6 +532,68 @@
         "Integration rerun (orchestrator ran 25/25 on d212329)",
         "A real IPv6 proxy"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-104",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "baseline on develop 338ce86: dotnet build -warnaserror -c Release; dotnet test tests/Keemese.UnitTests -c Release; dotnet test tests/Keemese.IntegrationTests -c Release",
+        "dotnet tool exec dotnet-ef@10.0.13 -- migrations add Students (ASPNETCORE_ENVIRONMENT=Development)",
+        "dotnet build -warnaserror -c Release; dotnet test tests/Keemese.UnitTests -c Release; dotnet test tests/Keemese.IntegrationTests -c Release (background, after the review fixes)",
+        "node --test .claude/hooks/*.test.mjs; node --test scripts/*.test.mjs; node scripts/check-docs.mjs; node scripts/check-progress.mjs"
+      ],
+      "result": "pass",
+      "summary": "Baseline: build 0/0, unit 27/27, integration 25/25. Final: build 0/0; unit 27/27 (module boundary green: Students uses Identity only through Modules/Identity/Contracts/IAccountService); integration 37/37 (+12: StudentsTests x10, AuthorizationSuiteTests x1, IsolationSuiteTests x1; PasswordLifecycleTests now hits the real tutor route behind the gate). Covered: create with only fullName+userName → 201 + Location, 12-char password once, username trimmed/lowercased, must_change_password, hash only, audit student.created with actor and null details, login + me displayName; chosen password works; field codes userName students.username_taken (case-insensitive, STU-AC2) / userName.invalid, temporaryPassword password.too_short/too_common, fullName.required/too_long, email.invalid, contactChannels.invalid, parents.invalid, nothing half-created; search nguyen and NGUYỄN → Nguyễn (AC3), NFD input, % and _ literal, paging total, archived filter, status=deleted 400; PATCH 200 with new xmin version, \"\" clears, null keeps, stale version 409 concurrency.conflict (AC6), displayName follows fullName, missing version 400; archive → open session 401 and login 401 (AUTH-AC8), restore keeps mustChangePassword; reset → new 12-char password, old session and old password 401, must change again (AC6/AC7); unlock clears a lockout (AC9); delete needs the typed name (NFD accepted, wrong → students.confirm_name_mismatch), removes users + student_profiles, session 401, audit created+deleted; random and tutor IDs 404 on all 8 {id} routes; POST without X-XSRF-TOKEN 400 auth.antiforgery_failed. Authorization suite discovered 13 authenticated (route, method) pairs: GET /api/students/, POST /api/students/, GET|PATCH|DELETE /api/students/{id:guid}, POST /api/students/{id:guid}/archive|restore|reset-password|unlock [tutor]; GET /api/auth/me, POST /api/auth/logout, POST /api/auth/change-password, PUT /api/auth/preferences [authenticated]; every one 401 without a cookie, every tutor one 403 auth.forbidden for a student who changed the password, every anonymous route is on PipelineTests.AnonymousAllowlist, no /api route outside /api/auth and /api/me lacks the tutor policy. Isolation suite: 0 /api/me or /api/files/{id} routes discovered (M1), discovery asserted against /api/auth/me; student me returns exactly id/role/displayName/language/mustChangePassword with no phone, channel, parent values or the other student ID. Hooks 13/13, scripts 4/4, check-docs 0 broken, check-progress 0 problems",
+      "not_run": [
+        "Concurrent creates of one username (the 23505 → students.username_taken mapping is code-reviewed only)",
+        "A T6 reflection test over student DTO types (planned with the first /api/me DTO; tutor DTOs renamed Tutor* so it will not collide)",
+        "Isolation suite steps 2-3 against real routes (none before M2); a discovered-count > 0 assertion belongs with the first /api/me route",
+        "File deletion on student delete (FR-STU-AC5 file part, M3; shortcut comment in StudentsService.DeleteAsync)",
+        "The framework 400 body for DELETE without a JSON body",
+        "Debug test runs (local Application Control policy; Release used)",
+        "web checks (no web changes)",
+        "CI (runs on the PR)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-104",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "dotnet build -warnaserror -c Release",
+        "dotnet test tests/Keemese.UnitTests -c Release",
+        "dotnet test tests/Keemese.IntegrationTests -c Release"
+      ],
+      "result": "changes_requested → fixed",
+      "summary": "On e9f6b13: build 0/0, unit 27/27, integration 36/36; every AC mapped to a test, boundary, transactions, xmin concurrency and validation codes OK; the known decisions (reset clears lockout, PATCH null = unchanged / \"\" clears, status defaults to active, field codes, tutor DTOs only) judged fine. Blocking: the authorization suite skipped AllowAnonymous routes without checking them against the allowlist (fixed: asserts every anonymous route is on PipelineTests.AnonymousAllowlist). Non-blocking: the % test did not prove escaping (fixed: explicit ESCAPE \\ and a _ search that would match every name unescaped); progress.json evidence (done); DELETE without a body falls to the framework 400 (recorded)",
+      "not_run": [
+        "Generated LIKE SQL",
+        "Framework 400 body",
+        "CI"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-104",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...e9f6b13",
+        "dotnet build -warnaserror -c Release",
+        "dotnet test tests/Keemese.IntegrationTests -c Release --no-build (36/36)"
+      ],
+      "result": "approve (low findings → fixed or recorded)",
+      "summary": "No critical/high/medium. Verified: temporary passwords CSPRNG, hash-only, returned once, never logged or audited; archive and reset rotate the stamp in the same save as the audit row; every lookup is filtered to role student, so the tutor ID is 404; username normalization and 23505 mapping on the real index name; parameterized, escaped search; NFC-normalized confirmName; gate and antiforgery order; the authorization suite cannot pass vacuously. L1 tutor DTO names would collide with the planned T6 Student*Dto check (fixed: TutorStudentDto, TutorStudentListItemDto). L2 isolation suite has 0 routes in M1 (recorded: assert count > 0 with the first /api/me route). L3 untested username race and tutor POST without X-XSRF-TOKEN (antiforgery test added; race recorded). Info: no student.updated audit (not required)",
+      "not_run": [
+        "Unit tests",
+        "CI",
+        "Real concurrent creates",
+        "Frontend",
+        "File deletion (M3)"
+      ]
     }
   ],
   "tests": [
@@ -542,8 +604,8 @@
     },
     {
       "command": "dotnet build -warnaserror",
-      "result": "pass",
-      "date": "2026-10-19"
+      "result": "pass (-c Release)",
+      "date": "2026-10-24"
     },
     {
       "command": "dotnet test tests/Keemese.UnitTests -c Release",
@@ -552,7 +614,7 @@
     },
     {
       "command": "dotnet test tests/Keemese.IntegrationTests -c Release",
-      "result": "pass (25/25)",
+      "result": "pass (37/37)",
       "date": "2026-10-24"
     },
     {
@@ -563,7 +625,7 @@
     {
       "command": "node --test \"scripts/*.test.mjs\"",
       "result": "pass (4/4)",
-      "date": "2026-10-23"
+      "date": "2026-10-24"
     },
     {
       "command": "GitHub ci + compat on PR #5",
@@ -584,6 +646,7 @@
   },
   "blockers": [],
   "pending_owner_actions": [
+    "Approve the merge of T-104 (PR for feature/m1-students-api): authorization and student data, outside the merge delegation",
     "Follow-up from T-103: record the accepted T19 lockout-abuse risk (docs/security/security-model.md) in docs/security/threat-model.md T19 (outside T-103 file ownership; owner to approve the doc change)",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
@@ -654,6 +717,12 @@
       "tool": "claude-code",
       "task": "T-103",
       "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (L2 fixed, M1/L1 documented); merged via PR #12 (owner approval)"
+    },
+    {
+      "date": "2026-10-24",
+      "tool": "claude-code",
+      "task": "T-104",
+      "outcome": "Implemented and verified (L4); reviewer changes_requested → fixed, security-reviewer approve (L1 fixed, L2/L3 partly recorded); PR open, waiting for the owner to approve the merge"
     }
   ]
 }

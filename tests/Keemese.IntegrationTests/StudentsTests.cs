@@ -110,6 +110,7 @@ public sealed class StudentsTests(PostgresFixture postgres) : IDisposable
         Assert.Equal(["Trần Thị Bình"], await Names(tutor, "?q=thi%20binh"));
         Assert.Equal(["Nguyễn Văn Cường"], await Names(tutor, "?q=" + Uri.EscapeDataString("Cuòng".Normalize(NormalizationForm.FormD))));
         Assert.Empty(await Names(tutor, "?q=%25")); // a literal %, not a wildcard
+        Assert.Empty(await Names(tutor, "?q=_")); // unescaped, _ would match every name
 
         var page = await tutor.GetFromJsonAsync<JsonElement>("/api/students?pageSize=1&page=2", Ct);
         Assert.Equal(3, page.GetProperty("total").GetInt32());
@@ -259,6 +260,19 @@ public sealed class StudentsTests(PostgresFixture postgres) : IDisposable
         }
         Assert.Equal(HttpStatusCode.NotFound, (await tutor.GetAsync("/api/students/not-a-guid", Ct)).StatusCode);
         Assert.True((await tutor.GetFromJsonAsync<JsonElement>("/api/auth/me", Ct)).GetProperty("role").GetString() == "tutor"); // still active
+    }
+
+    [Fact]
+    public async Task Unsafe_student_routes_need_the_antiforgery_header()
+    {
+        await using var app = NewApp();
+        var tutor = await app.AsReadyTutor();
+        tutor.DefaultRequestHeaders.Remove("X-XSRF-TOKEN");
+
+        var response = await tutor.PostAsJsonAsync("/api/students", new { fullName = "Võ An", userName = "vo.an" }, Ct);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("auth.antiforgery_failed", (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString());
+        Assert.Equal(0, (await tutor.GetFromJsonAsync<JsonElement>("/api/students", Ct)).GetProperty("total").GetInt32()); // nothing created
     }
 
     private static Task<HttpResponseMessage> Delete(HttpClient tutor, Guid id, string confirmName) =>

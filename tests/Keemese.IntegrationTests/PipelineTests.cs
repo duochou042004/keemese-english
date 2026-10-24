@@ -16,7 +16,7 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
         "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
 
     // Every endpoint allowed without a login. Adding one here needs a security review.
-    private static readonly HashSet<string> AnonymousAllowlist =
+    internal static readonly HashSet<string> AnonymousAllowlist =
     [
         "/health/live",
         "/health/ready",
