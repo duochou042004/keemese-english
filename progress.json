@@ -37,17 +37,16 @@
       "status": "in_progress",
       "requires": "M1 packets T-101..T-110 approved by the Lead Coordinator 2026-10-23 (OD-09 decided the same day → PD-08)",
       "started": "2026-10-19",
-      "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged. M0 closed 2026-10-23 (CI green on develop after T-003)."
+      "note": "T-001 started 2026-10-19 on the owner's /goal instruction (treated as the go-ahead) after PR #2 was merged. M0 closed 2026-10-23 (CI green on develop after T-003). M1 closed 2026-10-24 (Lead Coordinator approved in chat after T-110; PR #27 merged as ecce50e)."
     }
   ],
   "current_phase": "P2",
   "current_task": {
     "id": "T-110",
     "title": "M1 milestone gate",
-    "status": "in_review",
-    "branch": "chore/m1-gate",
-    "packet": "docs/delivery/tasks/T-110-m1-gate.md",
-    "note": "Evidence complete (docs/delivery/evidence/m1.md); M1 closes only after the Lead Coordinator approves"
+    "status": "done",
+    "branch": "chore/m1-gate (merged via PR #27, ecce50e; branch deleted)",
+    "packet": "docs/delivery/tasks/T-110-m1-gate.md"
   },
   "repository": {
     "branches": {
@@ -85,7 +84,8 @@
     "T-106 login flow merged into develop via PR #18 (d047d5a) with the owner approval in chat; PR ci green on fe3ac73, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40067787763) after the deliberate E2E red run (https://github.com/duochou042004/keemese-english/actions/runs/40067586356, reverted); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40068085916)",
     "T-107 AppShell merged into develop via PR #20 (8ed413c) with the owner approval in chat; PR ci green on cb4d1b3 (changes, web, docs, secrets, e2e-smoke; backend skipped, no backend change) (https://github.com/duochou042004/keemese-english/actions/runs/40082845405); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40082990792)",
     "T-108 student list and Add student merged into develop via PR #23 (b0ef86d) under the merge delegation (reviewer approve, evidence recorded, UI-only); PR ci green on 90a05ee (changes, web, docs, secrets, e2e-smoke incl. E2E-J2; backend skipped) (https://github.com/duochou042004/keemese-english/actions/runs/40085897060)",
-    "T-109 student workspace, profile editing and account actions merged into develop via PR #25 (bfd8df6) with the owner approval in chat; PR ci green on 323eb9e (changes, web, docs, secrets, e2e-smoke incl. E2E-ISO; backend skipped) (https://github.com/duochou042004/keemese-english/actions/runs/40092684044)"
+    "T-109 student workspace, profile editing and account actions merged into develop via PR #25 (bfd8df6) with the owner approval in chat; PR ci green on 323eb9e (changes, web, docs, secrets, e2e-smoke incl. E2E-ISO; backend skipped) (https://github.com/duochou042004/keemese-english/actions/runs/40092684044)",
+    "T-110 M1 gate merged into develop via PR #27 (ecce50e) with the owner approval in chat; PR ci green on 7fd5cb2 (changes, backend, e2e-smoke, docs, secrets; web skipped, no web changes): https://github.com/duochou042004/keemese-english/actions/runs/40094288948. M1 closed 2026-10-24 (evidence: docs/delivery/evidence/m1.md)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -1094,7 +1094,6 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "T-110: review the M1 gate PR and evidence (docs/delivery/evidence/m1.md) and approve closing M1; after that the next task is writing the M2/M3 packets (M2 needs OD-08; M3 needs OD-03 and OD-05)",
     "Follow-up from T-103: record the accepted T19 lockout-abuse risk (docs/security/security-model.md) in docs/security/threat-model.md T19 (outside T-103 file ownership; owner to approve the doc change)",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
@@ -1114,10 +1113,11 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-110",
-    "title": "M1 milestone gate",
-    "packet": "docs/delivery/tasks/T-110-m1-gate.md",
-    "requires": "T-101..T-109 merged into develop (done 2026-10-24)"
+    "id": "M2/M3 packets",
+    "title": "Write the M2 and M3 task packets",
+    "packet": "docs/delivery/milestones.md",
+    "requires": "M1 closed (done 2026-10-24); M2 needs OD-08 answered; M3 needs OD-03 and OD-05",
+    "note": "No packet yet: this task writes the M2/M3 packets into docs/delivery/tasks/"
   },
   "sessions": [
     {
@@ -1209,7 +1209,7 @@
       "date": "2026-10-24",
       "tool": "claude-code",
       "task": "T-110",
-      "outcome": "M1 gate evidence collected (all exit criteria + standard gate); security-reviewer PASS, low finding fixed; PR opened for the Lead Coordinator"
+      "outcome": "M1 gate evidence collected (all exit criteria + standard gate); security-reviewer PASS, low finding fixed; PR opened for the Lead Coordinator; owner approved closing M1; PR #27 merged (ecce50e), M1 closed"
     }
   ]
 }
