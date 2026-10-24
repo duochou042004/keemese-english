@@ -1,7 +1,7 @@
 # T-106: Login, forced password change, session guards, Playwright + axe and the e2e-smoke job
 
 - Milestone: M1 · Ladder level: L4 (routing, guards, CI) · Depends on: T-103 and T-105 merged · Branch: `feature/m1-login-flow` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review (PR #18)
+- Status: done (PR #18, d047d5a)
 
 ## Objective
 A tutor and a student can log in through the real UI, are forced to change a temporary password, land in their role's area, and log out; the first E2E scenario (`E2E-AUTH`) runs with axe in CI.

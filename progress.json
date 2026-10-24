@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-106",
     "title": "Login, forced password change, session guards, Playwright + axe and the e2e-smoke job",
-    "status": "in_review",
-    "branch": "feature/m1-login-flow (PR #18)",
+    "status": "done",
+    "branch": "feature/m1-login-flow (merged via PR #18, d047d5a; branch deleted)",
     "packet": "docs/delivery/tasks/T-106-login-flow-and-e2e-harness.md"
   },
   "repository": {
@@ -80,7 +80,8 @@
     "T-102 identity merged into develop via PR #10 (2d68d91) with the owner's approval in chat; PR ci green on 9afce2e (changes, backend, docs, secrets; web skipped). The first secrets run failed on a gitleaks generic-api-key false positive (invented test password in 3d63d7a): line changed and that one fingerprint added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39989222670)",
     "T-103 password lifecycle merged into develop via PR #12 (cee9a58) with the owner's approval in chat (AppError.cs change approved); PR ci green on c8966e0 (changes, backend, docs, secrets; web skipped)",
     "T-104 students API merged into develop via PR #14 (4f549e9) with the owner approval in chat; PR ci green on f4d4f5a (changes, backend, docs, secrets; web and compat skipped) after one gitleaks false positive was added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40058058050)",
-    "T-105 API types merged into develop via PR #16 (23cc0cc) with the owner approval in chat (incl. the four out-of-scope changes); PR ci green on 8380978 (https://github.com/duochou042004/keemese-english/actions/runs/40065602448) after the deliberate stale-types red run (https://github.com/duochou042004/keemese-english/actions/runs/40065472421, reverted); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40065736533)"
+    "T-105 API types merged into develop via PR #16 (23cc0cc) with the owner approval in chat (incl. the four out-of-scope changes); PR ci green on 8380978 (https://github.com/duochou042004/keemese-english/actions/runs/40065602448) after the deliberate stale-types red run (https://github.com/duochou042004/keemese-english/actions/runs/40065472421, reverted); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40065736533)",
+    "T-106 login flow merged into develop via PR #18 (d047d5a) with the owner approval in chat; PR ci green on fe3ac73, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40067787763) after the deliberate E2E red run (https://github.com/duochou042004/keemese-english/actions/runs/40067586356, reverted); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40068085916)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -790,6 +791,11 @@
       "command": "npm run e2e --prefix web (E2E-AUTH, Chromium)",
       "result": "pass (3/3, axe clean)",
       "date": "2026-10-24"
+    },
+    {
+      "command": "GitHub ci on PR #18 and the push to develop (incl. e2e-smoke)",
+      "result": "pass",
+      "date": "2026-10-24"
     }
   ],
   "environment_verified": {
@@ -809,14 +815,15 @@
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones",
     "Guard hook (.claude/hooks/guard.mjs): it blocked a subagent's docker run --rm ... as a recursive delete during T-105; owner to decide whether to narrow the rule",
-    "T-106: add e2e-smoke to the required checks on develop and master (with the other ci checks); accept or reject the two reviewer notes: the deep link is not carried through a forced password change, and the remember-me box is a native checkbox instead of shadcn Checkbox"
+    "T-106: add e2e-smoke to the required checks on develop and master (with the other ci checks)"
   ],
   "decisions": [
     "ADR-0001..ADR-0016",
     "PD-01..PD-13 (PD-08 = navigation, approved 2026-10-23 from OD-09)",
     "OD-01..OD-08 open; OD-09 decided 2026-10-23 (accepted as proposed)",
     "M1 packets T-101..T-110 approved 2026-10-23, with T-105 option 1 (build-time Microsoft.Extensions.ApiDescription.Server) and T-106 adding @hookform/resolvers",
-    "Merge delegation (Lead Coordinator, 2026-10-23): the orchestrator merges develop PRs itself under the conditions in docs/agents/operating-model.md#merge-delegation"
+    "Merge delegation (Lead Coordinator, 2026-10-23): the orchestrator merges develop PRs itself under the conditions in docs/agents/operating-model.md#merge-delegation",
+    "T-106 (Lead Coordinator, 2026-10-24): accepted that a forced password change goes to the role home (the ?redirect= deep link is not carried through /change-password) and that remember-me is a native checkbox, not shadcn Checkbox"
   ],
   "risks": [
     "R-01..R-18 (docs/delivery/risks.md); top: R-01 frontend quality, R-04 student data leak, R-02 scope creep",
@@ -894,7 +901,7 @@
       "date": "2026-10-24",
       "tool": "claude-code",
       "task": "T-106",
-      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (findings fixed); CI green + deliberate E2E red run; PR #18 awaiting the owner merge approval"
+      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (findings fixed); CI green + deliberate E2E red run; merged via PR #18 (owner approval)"
     }
   ]
 }
