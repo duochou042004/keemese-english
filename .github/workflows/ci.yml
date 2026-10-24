@@ -123,6 +123,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
+      # Failure traces contain these passwords: never replace them with repository secrets.
       - name: Throwaway E2E credentials (generated per run, never stored)
         run: |
           for name in POSTGRES_PASSWORD Security__IpHashSalt BOOTSTRAP_TUTOR_PASSWORD; do
