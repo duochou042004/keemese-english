@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-108",
-    "title": "Student list and Add student (J2)",
-    "status": "done",
-    "branch": "feature/m1-students-ui (merged via PR #23, b0ef86d; branch deleted)",
-    "packet": "docs/delivery/tasks/T-108-students-list-and-add-student.md"
+    "id": "T-109",
+    "title": "Student workspace shell, profile editing and account actions",
+    "status": "in_review",
+    "branch": "feature/m1-student-workspace",
+    "packet": "docs/delivery/tasks/T-109-student-workspace-and-account-actions.md"
   },
   "repository": {
     "branches": {
@@ -843,6 +843,64 @@
         "Screenshots",
         "CI"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-109",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "docker run node:24-alpine: npm ci, lint (+ Prettier), typecheck, test, build (routeTree.gen.ts regenerated and committed)",
+        "npm run e2e:reset (fresh keemese-e2e stack, throwaway env exported in the shell, no .env) then npm run e2e (Windows Chromium), on 4e0a55a",
+        "scratchpad Playwright script: Overview, Profile and the reset/archive/delete dialogs at 1440/1024/768/390 x vi/en, scrollWidth",
+        "scratchpad Playwright repro of the profile save against the E2E stack (found the scrollIntoView crash)",
+        "docker run zricethezav/gitleaks:v8.24.3 git --log-opts=develop..HEAD; node --test hooks and scripts"
+      ],
+      "result": "pass",
+      "summary": "Web: lint + Prettier clean, tsc clean, build ok, vitest 122/122 (+16 in workspace.test.tsx: header with Active/Locked badges, only Overview + Profile tabs, Overview empty states (FR-STU-07); 404 → localized not-found without retry; Archived badge; re-render survives a Promise-returning scrollIntoView (failed with \"destroy is not a function\" before the fix); profile PATCH sends every field with the loaded version and \"\" clears; 409 concurrency.conflict → alert + Reload loads the latest and the next save uses it (AC6); a background refetch does not change the version sent (reviewer finding); API field codes under fields; parents removed and added (FR-STU-05); namesMatch trim + NFC only; delete disabled until the exact name, then DELETE {confirmName}, navigate to the list, toast; rejected delete keeps the dialog with the error; reset asks first, then the password once with Copy + Copy message (AC7); Unlock only when locked (AC9); archive dialog explains no sign-in + data kept, toast with Undo → restore (FR-AUTH-07); archived → Restore). StudentLink and Open workspace now type-checked with params. E2E 5/5 on a fresh stack: E2E-AUTH 3, E2E-J2, E2E-ISO (student B: /t/students/<A>, /profile and /t/students → /s, GET /api/students/<A> and /api/students → 403; tutor: header, tabs, Overview, profile phone + parent saved and reloaded, archive dialog → toast with Undo, Archived badge, A's open session → /login on the next navigation, reset → password shown once, restore dialog cancel, delete disabled until the exact name → list + toast, A's URL → not-found); axe serious/critical = 0 on Overview, Profile, each dialog, the list and not-found. Visual QA: 40 captures (workspace-overview, workspace-profile, dialog-reset, dialog-archive, dialog-delete x vi/en x 4 widths), horizontal overflow 0, saved in docs/delivery/evidence/m1/, local only (git-ignored; invented data). A first E2E run caught a real bug the unit tests missed: Chromium's scrollIntoView returns a Promise, which the expression-bodied tab effect handed React as its cleanup (crash on the first re-render, e.g. after Save); fixed with a block body + regression test. gitleaks: no leaks (5 commits). Hooks 13/13, scripts 4/4",
+      "not_run": [
+        "The Locked badge and Unlock in E2E (locking needs 5 failed logins against the per-IP limit; covered by unit tests)",
+        "Undo clicked in E2E (unit-tested)",
+        "Firefox/WebKit (release workflow)",
+        "Podman",
+        "Local Windows vitest/vite (Application Control blocks rolldown; Linux container used)",
+        ".NET build and suites (no backend change)",
+        "CI (runs on the PR)",
+        "Reviewer re-review of the three fixes after a328d49 (verified by the orchestrator with tests)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-109",
+      "level": "L4",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "npm ci, lint, typecheck, test, build (node:24-alpine, own node_modules volume) on a328d49"
+      ],
+      "result": "changes_requested → fixed",
+      "summary": "Every packet AC mapped to code or tests; vitest 120/120, build ok, routeTree.gen.ts unchanged; toast shortcut (no sonner) and nav+aria-current tabs accepted. Blocking: the PATCH used the live query version, so a window-focus refetch could hide a 409 and overwrite another change (fixed in 55a9b44: the form keeps the version it was loaded with; test added). Non-blocking: evidence/progress.json (done)",
+      "not_run": [
+        "E2E",
+        "axe",
+        "screenshots",
+        "security review"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-109",
+      "level": "L4",
+      "tool": "claude-code security-reviewer subagent",
+      "commands": [
+        "git diff develop...a328d49",
+        "docker run zricethezav/gitleaks:v8.24.3 git --log-opts=develop..HEAD"
+      ],
+      "result": "approve",
+      "summary": "Temporary password only in component state (not cache, URL, storage, logs or toasts); only lang in localStorage; every write through api() with the XSRF header; delete name check matches the server (Trim + NFC) and the ID comes from the URL with a server re-check; /t behind requireRole(tutor); no dangerouslySetInnerHTML, names in toasts escaped by React; E2E-ISO asserts redirect, 403, archive → /login, delete → not-found; gitleaks clean. Low: the profile panel kept state when only $studentId changed (fixed in 55a9b44: keyed by studentId)",
+      "not_run": [
+        "E2E, unit tests and build",
+        "i18n files line by line"
+      ]
     }
   ],
   "tests": [
@@ -909,6 +967,16 @@
     {
       "command": "GitHub ci on PR #20 and the push to develop (incl. e2e-smoke)",
       "result": "pass",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "npm run lint && npm run typecheck && npm test && npm run build (--prefix web)",
+      "result": "pass (vitest 122/122, Linux container)",
+      "date": "2026-10-24"
+    },
+    {
+      "command": "npm run e2e --prefix web (E2E-AUTH, E2E-J2, E2E-ISO, Chromium, fresh stack)",
+      "result": "pass (5/5, axe clean)",
       "date": "2026-10-24"
     }
   ],

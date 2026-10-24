@@ -24,7 +24,8 @@
     "mismatch": "The passwords do not match."
   },
   "students": {
-    "username_taken": "This username is already taken."
+    "username_taken": "This username is already taken.",
+    "confirm_name_mismatch": "The name does not match. Type the full name exactly."
   },
   "userName": {
     "invalid": "Use 3–40 characters: a–z, 0–9, dot, dash or underscore."
@@ -44,5 +45,11 @@
   },
   "parents": {
     "invalid": "Check the parent or guardian details: at most 10, and keep each field within its length limit."
+  },
+  "concurrency": {
+    "conflict": "This profile was changed somewhere else after you opened it. Reload to see the latest version; your edits here were not saved."
+  },
+  "version": {
+    "required": "The page is out of date. Reload it and try again."
   }
 }

@@ -11,8 +11,18 @@ import { accountMessage, generatePassword, nextUsername, suggestUsername } from 
 import { StudentList } from './StudentList'
 
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ to, className, children }: { to: string; className?: string; children: ReactNode }) => (
-    <a href={to} className={className}>
+  Link: ({
+    to,
+    params,
+    className,
+    children,
+  }: {
+    to: string
+    params?: { studentId: string }
+    className?: string
+    children: ReactNode
+  }) => (
+    <a href={to.replace('$studentId', params?.studentId ?? '')} className={className}>
       {children}
     </a>
   ),

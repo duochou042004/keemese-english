@@ -77,16 +77,28 @@ export async function ensureTutor(language: 'vi' | 'en', headers?: Headers) {
   await context.dispose()
 }
 
-/** Creates a student with only the required fields (J2); returns the login the tutor would hand over. */
-export async function createStudent(fullName: string) {
-  const context = await tutorContext()
-  const userName = `e2e.${Date.now()}`
-  const res = await context.post('/api/students', {
-    data: { fullName, userName },
-    headers: await xsrfHeader(context),
-  })
-  expect(res.status(), 'create student').toBe(201)
-  const { temporaryPassword } = (await res.json()) as { temporaryPassword: string }
+/** Creates students with only the required fields (J2) in one tutor login; returns what the tutor would hand over. */
+export async function createStudents(fullNames: string[], headers?: Headers) {
+  const context = await tutorContext(headers)
+  const created = []
+  for (const [i, fullName] of fullNames.entries()) {
+    const userName = `e2e.${Date.now()}.${i}`
+    const res = await context.post('/api/students', {
+      data: { fullName, userName },
+      headers: await xsrfHeader(context),
+    })
+    expect(res.status(), 'create student').toBe(201)
+    const { id, temporaryPassword } = (await res.json()) as {
+      id: string
+      temporaryPassword: string
+    }
+    created.push({ id, fullName, userName, temporaryPassword })
+  }
   await context.dispose()
-  return { userName, temporaryPassword }
+  return created
+}
+
+export async function createStudent(fullName: string, headers?: Headers) {
+  const [student] = await createStudents([fullName], headers)
+  return student!
 }

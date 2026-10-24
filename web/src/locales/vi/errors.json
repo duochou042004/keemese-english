@@ -24,7 +24,8 @@
     "mismatch": "Hai mật khẩu không khớp."
   },
   "students": {
-    "username_taken": "Tên đăng nhập này đã có người dùng."
+    "username_taken": "Tên đăng nhập này đã có người dùng.",
+    "confirm_name_mismatch": "Tên không khớp. Hãy nhập chính xác họ và tên."
   },
   "userName": {
     "invalid": "Dùng 3–40 ký tự: a–z, 0–9, dấu chấm, gạch ngang hoặc gạch dưới."
@@ -44,5 +45,11 @@
   },
   "parents": {
     "invalid": "Kiểm tra lại thông tin phụ huynh: tối đa 10 người, mỗi trường trong giới hạn độ dài."
+  },
+  "concurrency": {
+    "conflict": "Hồ sơ này đã được sửa ở nơi khác sau khi bạn mở. Hãy tải lại để xem bản mới nhất; thay đổi của bạn ở đây chưa được lưu."
+  },
+  "version": {
+    "required": "Trang đã cũ. Hãy tải lại trang rồi thử lại."
   }
 }
