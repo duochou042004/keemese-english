@@ -202,6 +202,53 @@ namespace Keemese.Api.Infrastructure.Data.Migrations
                     b.ToTable("audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("Keemese.Api.Modules.Students.Domain.StudentProfile", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("ContactChannels")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("contact_channels");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("Parents")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("parents");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("UserId")
+                        .HasName("pk_student_profiles");
+
+                    b.ToTable("student_profiles", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -281,6 +328,16 @@ namespace Keemese.Api.Infrastructure.Data.Migrations
                         .HasName("pk_user_tokens");
 
                     b.ToTable("user_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Keemese.Api.Modules.Students.Domain.StudentProfile", b =>
+                {
+                    b.HasOne("Keemese.Api.Modules.Identity.Domain.AppUser", null)
+                        .WithOne()
+                        .HasForeignKey("Keemese.Api.Modules.Students.Domain.StudentProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_student_profiles_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>

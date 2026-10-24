@@ -1,4 +1,5 @@
 using Keemese.Api.Modules.Identity.Domain;
+using Keemese.Api.Modules.Students.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,10 @@ namespace Keemese.Api.Infrastructure.Data;
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityUserContext<AppUser, Guid>(options)
 {
     public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
+    public DbSet<StudentProfile> StudentProfiles => Set<StudentProfile>();
+
+    /// <summary>public.f_unaccent from the Initial migration, for diacritics-insensitive search (database.md#conventions). LINQ only.</summary>
+    public static string Unaccent(string text) => throw new NotSupportedException("Only usable inside a LINQ query.");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -16,7 +21,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
         modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
         modelBuilder.HasPostgresExtension("unaccent");
+        modelBuilder.HasDbFunction(() => Unaccent("")).HasName("f_unaccent").HasSchema("public");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        // Cross-module FKs live here, so no module references another module's entities (ADR-0002).
+        modelBuilder.Entity<StudentProfile>().HasOne<AppUser>().WithOne().HasForeignKey<StudentProfile>(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
         ApplySnakeCaseNames(modelBuilder);
     }
 

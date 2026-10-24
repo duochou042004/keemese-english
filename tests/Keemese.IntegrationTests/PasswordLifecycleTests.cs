@@ -73,7 +73,7 @@ public sealed class PasswordLifecycleTests(PostgresFixture postgres) : IDisposab
         await using var app = NewApp();
         var client = await app.AsTutor(); // the bootstrapped tutor starts with mustChangePassword
 
-        // No tutor-policy route exists before T-104: an ordinary signed-in endpoint and an unmapped API path stand in.
+        // An ordinary signed-in endpoint and a tutor-policy route (T-104) are both blocked.
         var blocked = await client.PutAsJsonAsync("/api/auth/preferences", new { language = "en" }, Ct);
         Assert.Equal(HttpStatusCode.Forbidden, blocked.StatusCode);
         Assert.Equal("auth.password_change_required", await Code(blocked));
@@ -87,7 +87,7 @@ public sealed class PasswordLifecycleTests(PostgresFixture postgres) : IDisposab
         client.UseXsrfToken(change);
 
         Assert.Equal(HttpStatusCode.NoContent, (await client.PutAsJsonAsync("/api/auth/preferences", new { language = "en" }, Ct)).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/students", Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/students", Ct)).StatusCode); // the tutor route behind the gate (T-104)
 
         // The flag is read from the database on every request, so setting it again takes effect on the open session.
         using (var scope = app.Services.CreateScope())

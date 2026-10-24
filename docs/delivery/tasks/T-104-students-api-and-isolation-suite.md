@@ -1,7 +1,7 @@
 # T-104: Students API, account actions, isolation and authorization suites
 
 - Milestone: M1 · Ladder level: L4 (authz, student data) · Depends on: T-103 merged · Branch: `feature/m1-students-api` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review
 
 ## Objective
 The tutor can create, find, edit, archive, restore, reset, unlock and permanently delete students through the API, and two discovering test suites prove that students can't reach tutor routes or each other's data.
