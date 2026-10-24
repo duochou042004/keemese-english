@@ -3,3 +3,6 @@
 3d63d7a6b6aa6bc1244fda13efae2c65d9cc3252:tests/Keemese.IntegrationTests/IdentityTests.cs:generic-api-key:97
 # T-104: an invented tutor test password constant in the test builders (generic-api-key).
 e9f6b13d0afa7c9fb5fc1282e3ce0c1865bf6dc5:tests/Keemese.IntegrationTests/Given.cs:generic-api-key:62
+# T-108: invented temporaryPassword values in MSW mocks (generic-api-key); replaced by a generated value in the next commit.
+fa8f22d6399bffdc09a01a4e18032092fe294ada:web/src/features/students/students.test.tsx:generic-api-key:177
+fa8f22d6399bffdc09a01a4e18032092fe294ada:web/src/features/students/students.test.tsx:generic-api-key:221
