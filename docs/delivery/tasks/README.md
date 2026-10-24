@@ -46,7 +46,7 @@ One sentence: the outcome.
 | [T-103](T-103-password-lifecycle.md) | Password change, must-change gate, lockout, rate limits, preferences | M1 | not_started |
 | [T-104](T-104-students-api-and-isolation-suite.md) | Students API, account actions, isolation and authorization suites | M1 | not_started |
 | [T-105](T-105-api-types-and-fetch-wrapper.md) | Generated API types, CI freshness check, auth-aware fetch wrapper | M1 | not_started |
-| [T-106](T-106-login-flow-and-e2e-harness.md) | Login, forced password change, guards, Playwright + axe, e2e-smoke | M1 | not_started |
+| [T-106](T-106-login-flow-and-e2e-harness.md) | Login, forced password change, guards, Playwright + axe, e2e-smoke | M1 | in_review |
 | [T-107](T-107-appshell-and-dashboard-shells.md) | AppShell (tutor and student) and the Today / Home shells | M1 | not_started |
 | [T-108](T-108-students-list-and-add-student.md) | Student list and Add student (J2) | M1 | not_started |
 | [T-109](T-109-student-workspace-and-account-actions.md) | Student workspace shell, profile editing and account actions | M1 | not_started |

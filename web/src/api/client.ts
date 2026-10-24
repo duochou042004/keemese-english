@@ -6,6 +6,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     readonly traceId?: string,
+    /** `validation.failed` only: field name → error codes, e.g. `newPassword: ["password.too_short"]`. */
+    readonly errors?: Record<string, string[]>,
   ) {
     super(code)
     this.name = 'ApiError'
@@ -63,12 +65,19 @@ export async function apiFetch<T>(path: `/api/${string}`, init: ApiInit = {}): P
 
   let code = 'common.unexpected'
   let traceId: string | undefined
+  let errors: Record<string, string[]> | undefined
   if (res.headers.get('content-type')?.includes('application/problem+json')) {
-    const problem = (await res.json().catch(() => ({}))) as { code?: unknown; traceId?: unknown }
+    const problem = (await res.json().catch(() => ({}))) as {
+      code?: unknown
+      traceId?: unknown
+      errors?: unknown
+    }
     if (typeof problem.code === 'string') code = problem.code
     if (typeof problem.traceId === 'string') traceId = problem.traceId
+    if (typeof problem.errors === 'object' && problem.errors !== null)
+      errors = problem.errors as Record<string, string[]>
   }
-  throw new ApiError(res.status, code, traceId)
+  throw new ApiError(res.status, code, traceId, errors)
 }
 
 // Typed calls over the generated `paths` (ADR-0016): request and response types come from schema.d.ts.

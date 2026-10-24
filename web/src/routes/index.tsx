@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { requireSession } from '@/lib/guard'
+import { redirectHome } from '@/lib/guard'
 
-// Placeholder: M1 sends a signed-in tutor to /t and a student to /s.
+// A signed-in tutor goes to /t, a student to /s, anyone else to /login.
 export const Route = createFileRoute('/')({
-  beforeLoad: requireSession,
+  beforeLoad: redirectHome,
 })

@@ -13,7 +13,21 @@
     "username": "Username",
     "password": "Password",
     "submit": "Sign in",
-    "notReady": "Sign-in arrives in the next release."
+    "rememberMe": "Keep me signed in on this device"
+  },
+  "auth": {
+    "signOut": "Sign out"
+  },
+  "changePassword": {
+    "title": "Change password",
+    "subtitle": "Enter your current password, then choose a new one.",
+    "forcedTitle": "Choose a new password",
+    "forcedSubtitle": "You signed in with a temporary password. Choose your own before you continue.",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Confirm new password",
+    "policy": "At least 10 characters. Avoid common passwords.",
+    "submit": "Save new password"
   },
   "notFound": {
     "title": "Page not found",

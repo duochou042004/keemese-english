@@ -3,5 +3,24 @@
     "not_found": "Không tìm thấy nội dung yêu cầu.",
     "unexpected": "Đã có lỗi xảy ra. Vui lòng thử lại.",
     "network": "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại."
+  },
+  "validation": {
+    "required": "Vui lòng nhập trường này.",
+    "failed": "Một số trường cần sửa lại."
+  },
+  "auth": {
+    "invalid_credentials": "Tên đăng nhập hoặc mật khẩu không đúng.",
+    "rate_limited": "Bạn đã thử đăng nhập quá nhiều lần. Đợi một phút rồi thử lại.",
+    "invalid_current_password": "Mật khẩu hiện tại không đúng.",
+    "unauthenticated": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại.",
+    "forbidden": "Bạn không có quyền truy cập trang này.",
+    "password_change_required": "Hãy chọn mật khẩu mới trước khi tiếp tục.",
+    "antiforgery_failed": "Trang đã cũ. Hãy tải lại trang rồi thử lại."
+  },
+  "password": {
+    "too_short": "Dùng ít nhất 10 ký tự.",
+    "too_common": "Mật khẩu này quá phổ biến. Hãy chọn mật khẩu khác.",
+    "too_long": "Dùng tối đa 256 ký tự.",
+    "mismatch": "Hai mật khẩu không khớp."
   }
 }

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SRouteImport } from './routes/s'
 import { Route as TRouteImport } from './routes/t'
@@ -17,6 +18,11 @@ import { Route as TRouteImport } from './routes/t'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -37,12 +43,14 @@ const TRoute = TRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/s': typeof SRoute
   '/t': typeof TRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/s': typeof SRoute
   '/t': typeof TRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/s': typeof SRoute
   '/t': typeof TRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/s' | '/t'
+  fullPaths: '/' | '/change-password' | '/login' | '/s' | '/t'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/s' | '/t'
-  id: '__root__' | '/' | '/login' | '/s' | '/t'
+  to: '/' | '/change-password' | '/login' | '/s' | '/t'
+  id: '__root__' | '/' | '/change-password' | '/login' | '/s' | '/t'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangePasswordRoute: typeof ChangePasswordRoute
   LoginRoute: typeof LoginRoute
   SRoute: typeof SRoute
   TRoute: typeof TRoute
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangePasswordRoute: ChangePasswordRoute,
   LoginRoute: LoginRoute,
   SRoute: SRoute,
   TRoute: TRoute,

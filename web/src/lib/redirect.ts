@@ -3,9 +3,11 @@ export type Role = 'tutor' | 'student'
 const HOME: Record<Role, string> = { tutor: '/t', student: '/s' }
 const BASE = 'http://keemese.invalid'
 
+export const roleHome = (role: Role) => HOME[role]
+
 /** The `?redirect=` target if it is a same-origin path inside the role's area (IA "Deep links"), else the role home. */
 export function safeRedirect(target: string | null | undefined, role: Role): string {
-  const home = HOME[role]
+  const home = roleHome(role)
   if (!target?.startsWith('/') || target.startsWith('//') || target.includes('\\')) return home
   let url: URL
   try {

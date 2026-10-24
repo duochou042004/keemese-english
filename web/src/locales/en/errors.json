@@ -3,5 +3,24 @@
     "not_found": "The requested item was not found.",
     "unexpected": "Something went wrong. Please try again.",
     "network": "Cannot reach the server. Check your connection and try again."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "failed": "Some fields need attention."
+  },
+  "auth": {
+    "invalid_credentials": "Incorrect username or password.",
+    "rate_limited": "Too many sign-in attempts. Wait a minute, then try again.",
+    "invalid_current_password": "The current password is incorrect.",
+    "unauthenticated": "Your session has ended. Sign in again.",
+    "forbidden": "You do not have access to this page.",
+    "password_change_required": "Choose a new password before you continue.",
+    "antiforgery_failed": "The page is out of date. Reload it and try again."
+  },
+  "password": {
+    "too_short": "Use at least 10 characters.",
+    "too_common": "This password is too common. Choose another one.",
+    "too_long": "Use at most 256 characters.",
+    "mismatch": "The passwords do not match."
   }
 }

@@ -108,6 +108,55 @@ jobs:
         working-directory: .
         run: node --test ".claude/hooks/*.test.mjs"
 
+  e2e-smoke:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run: { working-directory: web }
+    steps:
+      - uses: actions/checkout@v7
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      # Failure traces contain these passwords: never replace them with repository secrets.
+      - name: Throwaway E2E credentials (generated per run, never stored)
+        run: |
+          for name in POSTGRES_PASSWORD Security__IpHashSalt BOOTSTRAP_TUTOR_PASSWORD; do
+            value=$(openssl rand -hex 16)
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+          echo "BOOTSTRAP_TUTOR_USERNAME=e2e.tutor" >> "$GITHUB_ENV"
+      - run: npm ci
+      - name: Compose up (db + app image built here, fresh volumes)
+        run: npm run e2e:reset
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+      # @smoke always; area tags (e.g. @students) join with their scenarios (docs/frontend/ux-journeys.md).
+      - run: npm run e2e -- --project=chromium --grep @smoke
+      - if: failure()
+        name: App logs
+        run: docker compose -f ../deploy/compose.yaml -p keemese-e2e --profile app logs app
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            web/playwright-report/
+            web/test-results/
+          retention-days: 5
+          if-no-files-found: ignore
+
   docs:
     needs: changes
     if: needs.changes.outputs.docs == 'true'

@@ -27,6 +27,24 @@ describe('apiFetch', () => {
     await expect(apiFetch('/api/x')).rejects.toEqual(new ApiError(404, 'common.not_found', 't-1'))
   })
 
+  it('keeps the field errors of validation.failed', async () => {
+    stubFetch(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: 'validation.failed',
+            errors: { newPassword: ['password.too_short'] },
+          }),
+          { status: 400, headers: { 'content-type': 'application/problem+json' } },
+        ),
+      ),
+    )
+    await expect(apiFetch('/api/x')).rejects.toMatchObject({
+      code: 'validation.failed',
+      errors: { newPassword: ['password.too_short'] },
+    })
+  })
+
   it('falls back to common.unexpected without ProblemDetails', async () => {
     stubFetch(() => Promise.resolve(new Response('<html>', { status: 502 })))
     await expect(apiFetch('/api/x')).rejects.toMatchObject({
