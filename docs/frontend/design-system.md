@@ -106,4 +106,4 @@ Do this with **realistic data**: long Vietnamese names ("Nguyễn Thị Phương
 5. Keyboard: Tab order is logical, focus is visible, Esc closes overlays, focus returns to the trigger.
 6. axe: no serious or critical violations.
 7. Vietnamese text fits (it is often 20–30 % longer); diacritics are not clipped in buttons or pills.
-8. Screenshots (in both languages if the layout changed) attached to the PR or saved under `docs/delivery/evidence/` at gates.
+8. Screenshots (in both languages if the layout changed) saved locally under `docs/delivery/evidence/<milestone>/` for review. Images are git-ignored and never committed (repository size); the evidence record lists what was captured and what it showed.

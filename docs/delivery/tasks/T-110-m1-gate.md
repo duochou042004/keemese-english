@@ -10,7 +10,7 @@ Prove every M1 exit criterion on `develop` with recorded evidence, so the Lead C
 Each row of the M1 exit criteria in docs/delivery/milestones.md has evidence (command + result, or a run URL):
 - J2 ≤ 2 interactions (`E2E-J2`) · forced password change and lockout (integration tests + `E2E-AUTH`) · isolation suite + authorization enumeration test present and green · `E2E-AUTH`, `E2E-J2`, `E2E-ISO` green in CI (`e2e-smoke`) · AppShell for both roles at 4 widths × 2 languages · tutor-password reset CLI run against the container.
 - The standard gate (docs/testing/strategy.md#quality-gates): full backend tests, full frontend tests, full E2E on Chromium, axe clean, visual QA of every new M1 screen against the checklist, `security-reviewer` pass over the whole M1 diff (`git diff <M0 close>...develop`), **gitleaks full-history scan** run locally (CI scans first-parent only).
-- `docs/delivery/evidence/m1.md` written (commands, summaries, run URLs, screenshot index, `not_run`).
+- `docs/delivery/evidence/m1.md` written (commands, summaries, run URLs, screenshot index (file names of the local, uncommitted images), `not_run`).
 - Traceability (docs/product/traceability.md) marks the M1 requirements implemented, with test references.
 - Fixes found here are small and go in this branch; anything larger becomes a `fix/*` packet and blocks the gate.
 - `progress.json`: M1 closed only after the Lead Coordinator approves; next task = write the M2/M3 packets (M2 needs OD-08; M3 needs OD-03 and OD-05).
