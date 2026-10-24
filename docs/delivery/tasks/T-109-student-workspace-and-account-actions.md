@@ -1,7 +1,7 @@
 # T-109: Student workspace shell, profile editing and account actions
 
 - Milestone: M1 · Ladder level: L4 (destructive and account actions, isolation in the UI) · Depends on: T-108 merged · Branch: `feature/m1-student-workspace` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review (PR open; merge needs the Lead Coordinator: student isolation)
+- Status: done (merged via PR #25, bfd8df6, 2026-10-24)
 
 ## Objective
 The tutor opens a student's workspace, edits their profile and parents, and archives, restores, resets, unlocks or permanently deletes the account safely; a student cannot reach any of it.
