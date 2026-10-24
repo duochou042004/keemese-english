@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useErrorText } from '@/lib/errors'
 
 /** T18: end the session, forget every cached response, then show the login page. */
-export function SignOutButton() {
-  const { t } = useTranslation()
+export function useSignOut() {
   const errorText = useErrorText()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -32,6 +31,12 @@ export function SignOutButton() {
     await navigate({ to: '/login' })
   }
 
+  return { signOut, pending, error }
+}
+
+export function SignOutButton() {
+  const { t } = useTranslation()
+  const { signOut, pending, error } = useSignOut()
   return (
     <>
       {error && (
