@@ -62,8 +62,10 @@ test('student: created via the API, login, forced change, /s, kept out of /t @sm
 }) => {
   const student = await createStudent(tutorPassword, 'Trần Gia Bảo')
   await page.goto('/login')
+  await expectAccessible(page)
   await signIn(page, student.userName, student.temporaryPassword)
   await expect(page).toHaveURL(/\/change-password$/)
+  await expectAccessible(page)
   await changePassword(page, student.temporaryPassword, newPassword(), vi)
   await expect(page).toHaveURL(/\/s$/)
   await expect(page.getByText('Trần Gia Bảo')).toBeVisible()

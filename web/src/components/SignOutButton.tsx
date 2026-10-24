@@ -14,12 +14,10 @@ export function SignOutButton() {
 
   async function signOut() {
     setPending(true)
-    try {
-      await api('post', '/api/auth/logout')
-    } finally {
-      queryClient.clear()
-      await navigate({ to: '/login' })
-    }
+    // Leave even if the call fails: the login page then shows whether the session is still open.
+    await api('post', '/api/auth/logout').catch(() => undefined)
+    queryClient.clear()
+    await navigate({ to: '/login' })
   }
 
   return (
