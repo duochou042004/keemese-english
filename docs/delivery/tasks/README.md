@@ -43,11 +43,11 @@ One sentence: the outcome.
 | [T-003](T-003-ci-and-repo-automation.md) | CI workflow, Dependabot, secret scan | M0 | done |
 | [T-101](T-101-pipeline-hardening.md) | Request pipeline hardening and the anonymous-endpoint test | M1 | done |
 | [T-102](T-102-identity-and-login.md) | Identity, login/logout, antiforgery, tutor bootstrap and reset CLI | M1 | done |
-| [T-103](T-103-password-lifecycle.md) | Password change, must-change gate, lockout, rate limits, preferences | M1 | not_started |
-| [T-104](T-104-students-api-and-isolation-suite.md) | Students API, account actions, isolation and authorization suites | M1 | not_started |
-| [T-105](T-105-api-types-and-fetch-wrapper.md) | Generated API types, CI freshness check, auth-aware fetch wrapper | M1 | not_started |
+| [T-103](T-103-password-lifecycle.md) | Password change, must-change gate, lockout, rate limits, preferences | M1 | done |
+| [T-104](T-104-students-api-and-isolation-suite.md) | Students API, account actions, isolation and authorization suites | M1 | done |
+| [T-105](T-105-api-types-and-fetch-wrapper.md) | Generated API types, CI freshness check, auth-aware fetch wrapper | M1 | done |
 | [T-106](T-106-login-flow-and-e2e-harness.md) | Login, forced password change, guards, Playwright + axe, e2e-smoke | M1 | done |
-| [T-107](T-107-appshell-and-dashboard-shells.md) | AppShell (tutor and student) and the Today / Home shells | M1 | not_started |
+| [T-107](T-107-appshell-and-dashboard-shells.md) | AppShell (tutor and student) and the Today / Home shells | M1 | done |
 | [T-108](T-108-students-list-and-add-student.md) | Student list and Add student (J2) | M1 | not_started |
 | [T-109](T-109-student-workspace-and-account-actions.md) | Student workspace shell, profile editing and account actions | M1 | not_started |
 | [T-110](T-110-m1-gate.md) | M1 milestone gate | M1 | not_started |

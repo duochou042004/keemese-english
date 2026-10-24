@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-107",
     "title": "AppShell (tutor and student) and the Today / Home shells",
-    "status": "in_review",
-    "branch": "feature/m1-appshell",
+    "status": "done",
+    "branch": "feature/m1-appshell (merged via PR #20, 8ed413c; branch deleted)",
     "packet": "docs/delivery/tasks/T-107-appshell-and-dashboard-shells.md"
   },
   "repository": {
@@ -81,7 +81,8 @@
     "T-103 password lifecycle merged into develop via PR #12 (cee9a58) with the owner's approval in chat (AppError.cs change approved); PR ci green on c8966e0 (changes, backend, docs, secrets; web skipped)",
     "T-104 students API merged into develop via PR #14 (4f549e9) with the owner approval in chat; PR ci green on f4d4f5a (changes, backend, docs, secrets; web and compat skipped) after one gitleaks false positive was added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40058058050)",
     "T-105 API types merged into develop via PR #16 (23cc0cc) with the owner approval in chat (incl. the four out-of-scope changes); PR ci green on 8380978 (https://github.com/duochou042004/keemese-english/actions/runs/40065602448) after the deliberate stale-types red run (https://github.com/duochou042004/keemese-english/actions/runs/40065472421, reverted); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40065736533)",
-    "T-106 login flow merged into develop via PR #18 (d047d5a) with the owner approval in chat; PR ci green on fe3ac73, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40067787763) after the deliberate E2E red run (https://github.com/duochou042004/keemese-english/actions/runs/40067586356, reverted); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40068085916)"
+    "T-106 login flow merged into develop via PR #18 (d047d5a) with the owner approval in chat; PR ci green on fe3ac73, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40067787763) after the deliberate E2E red run (https://github.com/duochou042004/keemese-english/actions/runs/40067586356, reverted); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40068085916)",
+    "T-107 AppShell merged into develop via PR #20 (8ed413c) with the owner approval in chat; PR ci green on cb4d1b3 (changes, web, docs, secrets, e2e-smoke; backend skipped, no backend change) (https://github.com/duochou042004/keemese-english/actions/runs/40082845405); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40082990792)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -863,6 +864,11 @@
       "command": "npm run e2e --prefix web (E2E-AUTH incl. shells, Chromium)",
       "result": "pass (3/3, axe clean)",
       "date": "2026-10-24"
+    },
+    {
+      "command": "GitHub ci on PR #20 and the push to develop (incl. e2e-smoke)",
+      "result": "pass",
+      "date": "2026-10-24"
     }
   ],
   "environment_verified": {
@@ -897,10 +903,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-107",
-    "title": "AppShell and dashboard shells",
-    "packet": "docs/delivery/tasks/T-107-appshell-and-dashboard-shells.md",
-    "requires": "T-106 merged into develop"
+    "id": "T-108",
+    "title": "Student list and Add student (J2)",
+    "packet": "docs/delivery/tasks/T-108-students-list-and-add-student.md",
+    "requires": "T-104 and T-107 merged into develop"
   },
   "sessions": [
     {
@@ -974,7 +980,7 @@
       "date": "2026-10-24",
       "tool": "claude-code",
       "task": "T-107",
-      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (low finding fixed); PR open, waiting for the Lead Coordinator merge approval"
+      "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (low finding fixed); merged via PR #20 (owner approval)"
     }
   ]
 }
