@@ -668,6 +668,21 @@
         "Docker build",
         ".NET suites (no behaviour change)"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-105",
+      "level": "L4",
+      "tool": "claude-code",
+      "commands": [
+        "gh run watch 40065322412 (PR #16, dd6274a)",
+        "deliberately stale schema.d.ts in 81f235c; gh run watch 40065472421; reverted in b539918"
+      ],
+      "result": "pass",
+      "summary": "PR #16 ci green on dd6274a, all 5 jobs (changes, backend incl. \"API types are up to date\", web, docs, secrets): https://github.com/duochou042004/keemese-english/actions/runs/40065322412. Deliberate stale-types commit 81f235c (hand-edited schema.d.ts header): only backend failed, at \"API types are up to date\", printing \" M web/src/api/schema.d.ts\" and the diff: https://github.com/duochou042004/keemese-english/actions/runs/40065472421. Reverted in b539918. The Lead Coordinator approved in chat the four out-of-scope changes (.Produces<T>() metadata on the identity/students endpoints, the 401 handler in main.tsx, lint ignores for the generated files, the openapi-typescript typescript-peer override) and the merge once CI is green",
+      "not_run": [
+        "Push ci on develop after the merge (recorded with the merge)"
+      ]
     }
   ],
   "tests": [
