@@ -1,15 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ComponentProps,
-  type ReactNode,
-} from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api, ApiError } from '@/api/client'
@@ -17,12 +10,21 @@ import { FormField } from '@/components/FormField'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { useErrorText } from '@/lib/errors'
 import { accountMessage, generatePassword, nextUsername, suggestUsername } from './credentials'
+import {
+  applyApiErrors,
+  channelsBody,
+  ContactFields,
+  CopyButton,
+  detailsSchema,
+  FormAlert,
+  Group,
+  ParentFields,
+  parentsBody,
+} from './StudentFields'
 import { StudentLink } from './StudentList'
 
 // Mirrors the API's limits (api.md, POST /api/students); the API still decides, and its codes land on the same fields.
-const optional = (max: number, code: string) => z.string().trim().max(max, code)
-const schema = z.object({
-  fullName: z.string().trim().min(1, 'fullName.required').max(120, 'fullName.too_long'),
+const schema = detailsSchema.extend({
   userName: z
     .string()
     .trim()
@@ -32,34 +34,9 @@ const schema = z.object({
     .string()
     .max(256, 'password.too_long')
     .refine((v) => v === '' || v.length >= 10, 'password.too_short'),
-  email: z
-    .string()
-    .trim()
-    .refine((v) => v === '' || z.email().safeParse(v).success, 'email.invalid'),
-  phone: optional(40, 'phone.too_long'),
-  // A value needs a channel type, or the API rejects the whole list (contactChannels.invalid).
-  contactChannels: z.array(
-    z
-      .object({
-        type: optional(40, 'contactChannels.invalid'),
-        value: optional(200, 'contactChannels.invalid'),
-      })
-      .refine((c) => !c.value || c.type, { path: ['type'], message: 'validation.required' }),
-  ),
-  parents: z.array(
-    z.object({
-      name: z.string().trim().min(1, 'validation.required').max(120, 'parents.invalid'),
-      relationship: optional(60, 'parents.invalid'),
-      contact: optional(200, 'parents.invalid'),
-      notes: optional(2000, 'parents.invalid'),
-    }),
-  ),
 })
 
 const simpleFields = ['fullName', 'userName', 'temporaryPassword', 'email', 'phone'] as const
-type SimpleField = (typeof simpleFields)[number]
-const isSimpleField = (field: string): field is SimpleField =>
-  (simpleFields as readonly string[]).includes(field)
 
 type Created = { id: string; fullName: string; userName: string; password: string }
 
@@ -77,15 +54,7 @@ function AddStudentForm({ onCreated }: { onCreated: (created: Created) => void }
   const [suggestion, setSuggestion] = useState<string>()
   const [autoUserName, setAutoUserName] = useState(true)
   const [initialPassword] = useState(generatePassword)
-  const {
-    register,
-    control,
-    handleSubmit,
-    setError,
-    setValue,
-    getValues,
-    formState: { errors, isSubmitting },
-  } = useForm({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: '',
@@ -97,13 +66,19 @@ function AddStudentForm({ onCreated }: { onCreated: (created: Created) => void }
       parents: [],
     },
   })
-  const channels = useFieldArray({ control, name: 'contactChannels' })
-  const parents = useFieldArray({ control, name: 'parents' })
+  const {
+    register,
+    handleSubmit,
+    setError,
+    setValue,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = form
 
   const onSubmit = handleSubmit(async (v) => {
     setFormError(undefined)
     setSuggestion(undefined)
-    const contactChannels = v.contactChannels.filter((c) => c.value)
+    const contactChannels = channelsBody(v.contactChannels)
     try {
       const res = await api('post', '/api/students', {
         body: {
@@ -113,14 +88,7 @@ function AddStudentForm({ onCreated }: { onCreated: (created: Created) => void }
           email: v.email || null,
           phone: v.phone || null,
           contactChannels: contactChannels.length ? contactChannels : null,
-          parents: v.parents.length
-            ? v.parents.map((p) => ({
-                name: p.name,
-                relationship: p.relationship || null,
-                contact: p.contact || null,
-                notes: p.notes || null,
-              }))
-            : null,
+          parents: v.parents.length ? parentsBody(v.parents) : null,
         },
       })
       void queryClient.invalidateQueries({ queryKey: ['students'] })
@@ -131,17 +99,10 @@ function AddStudentForm({ onCreated }: { onCreated: (created: Created) => void }
         password: res.temporaryPassword,
       })
     } catch (e) {
-      const fieldErrors = Object.entries((e instanceof ApiError && e.errors) || {})
-      const unplaced: string[] = []
-      for (const [field, [code = 'common.unexpected']] of fieldErrors) {
-        if (isSimpleField(field)) setError(field, { message: code }, { shouldFocus: true })
-        else unplaced.push(code)
-        if (code === 'students.username_taken') setSuggestion(nextUsername(v.userName))
-      }
-      if (!fieldErrors.length || unplaced.length)
-        setFormError(
-          errorText(unplaced[0] ?? (e instanceof ApiError ? e.code : 'common.unexpected')),
-        )
+      const code = applyApiErrors(e, simpleFields, setError)
+      if (e instanceof ApiError && e.errors?.userName?.[0] === 'students.username_taken')
+        setSuggestion(nextUsername(v.userName))
+      setFormError(code && errorText(code))
     }
   })
 
@@ -149,228 +110,89 @@ function AddStudentForm({ onCreated }: { onCreated: (created: Created) => void }
   const contactHasErrors = !!(errors.email || errors.phone || errors.contactChannels)
 
   return (
-    <form className="flex max-w-xl flex-col gap-4" noValidate onSubmit={(e) => void onSubmit(e)}>
-      {formError && (
-        <p
-          role="alert"
-          className="rounded-control border border-danger px-3 py-2 text-small text-danger"
-        >
-          {formError}
-        </p>
-      )}
-      <FormField
-        id="full-name"
-        label={t('students.fullName')}
-        autoComplete="off"
-        error={message(errors.fullName?.message)}
-        {...register('fullName', {
-          onChange: (e: ChangeEvent<HTMLInputElement>) => {
-            if (autoUserName) setValue('userName', suggestUsername(e.target.value))
-          },
-        })}
-      />
-      <div className="flex flex-col gap-1.5">
+    <FormProvider {...form}>
+      <form className="flex max-w-xl flex-col gap-4" noValidate onSubmit={(e) => void onSubmit(e)}>
+        {formError && <FormAlert>{formError}</FormAlert>}
         <FormField
-          id="user-name"
-          label={t('students.userName')}
-          hint={t('students.userNameHint')}
+          id="full-name"
+          label={t('students.fullName')}
           autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          error={message(errors.userName?.message)}
-          {...register('userName', { onChange: () => setAutoUserName(false) })}
+          error={message(errors.fullName?.message)}
+          {...register('fullName', {
+            onChange: (e: ChangeEvent<HTMLInputElement>) => {
+              if (autoUserName) setValue('userName', suggestUsername(e.target.value))
+            },
+          })}
         />
-        {suggestion && errors.userName?.message === 'students.username_taken' && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="self-start"
-            onClick={() => {
-              setValue('userName', suggestion, { shouldValidate: true })
-              setSuggestion(undefined)
-            }}
-          >
-            {t('students.useSuggestion', { suggestion })}
-          </Button>
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <FormField
-          id="temporary-password"
-          label={t('students.temporaryPassword')}
-          hint={t('students.temporaryPasswordHint')}
-          autoComplete="off"
-          spellCheck={false}
-          className="font-mono"
-          error={message(errors.temporaryPassword?.message)}
-          {...register('temporaryPassword')}
-        />
-        <div className="flex gap-2">
-          <CopyButton
-            size="sm"
-            text={() => getValues('temporaryPassword')}
-            label={t('students.copyPassword')}
+        <div className="flex flex-col gap-1.5">
+          <FormField
+            id="user-name"
+            label={t('students.userName')}
+            hint={t('students.userNameHint')}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            error={message(errors.userName?.message)}
+            {...register('userName', { onChange: () => setAutoUserName(false) })}
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setValue('temporaryPassword', generatePassword(), { shouldValidate: true })
-            }
-          >
-            {t('students.regenerate')}
-          </Button>
-        </div>
-      </div>
-
-      <Group title={t('students.contactGroup')} forceOpen={contactHasErrors}>
-        <FormField
-          id="email"
-          type="email"
-          label={t('students.email')}
-          autoComplete="off"
-          error={message(errors.email?.message)}
-          {...register('email')}
-        />
-        <FormField
-          id="phone"
-          type="tel"
-          label={t('students.phone')}
-          autoComplete="off"
-          error={message(errors.phone?.message)}
-          {...register('phone')}
-        />
-        <datalist id="channel-types">
-          <option value="Zalo" />
-          <option value="Facebook" />
-          <option value={t('students.channelOther')} />
-        </datalist>
-        {channels.fields.map((field, i) => (
-          <fieldset
-            key={field.id}
-            className="grid gap-3 sm:grid-cols-[10rem_1fr_auto] sm:items-end"
-          >
-            <legend className="sr-only">{t('students.channelN', { n: i + 1 })}</legend>
-            <FormField
-              id={`channel-${i}-type`}
-              label={t('students.channelType')}
-              list="channel-types"
-              autoComplete="off"
-              error={message(errors.contactChannels?.[i]?.type?.message)}
-              {...register(`contactChannels.${i}.type`)}
-            />
-            <FormField
-              id={`channel-${i}-value`}
-              label={t('students.channelValue')}
-              autoComplete="off"
-              error={message(errors.contactChannels?.[i]?.value?.message)}
-              {...register(`contactChannels.${i}.value`)}
-            />
-            <Button type="button" variant="ghost" onClick={() => channels.remove(i)}>
-              {t('students.remove')}
-            </Button>
-          </fieldset>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          className="self-start"
-          onClick={() => channels.append({ type: 'Zalo', value: '' })}
-        >
-          {t('students.addChannel')}
-        </Button>
-      </Group>
-
-      <Group title={t('students.parentsGroup')} forceOpen={!!errors.parents}>
-        {parents.fields.map((field, i) => (
-          <fieldset
-            key={field.id}
-            className="flex flex-col gap-3 rounded-panel border border-border p-4"
-          >
-            <legend className="px-1 text-small font-medium">
-              {t('students.parentN', { n: i + 1 })}
-            </legend>
-            <FormField
-              id={`parent-${i}-name`}
-              label={t('students.parentName')}
-              autoComplete="off"
-              error={message(errors.parents?.[i]?.name?.message)}
-              {...register(`parents.${i}.name`)}
-            />
-            <FormField
-              id={`parent-${i}-relationship`}
-              label={t('students.relationship')}
-              autoComplete="off"
-              error={message(errors.parents?.[i]?.relationship?.message)}
-              {...register(`parents.${i}.relationship`)}
-            />
-            <FormField
-              id={`parent-${i}-contact`}
-              label={t('students.parentContact')}
-              autoComplete="off"
-              error={message(errors.parents?.[i]?.contact?.message)}
-              {...register(`parents.${i}.contact`)}
-            />
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={`parent-${i}-notes`} className="text-small font-medium">
-                {t('students.parentNotes')}
-              </label>
-              <textarea
-                id={`parent-${i}-notes`}
-                rows={3}
-                className="w-full rounded-control border border-border bg-surface px-3 py-2 text-body"
-                {...register(`parents.${i}.notes`)}
-              />
-            </div>
+          {suggestion && errors.userName?.message === 'students.username_taken' && (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
+              size="sm"
               className="self-start"
-              onClick={() => parents.remove(i)}
+              onClick={() => {
+                setValue('userName', suggestion, { shouldValidate: true })
+                setSuggestion(undefined)
+              }}
             >
-              {t('students.remove')}
+              {t('students.useSuggestion', { suggestion })}
             </Button>
-          </fieldset>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          className="self-start"
-          onClick={() => parents.append({ name: '', relationship: '', contact: '', notes: '' })}
-        >
-          {t('students.addParent')}
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <FormField
+            id="temporary-password"
+            label={t('students.temporaryPassword')}
+            hint={t('students.temporaryPasswordHint')}
+            autoComplete="off"
+            spellCheck={false}
+            className="font-mono"
+            error={message(errors.temporaryPassword?.message)}
+            {...register('temporaryPassword')}
+          />
+          <div className="flex gap-2">
+            <CopyButton
+              size="sm"
+              text={() => getValues('temporaryPassword')}
+              label={t('students.copyPassword')}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setValue('temporaryPassword', generatePassword(), { shouldValidate: true })
+              }
+            >
+              {t('students.regenerate')}
+            </Button>
+          </div>
+        </div>
+
+        <Group title={t('students.contactGroup')} forceOpen={contactHasErrors}>
+          <ContactFields />
+        </Group>
+
+        <Group title={t('students.parentsGroup')} forceOpen={!!errors.parents}>
+          <ParentFields />
+        </Group>
+
+        <Button type="submit" className="mt-2 self-start max-sm:w-full" disabled={isSubmitting}>
+          {t('students.create')}
         </Button>
-      </Group>
-
-      <Button type="submit" className="mt-2 self-start max-sm:w-full" disabled={isSubmitting}>
-        {t('students.create')}
-      </Button>
-    </form>
-  )
-}
-
-/** An optional group, collapsed by default (FR-STU-AC1); it opens itself when it holds an error. */
-function Group({
-  title,
-  forceOpen,
-  children,
-}: {
-  title: string
-  forceOpen: boolean
-  children: ReactNode
-}) {
-  const [open, setOpen] = useState(false)
-  return (
-    <details
-      open={open || forceOpen}
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-      className="rounded-panel border border-border bg-surface"
-    >
-      <summary className="cursor-pointer px-4 py-3 font-medium">{title}</summary>
-      <div className="flex flex-col gap-4 px-4 pb-4">{children}</div>
-    </details>
+      </form>
+    </FormProvider>
   )
 }
 
@@ -417,49 +239,5 @@ function CreatedPanel({ id, fullName, userName, password }: Created) {
         </StudentLink>
       </div>
     </section>
-  )
-}
-
-/** Copies `text()` and says so in a live region; a blocked clipboard is reported, never silent. */
-function CopyButton({
-  text,
-  label,
-  variant = 'outline',
-  size,
-}: {
-  text: () => string
-  label: string
-  variant?: 'default' | 'outline'
-  size?: ComponentProps<typeof Button>['size']
-}) {
-  const { t } = useTranslation()
-  const [status, setStatus] = useState<'copied' | 'failed'>()
-  useEffect(() => {
-    if (!status) return
-    const id = setTimeout(() => setStatus(undefined), 3000)
-    return () => clearTimeout(id)
-  }, [status])
-  return (
-    <span className="inline-flex items-center gap-2">
-      <Button
-        type="button"
-        variant={variant}
-        size={size}
-        onClick={() =>
-          // Rejects too when the Clipboard API is missing (an insecure origin).
-          void Promise.resolve()
-            .then(() => navigator.clipboard.writeText(text()))
-            .then(
-              () => setStatus('copied'),
-              () => setStatus('failed'),
-            )
-        }
-      >
-        {label}
-      </Button>
-      <span role="status" className="text-small text-text-muted">
-        {status && t(`students.${status}`)}
-      </span>
-    </span>
   )
 }

@@ -76,7 +76,9 @@
     "nextSessionEmpty": "Your next lesson will appear here once it is scheduled."
   },
   "common": {
-    "retry": "Try again"
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "dismiss": "Dismiss"
   },
   "students": {
     "title": "Students",
@@ -132,6 +134,63 @@
       "done": "Done",
       "openWorkspace": "Open workspace",
       "message": "Your account for our English lessons\nUsername: {{userName}}\nTemporary password: {{password}}\nSign in at {{url}} and choose your own password."
+    },
+    "loadingOne": "Loading the student",
+    "locked": "Locked",
+    "workspace": {
+      "tabs": "Student workspace",
+      "overview": "Overview",
+      "profile": "Profile"
+    },
+    "overview": {
+      "nextSession": "Next session",
+      "nextSessionEmpty": "The next session with this student appears here once it is scheduled.",
+      "tasks": "Open tasks",
+      "tasksEmpty": "Activities you assign to this student appear here, soonest due first.",
+      "goals": "Goals",
+      "goalsEmpty": "Goals and their progress appear here once you set them."
+    },
+    "notFound": {
+      "title": "Student not found",
+      "body": "This student does not exist or was deleted.",
+      "back": "Back to students"
+    },
+    "profile": {
+      "title": "Profile",
+      "contact": "Contact",
+      "parents": "Parents or guardians",
+      "save": "Save changes",
+      "saved": "Saved",
+      "reload": "Reload"
+    },
+    "account": {
+      "title": "Account",
+      "reset": "Reset password",
+      "resetText": "Gives the student a new temporary password. They choose their own at the next sign-in.",
+      "resetConfirmTitle": "Reset the password for {{name}}?",
+      "resetConfirmText": "The current password stops working and the student is signed out everywhere. The new temporary password is shown once.",
+      "issued": "New temporary password. It is shown only now: send it to the student.",
+      "unlock": "Unlock",
+      "unlockText": "Too many wrong passwords locked this account. Unlock it so the student can try again now.",
+      "archive": "Archive",
+      "archiveText": "Hides the student from the active list and stops them signing in. Nothing is deleted.",
+      "archiveConfirmTitle": "Archive {{name}}?",
+      "archiveConfirmText": "An archived student cannot sign in and is signed out now. Their profile and work are kept, and you can restore them at any time.",
+      "restore": "Restore",
+      "restoreText": "This student is archived and cannot sign in. Restoring lets them sign in again with their current password.",
+      "restoreConfirmTitle": "Restore {{name}}?",
+      "restoreConfirmText": "The student can sign in again and appears in the active list. Their data is unchanged.",
+      "delete": "Delete permanently",
+      "deleteText": "Removes the account and all of the student’s records. This cannot be undone.",
+      "deleteConfirmTitle": "Delete {{name}} permanently?",
+      "deleteConfirmText": "The account, profile and every record of this student are removed for good. To keep the data, archive the student instead.",
+      "typeName": "Type {{name}} to confirm",
+      "deleteConfirm": "Delete permanently",
+      "archived": "{{name}} was archived.",
+      "undo": "Undo",
+      "restored": "{{name}} was restored.",
+      "unlocked": "{{name}} was unlocked.",
+      "deleted": "{{name}} was deleted."
     }
   }
 }

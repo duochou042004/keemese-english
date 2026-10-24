@@ -76,7 +76,9 @@
     "nextSessionEmpty": "Buổi học tiếp theo sẽ hiện ở đây khi được lên lịch."
   },
   "common": {
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "cancel": "Huỷ",
+    "dismiss": "Đóng"
   },
   "students": {
     "title": "Học viên",
@@ -132,6 +134,63 @@
       "done": "Xong",
       "openWorkspace": "Mở không gian học viên",
       "message": "Tài khoản học tiếng Anh của bạn\nTên đăng nhập: {{userName}}\nMật khẩu tạm thời: {{password}}\nĐăng nhập tại {{url}} rồi đặt mật khẩu mới của riêng bạn."
+    },
+    "loadingOne": "Đang tải thông tin học viên",
+    "locked": "Đang bị khoá",
+    "workspace": {
+      "tabs": "Không gian học viên",
+      "overview": "Tổng quan",
+      "profile": "Hồ sơ"
+    },
+    "overview": {
+      "nextSession": "Buổi học tiếp theo",
+      "nextSessionEmpty": "Buổi học tiếp theo với học viên này sẽ hiện ở đây khi được lên lịch.",
+      "tasks": "Bài tập đang mở",
+      "tasksEmpty": "Bài tập bạn giao cho học viên này sẽ hiện ở đây, bài gần hạn nhất trước.",
+      "goals": "Mục tiêu",
+      "goalsEmpty": "Mục tiêu và tiến độ sẽ hiện ở đây khi bạn đặt mục tiêu."
+    },
+    "notFound": {
+      "title": "Không tìm thấy học viên",
+      "body": "Học viên này không tồn tại hoặc đã bị xoá.",
+      "back": "Quay lại danh sách học viên"
+    },
+    "profile": {
+      "title": "Hồ sơ",
+      "contact": "Liên hệ",
+      "parents": "Phụ huynh hoặc người giám hộ",
+      "save": "Lưu thay đổi",
+      "saved": "Đã lưu",
+      "reload": "Tải lại"
+    },
+    "account": {
+      "title": "Tài khoản",
+      "reset": "Đặt lại mật khẩu",
+      "resetText": "Cấp cho học viên một mật khẩu tạm thời mới. Học viên sẽ tự đặt mật khẩu riêng ở lần đăng nhập tới.",
+      "resetConfirmTitle": "Đặt lại mật khẩu cho {{name}}?",
+      "resetConfirmText": "Mật khẩu hiện tại sẽ hết hiệu lực và học viên bị đăng xuất trên mọi thiết bị. Mật khẩu tạm thời mới chỉ hiện một lần.",
+      "issued": "Mật khẩu tạm thời mới. Mật khẩu chỉ hiện lúc này: hãy gửi cho học viên.",
+      "unlock": "Mở khoá",
+      "unlockText": "Tài khoản bị khoá vì nhập sai mật khẩu quá nhiều lần. Mở khoá để học viên thử lại ngay.",
+      "archive": "Lưu trữ",
+      "archiveText": "Ẩn học viên khỏi danh sách đang học và chặn đăng nhập. Không có dữ liệu nào bị xoá.",
+      "archiveConfirmTitle": "Lưu trữ {{name}}?",
+      "archiveConfirmText": "Học viên đã lưu trữ không đăng nhập được và bị đăng xuất ngay. Hồ sơ và bài làm vẫn được giữ, và bạn có thể khôi phục bất cứ lúc nào.",
+      "restore": "Khôi phục",
+      "restoreText": "Học viên này đã được lưu trữ và không đăng nhập được. Khôi phục để học viên đăng nhập lại bằng mật khẩu hiện tại.",
+      "restoreConfirmTitle": "Khôi phục {{name}}?",
+      "restoreConfirmText": "Học viên đăng nhập lại được và hiện trong danh sách đang học. Dữ liệu không thay đổi.",
+      "delete": "Xoá vĩnh viễn",
+      "deleteText": "Xoá tài khoản và toàn bộ hồ sơ của học viên. Không thể hoàn tác.",
+      "deleteConfirmTitle": "Xoá vĩnh viễn {{name}}?",
+      "deleteConfirmText": "Tài khoản, hồ sơ và mọi dữ liệu của học viên này sẽ bị xoá hẳn. Nếu muốn giữ dữ liệu, hãy lưu trữ học viên.",
+      "typeName": "Nhập {{name}} để xác nhận",
+      "deleteConfirm": "Xoá vĩnh viễn",
+      "archived": "Đã lưu trữ {{name}}.",
+      "undo": "Hoàn tác",
+      "restored": "Đã khôi phục {{name}}.",
+      "unlocked": "Đã mở khoá {{name}}.",
+      "deleted": "Đã xoá {{name}}."
     }
   }
 }

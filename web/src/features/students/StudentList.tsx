@@ -128,7 +128,7 @@ export function StudentList({
   )
 }
 
-/** The workspace link; T-109 adds the route. */
+/** The link to a student's workspace. */
 export function StudentLink({
   id,
   className,
@@ -138,10 +138,8 @@ export function StudentLink({
   className?: string
   children: ReactNode
 }) {
-  // shortcut: a plain string until T-109 adds /t/students/$studentId; then link to it type-checked with params.
-  const to: string = `/t/students/${id}`
   return (
-    <Link to={to} className={className}>
+    <Link to="/t/students/$studentId" params={{ studentId: id }} className={className}>
       {children}
     </Link>
   )
@@ -177,7 +175,7 @@ function EmptyList({ q, status }: StudentSearch) {
   )
 }
 
-function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
+export function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const apiError = error instanceof ApiError ? error : undefined
@@ -203,7 +201,7 @@ function ListSkeleton({ label }: { label: string }) {
 }
 
 /** True once `on` has lasted `ms`: the skeleton appears only after 300 ms (design-system.md "Loading"). */
-function useDelayed(on: boolean, ms = 300) {
+export function useDelayed(on: boolean, ms = 300) {
   const [shown, setShown] = useState(false)
   useEffect(() => {
     if (!on) return

@@ -18,8 +18,12 @@ import { Route as SIndexRouteImport } from './routes/s/index'
 import { Route as SAccountRouteImport } from './routes/s/account'
 import { Route as TIndexRouteImport } from './routes/t/index'
 import { Route as TSettingsRouteImport } from './routes/t/settings'
+import { Route as TStudentsRouteRouteImport } from './routes/t/students/route'
 import { Route as TStudentsIndexRouteImport } from './routes/t/students/index'
+import { Route as TStudentsStudentIdRouteRouteImport } from './routes/t/students/$studentId/route'
 import { Route as TStudentsNewRouteImport } from './routes/t/students/new'
+import { Route as TStudentsStudentIdIndexRouteImport } from './routes/t/students/$studentId/index'
+import { Route as TStudentsStudentIdProfileRouteImport } from './routes/t/students/$studentId/profile'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -66,16 +70,37 @@ const TSettingsRoute = TSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => TRoute,
 } as any)
-const TStudentsIndexRoute = TStudentsIndexRouteImport.update({
-  id: '/students/',
-  path: '/students/',
+const TStudentsRouteRoute = TStudentsRouteRouteImport.update({
+  id: '/students',
+  path: '/students',
   getParentRoute: () => TRoute,
+} as any)
+const TStudentsIndexRoute = TStudentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TStudentsRouteRoute,
+} as any)
+const TStudentsStudentIdRouteRoute = TStudentsStudentIdRouteRouteImport.update({
+  id: '/$studentId',
+  path: '/$studentId',
+  getParentRoute: () => TStudentsRouteRoute,
 } as any)
 const TStudentsNewRoute = TStudentsNewRouteImport.update({
-  id: '/students/new',
-  path: '/students/new',
-  getParentRoute: () => TRoute,
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => TStudentsRouteRoute,
 } as any)
+const TStudentsStudentIdIndexRoute = TStudentsStudentIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TStudentsStudentIdRouteRoute,
+} as any)
+const TStudentsStudentIdProfileRoute =
+  TStudentsStudentIdProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => TStudentsStudentIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,12 +108,16 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/s': typeof SRouteWithChildren
   '/t': typeof TRouteWithChildren
+  '/t/students': typeof TStudentsRouteRouteWithChildren
   '/s/account': typeof SAccountRoute
   '/t/settings': typeof TSettingsRoute
   '/s/': typeof SIndexRoute
   '/t/': typeof TIndexRoute
+  '/t/students/$studentId': typeof TStudentsStudentIdRouteRouteWithChildren
   '/t/students/new': typeof TStudentsNewRoute
   '/t/students/': typeof TStudentsIndexRoute
+  '/t/students/$studentId/profile': typeof TStudentsStudentIdProfileRoute
+  '/t/students/$studentId/': typeof TStudentsStudentIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +129,8 @@ export interface FileRoutesByTo {
   '/t': typeof TIndexRoute
   '/t/students/new': typeof TStudentsNewRoute
   '/t/students': typeof TStudentsIndexRoute
+  '/t/students/$studentId/profile': typeof TStudentsStudentIdProfileRoute
+  '/t/students/$studentId': typeof TStudentsStudentIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,12 +139,16 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/s': typeof SRouteWithChildren
   '/t': typeof TRouteWithChildren
+  '/t/students': typeof TStudentsRouteRouteWithChildren
   '/s/account': typeof SAccountRoute
   '/t/settings': typeof TSettingsRoute
   '/s/': typeof SIndexRoute
   '/t/': typeof TIndexRoute
+  '/t/students/$studentId': typeof TStudentsStudentIdRouteRouteWithChildren
   '/t/students/new': typeof TStudentsNewRoute
   '/t/students/': typeof TStudentsIndexRoute
+  '/t/students/$studentId/profile': typeof TStudentsStudentIdProfileRoute
+  '/t/students/$studentId/': typeof TStudentsStudentIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,12 +158,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/s'
     | '/t'
+    | '/t/students'
     | '/s/account'
     | '/t/settings'
     | '/s/'
     | '/t/'
+    | '/t/students/$studentId'
     | '/t/students/new'
     | '/t/students/'
+    | '/t/students/$studentId/profile'
+    | '/t/students/$studentId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +179,8 @@ export interface FileRouteTypes {
     | '/t'
     | '/t/students/new'
     | '/t/students'
+    | '/t/students/$studentId/profile'
+    | '/t/students/$studentId'
   id:
     | '__root__'
     | '/'
@@ -147,12 +188,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/s'
     | '/t'
+    | '/t/students'
     | '/s/account'
     | '/t/settings'
     | '/s/'
     | '/t/'
+    | '/t/students/$studentId'
     | '/t/students/new'
     | '/t/students/'
+    | '/t/students/$studentId/profile'
+    | '/t/students/$studentId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,19 +273,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TSettingsRouteImport
       parentRoute: typeof TRoute
     }
+    '/t/students': {
+      id: '/t/students'
+      path: '/students'
+      fullPath: '/t/students'
+      preLoaderRoute: typeof TStudentsRouteRouteImport
+      parentRoute: typeof TRoute
+    }
     '/t/students/': {
       id: '/t/students/'
-      path: '/students'
+      path: '/'
       fullPath: '/t/students/'
       preLoaderRoute: typeof TStudentsIndexRouteImport
-      parentRoute: typeof TRoute
+      parentRoute: typeof TStudentsRouteRoute
+    }
+    '/t/students/$studentId': {
+      id: '/t/students/$studentId'
+      path: '/$studentId'
+      fullPath: '/t/students/$studentId'
+      preLoaderRoute: typeof TStudentsStudentIdRouteRouteImport
+      parentRoute: typeof TStudentsRouteRoute
     }
     '/t/students/new': {
       id: '/t/students/new'
-      path: '/students/new'
+      path: '/new'
       fullPath: '/t/students/new'
       preLoaderRoute: typeof TStudentsNewRouteImport
-      parentRoute: typeof TRoute
+      parentRoute: typeof TStudentsRouteRoute
+    }
+    '/t/students/$studentId/': {
+      id: '/t/students/$studentId/'
+      path: '/'
+      fullPath: '/t/students/$studentId/'
+      preLoaderRoute: typeof TStudentsStudentIdIndexRouteImport
+      parentRoute: typeof TStudentsStudentIdRouteRoute
+    }
+    '/t/students/$studentId/profile': {
+      id: '/t/students/$studentId/profile'
+      path: '/profile'
+      fullPath: '/t/students/$studentId/profile'
+      preLoaderRoute: typeof TStudentsStudentIdProfileRouteImport
+      parentRoute: typeof TStudentsStudentIdRouteRoute
     }
   }
 }
@@ -257,18 +330,48 @@ const SRouteChildren: SRouteChildren = {
 
 const SRouteWithChildren = SRoute._addFileChildren(SRouteChildren)
 
-interface TRouteChildren {
-  TSettingsRoute: typeof TSettingsRoute
-  TIndexRoute: typeof TIndexRoute
+interface TStudentsStudentIdRouteRouteChildren {
+  TStudentsStudentIdProfileRoute: typeof TStudentsStudentIdProfileRoute
+  TStudentsStudentIdIndexRoute: typeof TStudentsStudentIdIndexRoute
+}
+
+const TStudentsStudentIdRouteRouteChildren: TStudentsStudentIdRouteRouteChildren =
+  {
+    TStudentsStudentIdProfileRoute: TStudentsStudentIdProfileRoute,
+    TStudentsStudentIdIndexRoute: TStudentsStudentIdIndexRoute,
+  }
+
+const TStudentsStudentIdRouteRouteWithChildren =
+  TStudentsStudentIdRouteRoute._addFileChildren(
+    TStudentsStudentIdRouteRouteChildren,
+  )
+
+interface TStudentsRouteRouteChildren {
+  TStudentsStudentIdRouteRoute: typeof TStudentsStudentIdRouteRouteWithChildren
   TStudentsNewRoute: typeof TStudentsNewRoute
   TStudentsIndexRoute: typeof TStudentsIndexRoute
 }
 
-const TRouteChildren: TRouteChildren = {
-  TSettingsRoute: TSettingsRoute,
-  TIndexRoute: TIndexRoute,
+const TStudentsRouteRouteChildren: TStudentsRouteRouteChildren = {
+  TStudentsStudentIdRouteRoute: TStudentsStudentIdRouteRouteWithChildren,
   TStudentsNewRoute: TStudentsNewRoute,
   TStudentsIndexRoute: TStudentsIndexRoute,
+}
+
+const TStudentsRouteRouteWithChildren = TStudentsRouteRoute._addFileChildren(
+  TStudentsRouteRouteChildren,
+)
+
+interface TRouteChildren {
+  TStudentsRouteRoute: typeof TStudentsRouteRouteWithChildren
+  TSettingsRoute: typeof TSettingsRoute
+  TIndexRoute: typeof TIndexRoute
+}
+
+const TRouteChildren: TRouteChildren = {
+  TStudentsRouteRoute: TStudentsRouteRouteWithChildren,
+  TSettingsRoute: TSettingsRoute,
+  TIndexRoute: TIndexRoute,
 }
 
 const TRouteWithChildren = TRoute._addFileChildren(TRouteChildren)
