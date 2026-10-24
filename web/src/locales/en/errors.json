@@ -22,5 +22,27 @@
     "too_common": "This password is too common. Choose another one.",
     "too_long": "Use at most 256 characters.",
     "mismatch": "The passwords do not match."
+  },
+  "students": {
+    "username_taken": "This username is already taken."
+  },
+  "userName": {
+    "invalid": "Use 3–40 characters: a–z, 0–9, dot, dash or underscore."
+  },
+  "fullName": {
+    "required": "Enter the full name.",
+    "too_long": "Use at most 120 characters."
+  },
+  "email": {
+    "invalid": "Enter a valid email address."
+  },
+  "phone": {
+    "too_long": "Use at most 40 characters."
+  },
+  "contactChannels": {
+    "invalid": "Check the contact channels: at most 20, each type up to 40 and value up to 200 characters."
+  },
+  "parents": {
+    "invalid": "Check the parent or guardian details: at most 10, and keep each field within its length limit."
   }
 }

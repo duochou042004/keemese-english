@@ -22,5 +22,27 @@
     "too_common": "Mật khẩu này quá phổ biến. Hãy chọn mật khẩu khác.",
     "too_long": "Dùng tối đa 256 ký tự.",
     "mismatch": "Hai mật khẩu không khớp."
+  },
+  "students": {
+    "username_taken": "Tên đăng nhập này đã có người dùng."
+  },
+  "userName": {
+    "invalid": "Dùng 3–40 ký tự: a–z, 0–9, dấu chấm, gạch ngang hoặc gạch dưới."
+  },
+  "fullName": {
+    "required": "Hãy nhập họ và tên.",
+    "too_long": "Dùng tối đa 120 ký tự."
+  },
+  "email": {
+    "invalid": "Hãy nhập địa chỉ email hợp lệ."
+  },
+  "phone": {
+    "too_long": "Dùng tối đa 40 ký tự."
+  },
+  "contactChannels": {
+    "invalid": "Kiểm tra lại kênh liên hệ: tối đa 20 kênh, loại tối đa 40 và giá trị tối đa 200 ký tự."
+  },
+  "parents": {
+    "invalid": "Kiểm tra lại thông tin phụ huynh: tối đa 10 người, mỗi trường trong giới hạn độ dài."
   }
 }
