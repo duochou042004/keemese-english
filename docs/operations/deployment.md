@@ -16,7 +16,7 @@
 | `ASPNETCORE_URLS` | — | Default `http://+:8080` |
 | `ASPNETCORE_ENVIRONMENT` | — | `Production` |
 | `BOOTSTRAP_TUTOR_USERNAME` / `_PASSWORD` | first run only | Remove after the first login |
-| `Security__IpHashSalt` | ✅ | A random 32+ character string |
+| `Security__IpHashSalt` | ✅ | A random 32+ character string (the app refuses to start without it, and outside Development also refuses a `change-me` placeholder) |
 | `ForwardedHeaders__KnownProxies` | if behind a proxy | Comma-separated proxy IPs allowed to send `X-Forwarded-For` / `X-Forwarded-Proto`. Empty (default) = trust nobody, including loopback |
 | `ForwardedHeaders__KnownNetworks` | if behind a proxy | Comma-separated CIDR ranges, e.g. the Compose network (`172.16.0.0/12`) when the proxy IP is not fixed |
 | `AllowedHosts` | — | Default `*` until the host is known (OD-06). Set to the public host name, e.g. `app.example.com` |

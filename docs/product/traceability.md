@@ -76,6 +76,31 @@ Scope values: **MVP** · **P2** (Phase 2) · **FUT** (Phase 3 / Future) · **NON
 | 60 | Planning deliverables A–I | This doc set (see the coverage table below) | — | P1 | PROCESS |
 | 61 | North star | Review checklist question 1 | — | all | PROCESS |
 
+## Implementation status
+
+M1 (T-101…T-109) was verified at the M1 gate (T-110, 2026-10-24). The commands and results are in [evidence/m1.md](../delivery/evidence/m1.md). Integration test classes are in `tests/Keemese.IntegrationTests/`, vitest files in `web/src/`, and E2E specs in `web/e2e/`.
+
+| Requirement | Status | Tests |
+|---|---|---|
+| FR-AUTH-01 login, logout | Implemented (M1) | `IdentityTests.Login_sets_the_session_cookie_per_ADR_0004_and_me_returns_the_profile`, `.Wrong_password_unknown_user_and_deactivated_user_get_the_same_error`, `.Unsafe_requests_need_the_xsrf_header_and_logout_ends_the_session`; `PasswordLifecycleTests.Five_failures_lock_the_account_for_15_minutes_with_the_generic_error` + the two 429 tests; `auth-forms.test.tsx` LoginForm; E2E-AUTH (`auth.spec.ts`) |
+| FR-AUTH-02 no registration | Implemented (M1) | `IdentityTests.Anonymous_me_is_401_and_sign_up_paths_are_404`; `PipelineTests.Every_endpoint_has_an_authorization_policy_or_is_an_allowlisted_anonymous_endpoint` |
+| FR-AUTH-03 one bootstrapped tutor | Implemented (M1) | `IdentityTests.Bootstrap_creates_one_tutor_and_the_database_rejects_a_second`; E2E-AUTH (bootstrap login) |
+| FR-AUTH-04 forced change at first login | Implemented (M1) | `PasswordLifecycleTests.The_gate_allows_only_me_change_password_and_logout_until_the_password_is_changed`; `StudentsTests.Create_with_only_the_required_fields_returns_a_generated_password_once`; `guard.test.ts`; E2E-AUTH (tutor and student) |
+| FR-AUTH-05 change own password | Implemented (M1) | `PasswordLifecycleTests.Change_password_clears_the_flag_ends_other_sessions_and_keeps_this_one`, `.Change_password_rejects_a_wrong_current_or_a_weak_new_password`; `PasswordPolicyTests`; ChangePasswordForm in `auth-forms.test.tsx` |
+| FR-AUTH-06 tutor resets a student password (+ operator CLI, FR-AUTH-AC9) | Implemented (M1) | `StudentsTests.Reset_password_returns_a_new_temporary_password_and_ends_the_student_sessions`, `.Unlock_clears_a_lockout`; `IdentityTests.The_operator_reset_sets_a_temporary_password_clears_lockout_and_ends_sessions`; Account actions in `workspace.test.tsx`; E2E-ISO; CLI run against the container ([evidence](../delivery/evidence/m1.md#tutor-password-reset-cli)) |
+| FR-AUTH-07 deactivate / reactivate | Implemented (M1, as archive / restore) | `StudentsTests.Archive_ends_the_open_session_and_restore_keeps_must_change_password`; `workspace.test.tsx`; E2E-ISO |
+| FR-AUTH-08 language preference saved | Implemented (M1) | `PasswordLifecycleTests.Preferences_round_trip_through_me`; `i18n.test.ts`; E2E-AUTH (language saved in settings) |
+| FR-STU-01 create with the minimum (J2) | Implemented (M1) | `StudentsTests.Create_with_only_the_required_fields_returns_a_generated_password_once`, `.Create_accepts_a_chosen_password_and_rejects_invalid_input_with_field_codes`; AddStudent (J2) in `students.test.tsx`; E2E-J2 (`students.spec.ts`) |
+| FR-STU-02 edit profile | Implemented (M1) | `StudentsTests.Patch_saves_with_optimistic_concurrency_and_rejects_a_stale_version`; Profile form in `workspace.test.tsx`; E2E-ISO (tutor edits) |
+| FR-STU-03 list, search, filter | Implemented (M1) | `StudentsTests.List_search_ignores_diacritics_and_filters_by_status`; StudentList (FR-STU-03) in `students.test.tsx` |
+| FR-STU-05 parent contacts | Implemented (M1, data only) | Profile form in `workspace.test.tsx` (parents removed and added); `StudentsTests.Patch_saves_with_optimistic_concurrency_and_rejects_a_stale_version` |
+| FR-STU-06 archive, delete with typed name | Implemented (M1) | `StudentsTests.Archive_ends_the_open_session_and_restore_keeps_must_change_password`, `.Delete_requires_the_typed_name_and_removes_the_account_and_profile`; Account actions in `workspace.test.tsx`; E2E-ISO |
+| FR-STU-07 workspace shell with empty states | Implemented (M1 shell; tabs added in M2–M7) | StudentWorkspace in `workspace.test.tsx`; E2E-ISO |
+| FR-UX-01 bilingual vi/en | Implemented (M1) | catalog parity (NFR-I18N-01) and resolveLanguage in `i18n.test.ts`; E2E-AUTH; 4 widths × 2 languages visual QA ([evidence](../delivery/evidence/m1.md#visual-qa-and-axe)) |
+| FR-DASH-01 tutor Today | Shell only (M1); content M7 | nav config in `nav.test.ts`; E2E-AUTH (Today shell) |
+| FR-DASH-02 student Home | Shell only (M1); content M7 | nav config in `nav.test.ts`; E2E-AUTH (Home shell) |
+| NFR-SEC-01 student isolation | In place (M1); grows with `/api/me/**` | `AuthorizationSuiteTests.Students_get_403_on_tutor_endpoints_and_anonymous_callers_get_401_everywhere_else`; `IsolationSuiteTests.Student_B_cannot_reach_student_A_data_and_A_sees_no_tutor_only_fields`; `StudentsTests.Unknown_ids_and_the_tutor_id_are_404_on_every_student_route`; E2E-ISO (`workspace.spec.ts`) |
+
 ## §60 deliverable coverage
 
 | §60 item | Where |

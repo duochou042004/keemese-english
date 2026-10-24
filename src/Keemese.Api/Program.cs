@@ -115,9 +115,15 @@ if (generatingOpenApi) builder.Services.RemoveAll<IHostedService>(); // Data Pro
 
 var app = builder.Build();
 
-if (!generatingOpenApi && string.IsNullOrEmpty(app.Configuration["Security:IpHashSalt"]))
+var ipHashSalt = app.Configuration["Security:IpHashSalt"];
+if (!generatingOpenApi && string.IsNullOrEmpty(ipHashSalt))
 {
     throw new InvalidOperationException("Security:IpHashSalt is not configured (Security__IpHashSalt).");
+}
+// The documented placeholders (.env.example, appsettings.Development.json) are public: a known salt makes the audit IP hashes reversible.
+if (!generatingOpenApi && !app.Environment.IsDevelopment() && ipHashSalt!.StartsWith("change-me", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException("Security:IpHashSalt is still the change-me placeholder; set a random 32+ character value.");
 }
 
 // Operator CLI (FR-AUTH-AC9): reset the tutor's password and exit without starting the web host.

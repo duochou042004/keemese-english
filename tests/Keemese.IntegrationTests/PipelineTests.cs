@@ -110,6 +110,15 @@ public sealed class PipelineTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
+    public async Task The_placeholder_ip_hash_salt_fails_startup_outside_development()
+    {
+        await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir, "Production");
+        var bad = factory.WithWebHostBuilder(b => b.UseSetting("Security:IpHashSalt", "change-me-random-string"));
+        var error = Assert.Throws<InvalidOperationException>(() => bad.CreateClient());
+        Assert.Contains("change-me", error.Message);
+    }
+
+    [Fact]
     public async Task Every_endpoint_has_an_authorization_policy_or_is_an_allowlisted_anonymous_endpoint()
     {
         await using var factory = new KeemeseFactory(postgres.NewDatabase(), _dataDir);
