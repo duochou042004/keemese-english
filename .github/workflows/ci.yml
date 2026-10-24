@@ -34,7 +34,7 @@ jobs:
           echo "$files"
           has() { echo "$files" | grep -qE "$1" && echo true || echo false; }
           {
-            echo "backend=$(has '^(src/|tests/|deploy/|web/src/api/|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
+            echo "backend=$(has '^(src/|tests/|deploy/|web/src/api/|web/package(-lock)?\.json$|global\.json|Directory\.|\.editorconfig|[^/]*\.slnx|\.github/workflows/ci\.yml)')"
             echo "web=$(has '^(web/|\.nvmrc|\.editorconfig|\.claude/hooks/|\.github/workflows/ci\.yml)')"
             echo "docs=$(has '(\.md$|^progress\.json$|^scripts/|^\.github/workflows/ci\.yml)')"
           } >> "$GITHUB_OUTPUT"
@@ -63,7 +63,9 @@ jobs:
         run: |
           npm ci --prefix web --ignore-scripts --no-audit --no-fund
           npm run api:types --prefix web
-          git diff --exit-code web/src/api
+          # status, not diff: an added or renamed generated file is untracked and diff would miss it
+          stale=$(git status --porcelain web/src/api)
+          if [ -n "$stale" ]; then echo "$stale"; git diff web/src/api; exit 1; fi
       - name: Unit tests
         run: dotnet test --project tests/Keemese.UnitTests --no-build --results-directory TestResults --report-xunit-trx
       - name: Integration tests (Testcontainers)
