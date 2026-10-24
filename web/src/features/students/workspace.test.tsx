@@ -117,6 +117,30 @@ describe('StudentWorkspace', () => {
     expect(calls).toBe(1)
   })
 
+  it('survives re-renders where scrollIntoView returns a Promise (Chromium)', async () => {
+    const scroll = vi.fn(() => Promise.resolve())
+    Object.defineProperty(Element.prototype, 'scrollIntoView', {
+      value: scroll,
+      configurable: true,
+    })
+    server.use(http.get(`/api/students/${ID}`, () => HttpResponse.json(student())))
+    const client = new QueryClient()
+    render(
+      <QueryClientProvider client={client}>
+        <StudentWorkspace id={ID}>
+          <StudentOverview />
+        </StudentWorkspace>
+      </QueryClientProvider>,
+    )
+    await screen.findByRole('heading', { level: 1, name: NAME })
+    act(() => {
+      client.setQueryData(['students', ID], student({ fullName: 'Lê Thu Hà' }))
+    })
+    expect(await screen.findByRole('heading', { level: 1, name: 'Lê Thu Hà' })).toBeTruthy()
+    expect(scroll).toHaveBeenCalled()
+    Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+  })
+
   it('an archived student carries the Archived badge', async () => {
     server.use(
       http.get(`/api/students/${ID}`, () => HttpResponse.json(student({ isActive: false }))),

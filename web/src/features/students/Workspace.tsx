@@ -26,11 +26,12 @@ export function StudentWorkspace({ id, children }: { id: string; children: React
   const showSkeleton = useDelayed(student.isPending)
   const tabs = useRef<HTMLElement>(null)
   // The current tab scrolls into view on phones (IA "Workspace tabs on phone").
-  useEffect(() =>
-    tabs.current
+  // A block body: Chromium's scrollIntoView returns a Promise, which React would call as the cleanup.
+  useEffect(() => {
+    void tabs.current
       ?.querySelector('[aria-current="page"]')
-      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }),
-  )
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  })
 
   if (isNotFound(student.error)) return <StudentNotFound />
   if (student.isError && !student.data)
