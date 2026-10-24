@@ -1,7 +1,7 @@
 # T-107: AppShell (tutor and student) and the Today / Home shells
 
 - Milestone: M1 · Ladder level: L4 (AppShell, shared layout) · Depends on: T-106 merged · Branch: `feature/m1-appshell` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review (2026-10-24)
 
 ## Objective
 Both roles get the navigation decided in OD-09 at all four widths, with an account menu, and land on a Today / Home page that shows designed empty states instead of fake data.
@@ -40,4 +40,8 @@ Evidence: counts, axe result, the screenshot set, `not_run` (Firefox/WebKit unti
 Review: `reviewer` (L4, visual check against the checklist).
 
 ## Status / notes
-—
+- In review on `feature/m1-appshell` (2026-10-24); evidence in progress.json.
+- Students and Add student link to `/t/students` and `/t/students/new`, which T-108 builds (T-108 may not touch the AppShell, so the flag is on now); until then they reach the 404 page.
+- No icon library: inline SVG icons (`components/icons.tsx`), since lucide-react would be a new runtime dependency. Radix Dialog / Tooltip / DropdownMenu are used directly; no Avatar (initial only).
+- The tablet rail stays collapsed (no expand toggle, nothing in `localStorage`). The phone top bar shows the wordmark, not the page title. `APP_NAME` = the i18n `app.name` placeholder.
+- The language switch moved from the header to `/t/settings` and `/s/account`.
