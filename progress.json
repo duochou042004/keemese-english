@@ -594,6 +594,21 @@
         "Frontend",
         "File deletion (M3)"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-104",
+      "level": "L1",
+      "tool": "claude-code",
+      "commands": [
+        "gh pr checks 14; gh run view 40057635629 --job 120764030809 --log",
+        "docker run zricethezav/gitleaks:v8.24.3 git /repo --redact --log-opts=develop..HEAD (with and without .gitleaksignore)"
+      ],
+      "result": "pass",
+      "summary": "PR #14 ci: backend, docs, changes green, web skipped; secrets failed on one gitleaks generic-api-key false positive, the invented test password constant ChangedTutorPassword in tests/Keemese.IntegrationTests/Given.cs:62 (commit e9f6b13). Same rule and handling as T-102: that one fingerprint added to .gitleaksignore (history is not rewritten). Local gitleaks 8.24.3 over develop..HEAD: 1 leak without the entry, no leaks with it",
+      "not_run": [
+        "The rerun of the secrets job (runs on the push)"
+      ]
     }
   ],
   "tests": [
