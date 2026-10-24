@@ -23,13 +23,25 @@ export function StudentList({
 }: StudentSearch & { onSearchChange: (search: StudentSearch) => void }) {
   const { t, i18n } = useTranslation()
   const [text, setText] = useState(q ?? '')
+  // Active is the default, so it stays out of the URL.
+  const statusParam = status === 'active' ? undefined : status
+
+  // The URL changed from outside (nav link, back button): show its q, or the debounce would write the old one back.
+  const [shownQ, setShownQ] = useState(q)
+  if (q !== shownQ) {
+    setShownQ(q)
+    if ((text.trim() || undefined) !== q) setText(q ?? '')
+  }
 
   useEffect(() => {
     const next = text.trim() || undefined
     if (next === q) return
-    const id = setTimeout(() => onSearchChange({ q: next, status }), SEARCH_DEBOUNCE_MS)
+    const id = setTimeout(
+      () => onSearchChange({ q: next, status: statusParam }),
+      SEARCH_DEBOUNCE_MS,
+    )
     return () => clearTimeout(id)
-  }, [text, q, status, onSearchChange])
+  }, [text, q, statusParam, onSearchChange])
 
   const list = useInfiniteQuery({
     queryKey: ['students', { q, status }],

@@ -1,7 +1,7 @@
 # T-108: Student list and Add student (J2)
 
 - Milestone: M1 · Ladder level: L3 (journey J2) · Depends on: T-104 and T-107 merged · Branch: `feature/m1-students-ui` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: not_started
+- Status: in_review (feature/m1-students-ui; reviewer approve)
 
 ## Objective
 The tutor finds students by name and creates a usable student account in two interactions, with the temporary password shown once and a ready-to-paste message.
@@ -38,4 +38,9 @@ Evidence: counts, the interaction count from `E2E-J2`, axe, screenshots, `not_ru
 Review: `reviewer` (L3).
 
 ## Status / notes
-—
+- Workspace links (`/t/students/$studentId`) are plain strings with a `shortcut:` comment until T-109 adds the route; until then they reach the 404 page.
+- Username uniqueness shows on submit: the API has no availability endpoint. A taken name gets an inline error and a **Use <next>** button (`nguyen.minhanh2`).
+- The temporary password is generated client-side with the server's alphabet (12 characters, no look-alikes); leaving it empty lets the server generate one. The create call doesn't go through `useMutation`, so the password is not kept in the mutation cache; it lives only in the success panel's state.
+- **Copy message** holds the Vietnamese text, then the English one, whatever the UI language.
+- Optional groups are native `<details>` (no new shared component); a group opens itself when one of its fields has an error.
+- E2E-J2 is tagged `@smoke @students` so the current CI grep (`@smoke`) runs it. It signs in from its own `X-Forwarded-For` address because the login limit is per IP and E2E-AUTH uses 4 of 5. The tutor's post-E2E-AUTH password is derived from the throwaway bootstrap value (`tutor.password`), so each spec file can also run alone (`ensureTutor`).

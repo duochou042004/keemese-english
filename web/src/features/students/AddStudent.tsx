@@ -37,11 +37,14 @@ const schema = z.object({
     .trim()
     .refine((v) => v === '' || z.email().safeParse(v).success, 'email.invalid'),
   phone: optional(40, 'phone.too_long'),
+  // A value needs a channel type, or the API rejects the whole list (contactChannels.invalid).
   contactChannels: z.array(
-    z.object({
-      type: optional(40, 'contactChannels.invalid'),
-      value: optional(200, 'contactChannels.invalid'),
-    }),
+    z
+      .object({
+        type: optional(40, 'contactChannels.invalid'),
+        value: optional(200, 'contactChannels.invalid'),
+      })
+      .refine((c) => !c.value || c.type, { path: ['type'], message: 'validation.required' }),
   ),
   parents: z.array(
     z.object({

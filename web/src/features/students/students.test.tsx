@@ -89,6 +89,9 @@ describe('credentials', () => {
 })
 
 describe('AddStudent (J2)', () => {
+  // Generated: a password-like literal next to a *Password key trips gitleaks.
+  const issued = generatePassword()
+
   it('starts with a generated password and the optional groups collapsed (FR-STU-AC1)', () => {
     const { container } = renderWithQuery(<AddStudent />)
     expect(input('Temporary password').value).toMatch(/^[A-Za-z2-9]{12}$/)
@@ -157,6 +160,20 @@ describe('AddStudent (J2)', () => {
     expect(container.querySelector('details')!.open).toBe(true)
   })
 
+  it('needs a channel type when a channel has a value', async () => {
+    let called = false
+    server.use(http.post('/api/students', () => ((called = true), HttpResponse.json({}))))
+    renderWithQuery(<AddStudent />)
+    fill('Full name', 'Lê Thu Hà')
+    fireEvent.click(screen.getByRole('button', { name: 'Add contact channel' }))
+    fill('Channel', '')
+    fill('Account or number', '0900 000 000')
+    create()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
+    expect(input('Channel').getAttribute('aria-invalid')).toBe('true')
+    expect(called).toBe(false)
+  })
+
   it('shows an unknown failure as a form alert and keeps the input', async () => {
     server.use(http.post('/api/students', () => problem(500, 'common.unexpected')))
     renderWithQuery(<AddStudent />)
@@ -174,7 +191,7 @@ describe('AddStudent (J2)', () => {
       http.post('/api/students', async ({ request }) => {
         sent = await request.json()
         return HttpResponse.json(
-          { id: '0199a000-0000-7000-8000-000000000002', temporaryPassword: 'Xy34567890ab' },
+          { id: '0199a000-0000-7000-8000-000000000002', temporaryPassword: issued },
           { status: 201 },
         )
       }),
@@ -195,14 +212,15 @@ describe('AddStudent (J2)', () => {
       contactChannels: null,
       parents: null,
     })
-    expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Account created' }))
+    const heading = screen.getByRole('heading', { name: 'Account created' })
+    await waitFor(() => expect(document.activeElement).toBe(heading))
     expect(screen.getByText('tran.giabao')).toBeTruthy()
-    expect(screen.getByText('Xy34567890ab')).toBeTruthy()
+    expect(screen.getByText(issued)).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy message' }))
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith(
-        accountMessage('tran.giabao', 'Xy34567890ab', `${window.location.origin}/login`),
+        accountMessage('tran.giabao', issued, `${window.location.origin}/login`),
       ),
     )
     // FR-STU-AC4: only the M1 follow-ups.
@@ -218,7 +236,7 @@ describe('AddStudent (J2)', () => {
     server.use(
       http.post('/api/students', async ({ request }) => {
         sent = (await request.json()) as typeof sent
-        return HttpResponse.json({ id: 'x', temporaryPassword: 'Xy34567890ab' }, { status: 201 })
+        return HttpResponse.json({ id: 'x', temporaryPassword: issued }, { status: 201 })
       }),
     )
     renderWithQuery(<AddStudent />)
@@ -243,10 +261,14 @@ describe('AddStudent (J2)', () => {
 })
 
 describe('StudentList (FR-STU-03)', () => {
-  const page = (items: { fullName: string; lastLoginAt?: string }[], total = items.length) =>
+  const page = (
+    items: { fullName: string; lastLoginAt?: string }[],
+    total = items.length,
+    first = 0,
+  ) =>
     HttpResponse.json({
       items: items.map((s, i) => ({
-        id: `id-${i}`,
+        id: `id-${first + i}`,
         fullName: s.fullName,
         userName: `user${i}`,
         isActive: true,
@@ -264,7 +286,7 @@ describe('StudentList (FR-STU-03)', () => {
         pages.push(url.searchParams.toString())
         return url.searchParams.get('page') === '1'
           ? page([{ fullName: 'Nguyễn Thị Phương Thảo', lastLoginAt: '2026-10-20T08:00:00Z' }], 51)
-          : page([{ fullName: 'Trần Gia Bảo' }], 51)
+          : page([{ fullName: 'Trần Gia Bảo' }], 51, 50)
       }),
     )
     renderWithQuery(<StudentList onSearchChange={vi.fn()} />)
@@ -314,6 +336,22 @@ describe('StudentList (FR-STU-03)', () => {
     expect(await screen.findByRole('link', { name: /Lê Thu Hà/ })).toBeTruthy()
   })
 
+  it('shows a q that changed in the URL instead of writing the old one back', async () => {
+    server.use(http.get('/api/students', () => page([])))
+    const onSearchChange = vi.fn()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const ui = (q?: string) => (
+      <QueryClientProvider client={client}>
+        <StudentList q={q} onSearchChange={onSearchChange} />
+      </QueryClientProvider>
+    )
+    const { rerender } = render(ui('abc'))
+    rerender(ui(undefined))
+    expect(input('Search by name').value).toBe('')
+    await new Promise((r) => setTimeout(r, 350))
+    expect(onSearchChange).not.toHaveBeenCalled()
+  })
+
   it('debounces the search into the URL and switches the status filter', () => {
     server.use(http.get('/api/students', () => page([])))
     const onSearchChange = vi.fn()
@@ -326,7 +364,7 @@ describe('StudentList (FR-STU-03)', () => {
         vi.advanceTimersByTime(300)
       })
       expect(onSearchChange).toHaveBeenCalledTimes(1)
-      expect(onSearchChange).toHaveBeenCalledWith({ q: 'nguyen', status: 'active' })
+      expect(onSearchChange).toHaveBeenCalledWith({ q: 'nguyen', status: undefined })
     } finally {
       vi.useRealTimers()
     }
