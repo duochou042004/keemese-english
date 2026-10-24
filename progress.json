@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-104",
     "title": "Students API, account actions, isolation and authorization suites",
-    "status": "in_review",
-    "branch": "feature/m1-students-api",
+    "status": "done",
+    "branch": "feature/m1-students-api (merged via PR #14, 4f549e9; branch deleted)",
     "packet": "docs/delivery/tasks/T-104-students-api-and-isolation-suite.md"
   },
   "repository": {
@@ -78,7 +78,8 @@
     "PR #7 (M1 packets T-101..T-110) merged into develop (6d3be09)",
     "T-101 pipeline hardening merged into develop via PR #8 (eb7b49d) with the owner's approval in chat; PR ci green (changes, backend, docs, secrets; web skipped, no web changes); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39982022014)",
     "T-102 identity merged into develop via PR #10 (2d68d91) with the owner's approval in chat; PR ci green on 9afce2e (changes, backend, docs, secrets; web skipped). The first secrets run failed on a gitleaks generic-api-key false positive (invented test password in 3d63d7a): line changed and that one fingerprint added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/39989222670)",
-    "T-103 password lifecycle merged into develop via PR #12 (cee9a58) with the owner's approval in chat (AppError.cs change approved); PR ci green on c8966e0 (changes, backend, docs, secrets; web skipped)"
+    "T-103 password lifecycle merged into develop via PR #12 (cee9a58) with the owner's approval in chat (AppError.cs change approved); PR ci green on c8966e0 (changes, backend, docs, secrets; web skipped)",
+    "T-104 students API merged into develop via PR #14 (4f549e9) with the owner approval in chat; PR ci green on f4d4f5a (changes, backend, docs, secrets; web and compat skipped) after one gitleaks false positive was added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40058058050)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -643,9 +644,9 @@
       "date": "2026-10-24"
     },
     {
-      "command": "GitHub ci + compat on PR #5",
+      "command": "GitHub ci on PR #14 and the push to develop",
       "result": "pass",
-      "date": "2026-10-23"
+      "date": "2026-10-24"
     }
   ],
   "environment_verified": {
@@ -661,7 +662,6 @@
   },
   "blockers": [],
   "pending_owner_actions": [
-    "Approve the merge of T-104 (PR for feature/m1-students-api): authorization and student data, outside the merge delegation",
     "Follow-up from T-103: record the accepted T19 lockout-abuse risk (docs/security/security-model.md) in docs/security/threat-model.md T19 (outside T-103 file ownership; owner to approve the doc change)",
     "GitHub settings for T-003 (owner does them or approves each): branch protection on master and develop (require a PR + the ci checks changes/backend/web/docs/secrets, 0 required approvals, no force-push or deletion); turn on Dependabot security updates. Secret scanning and push protection are already on (security-reviewer checked via gh api, 2026-10-23)",
     "Answer OD-01, OD-02 (M1 uses the APP_NAME placeholder meanwhile), OD-04, OD-07, OD-08 (see docs/decisions/README.md); OD-03, OD-05 and OD-06 are decided later at their milestones"
@@ -678,10 +678,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-104",
-    "title": "Students API, account actions, isolation and authorization suites",
-    "packet": "docs/delivery/tasks/T-104-students-api-and-isolation-suite.md",
-    "requires": "T-103 merged into develop (done 2026-10-24, PR #12)"
+    "id": "T-105",
+    "title": "Generated API types, the CI freshness check, and the auth-aware fetch wrapper",
+    "packet": "docs/delivery/tasks/T-105-api-types-and-fetch-wrapper.md",
+    "requires": "T-102 merged into develop (done 2026-10-23, PR #10)"
   },
   "sessions": [
     {
@@ -737,7 +737,7 @@
       "date": "2026-10-24",
       "tool": "claude-code",
       "task": "T-104",
-      "outcome": "Implemented and verified (L4); reviewer changes_requested → fixed, security-reviewer approve (L1 fixed, L2/L3 partly recorded); PR open, waiting for the owner to approve the merge"
+      "outcome": "Implemented and verified (L4); reviewer changes_requested → fixed, security-reviewer approve; merged via PR #14 (owner approval); context ~280k at handoff"
     }
   ]
 }
