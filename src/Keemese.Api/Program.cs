@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,9 +108,14 @@ builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"])
     .AddCheck<DataDirHealthCheck>("data_dir", tags: ["ready"]);
 
+// The build-time OpenAPI generator (T-105) runs this entry point with no database or configuration: build the
+// endpoints, skip the checks and startup work. app.Run() does not serve under the generator.
+var generatingOpenApi = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
+if (generatingOpenApi) builder.Services.RemoveAll<IHostedService>(); // Data Protection's would write a key to DATA_DIR
+
 var app = builder.Build();
 
-if (string.IsNullOrEmpty(app.Configuration["Security:IpHashSalt"]))
+if (!generatingOpenApi && string.IsNullOrEmpty(app.Configuration["Security:IpHashSalt"]))
 {
     throw new InvalidOperationException("Security:IpHashSalt is not configured (Security__IpHashSalt).");
 }
@@ -129,8 +135,9 @@ if (args.Contains("--reset-tutor-password"))
     return;
 }
 
-await using (var scope = app.Services.CreateAsyncScope())
+if (!generatingOpenApi)
 {
+    await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<IdentityService>().BootstrapTutorAsync(CancellationToken.None);
 }
