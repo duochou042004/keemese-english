@@ -1,7 +1,7 @@
 # T-108: Student list and Add student (J2)
 
 - Milestone: M1 · Ladder level: L3 (journey J2) · Depends on: T-104 and T-107 merged · Branch: `feature/m1-students-ui` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review (feature/m1-students-ui; reviewer approve)
+- Status: done (merged via PR #23, 2026-10-24)
 
 ## Objective
 The tutor finds students by name and creates a usable student account in two interactions, with the temporary password shown once and a ready-to-paste message.

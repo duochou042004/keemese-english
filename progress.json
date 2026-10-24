@@ -44,8 +44,8 @@
   "current_task": {
     "id": "T-108",
     "title": "Student list and Add student (J2)",
-    "status": "in_review",
-    "branch": "feature/m1-students-ui",
+    "status": "done",
+    "branch": "feature/m1-students-ui (merged via PR #23, b0ef86d; branch deleted)",
     "packet": "docs/delivery/tasks/T-108-students-list-and-add-student.md"
   },
   "repository": {
@@ -82,7 +82,8 @@
     "T-104 students API merged into develop via PR #14 (4f549e9) with the owner approval in chat; PR ci green on f4d4f5a (changes, backend, docs, secrets; web and compat skipped) after one gitleaks false positive was added to .gitleaksignore; push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40058058050)",
     "T-105 API types merged into develop via PR #16 (23cc0cc) with the owner approval in chat (incl. the four out-of-scope changes); PR ci green on 8380978 (https://github.com/duochou042004/keemese-english/actions/runs/40065602448) after the deliberate stale-types red run (https://github.com/duochou042004/keemese-english/actions/runs/40065472421, reverted); push ci run on develop green, all 5 jobs (https://github.com/duochou042004/keemese-english/actions/runs/40065736533)",
     "T-106 login flow merged into develop via PR #18 (d047d5a) with the owner approval in chat; PR ci green on fe3ac73, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40067787763) after the deliberate E2E red run (https://github.com/duochou042004/keemese-english/actions/runs/40067586356, reverted); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40068085916)",
-    "T-107 AppShell merged into develop via PR #20 (8ed413c) with the owner approval in chat; PR ci green on cb4d1b3 (changes, web, docs, secrets, e2e-smoke; backend skipped, no backend change) (https://github.com/duochou042004/keemese-english/actions/runs/40082845405); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40082990792)"
+    "T-107 AppShell merged into develop via PR #20 (8ed413c) with the owner approval in chat; PR ci green on cb4d1b3 (changes, web, docs, secrets, e2e-smoke; backend skipped, no backend change) (https://github.com/duochou042004/keemese-english/actions/runs/40082845405); push ci run on develop green, all 6 jobs incl. e2e-smoke (https://github.com/duochou042004/keemese-english/actions/runs/40082990792)",
+    "T-108 student list and Add student merged into develop via PR #23 (b0ef86d) under the merge delegation (reviewer approve, evidence recorded, UI-only); PR ci green on 90a05ee (changes, web, docs, secrets, e2e-smoke incl. E2E-J2; backend skipped) (https://github.com/duochou042004/keemese-english/actions/runs/40085897060)"
   ],
   "changed_files": "see `git diff --stat develop...feature/planning-baseline`",
   "evidence": [
@@ -943,10 +944,10 @@
     "Threats T1-T21 (docs/security/threat-model.md)"
   ],
   "next_task": {
-    "id": "T-108",
-    "title": "Student list and Add student (J2)",
-    "packet": "docs/delivery/tasks/T-108-students-list-and-add-student.md",
-    "requires": "T-104 and T-107 merged into develop"
+    "id": "T-109",
+    "title": "Student workspace shell, profile editing and account actions",
+    "packet": "docs/delivery/tasks/T-109-student-workspace-and-account-actions.md",
+    "requires": "T-108 merged into develop"
   },
   "sessions": [
     {
@@ -1021,6 +1022,12 @@
       "tool": "claude-code",
       "task": "T-107",
       "outcome": "Implemented and verified (L4); reviewer and security-reviewer approve (low finding fixed); merged via PR #20 (owner approval)"
+    },
+    {
+      "date": "2026-10-24",
+      "tool": "claude-code",
+      "task": "T-108",
+      "outcome": "Implemented and verified (L3); reviewer approve (non-blocking findings fixed); CI green; merged via PR #23 under the merge delegation; context ~265k at handoff"
     }
   ]
 }
