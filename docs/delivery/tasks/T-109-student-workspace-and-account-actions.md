@@ -17,7 +17,7 @@ The tutor opens a student's workspace, edits their profile and parents, and arch
 - Unknown or deleted `$studentId` → the localized not-found state, not a crash.
 - i18n `vi`/`en`; Vitest + MSW for the profile form (conflict path), the delete dialog (name match) and the reset panel.
 - **`E2E-ISO`** (M1 form, @smoke; docs/frontend/ux-journeys.md#journey--e2e-mapping): student B opening `/t/students/<A's id>` (or any `/t/*` URL) lands in `/s`, and the API returns 403 for the same data; tutor archives A → A's open session is sent to `/login` on the next navigation; delete A → A's workspace URL shows not-found. axe on Overview, Profile and each dialog.
-- Visual QA: Overview, Profile, each dialog at 4 widths × 2 languages → `docs/delivery/evidence/m1/`.
+- Visual QA: Overview, Profile, each dialog at 4 widths × 2 languages → saved locally in `docs/delivery/evidence/m1/` (git-ignored, not committed; record them in the evidence).
 
 ## Inputs (read these, nothing more)
 - docs/frontend/information-architecture.md#student-workspace-tabs · docs/frontend/design-system.md

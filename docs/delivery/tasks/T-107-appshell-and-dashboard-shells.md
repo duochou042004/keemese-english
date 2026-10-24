@@ -18,7 +18,7 @@ Both roles get the navigation decided in OD-09 at all four widths, with an accou
 - Components per docs/frontend/design-system.md#components: `AppShell` (two variants), `PageHeader`, `EmptyState`; reuse tokens only (off-system colors don't compile). Add only the shadcn primitives used (e.g. Sheet for the drawer, Tooltip, DropdownMenu, Avatar).
 - i18n `vi`/`en` for every label; Vietnamese labels fit the rail tooltips and bottom bar at 390 px.
 - Tests: Vitest for the nav config (hidden items, role split); `E2E-AUTH` extended to assert the shell renders for both roles; axe clean on `/t`, `/t/settings`, `/s`, `/s/account`.
-- **Visual QA** (docs/frontend/design-system.md checklist): `/t` and `/s` at 1440/1024/768/390 × vi/en, no horizontal scroll, screenshots in `docs/delivery/evidence/m1/` (invented data only).
+- **Visual QA** (docs/frontend/design-system.md checklist): `/t` and `/s` at 1440/1024/768/390 × vi/en, no horizontal scroll, screenshots saved locally in `docs/delivery/evidence/m1/` (git-ignored, not committed; invented data only).
 
 ## Inputs (read these, nothing more)
 - docs/frontend/information-architecture.md (whole file) · docs/frontend/design-system.md · docs/decisions/README.md (OD-02, OD-09)

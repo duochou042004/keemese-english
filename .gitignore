@@ -38,3 +38,8 @@ Thumbs.db
 # Claude Code local-only settings
 .claude/settings.local.json
 .claude/worktrees/
+
+# Screenshots from visual QA stay on the local machine (keeps clones small); record them as text evidence instead.
+docs/delivery/evidence/**/*.png
+docs/delivery/evidence/**/*.jpg
+docs/delivery/evidence/**/*.webp

@@ -16,7 +16,7 @@ The tutor finds students by name and creates a usable student account in two int
 - Today's **Add student** quick action (T-107) and the Students page header action both open the form.
 - i18n `vi`/`en`; Vitest + MSW for the form (validation, username suggestion, taken error, copy message text).
 - **`E2E-J2`** (tagged for the students area + release): tutor adds "Trần Gia Bảo" with only the required fields in 2 interactions; the new student logs in with the copied password and is forced to change it; a duplicate username shows the suggestion. axe on both pages.
-- Visual QA: list (empty and filled) and form (collapsed and expanded, success panel) at 4 widths × 2 languages → `docs/delivery/evidence/m1/`.
+- Visual QA: list (empty and filled) and form (collapsed and expanded, success panel) at 4 widths × 2 languages → saved locally in `docs/delivery/evidence/m1/` (git-ignored, not committed; record them in the evidence).
 
 ## Inputs (read these, nothing more)
 - docs/frontend/ux-journeys.md#j2 · docs/frontend/information-architecture.md#routes · docs/frontend/design-system.md
