@@ -33,14 +33,16 @@ While `mustChangePassword` is true, every other `/api` request gets `403 auth.pa
 ### Students (Students + Identity)
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/students?q&status=active\|archived` | List with search (FR-STU-03) |
-| POST | `/api/students` | Create `{fullName, userName, temporaryPassword?, email?, phone?, contactChannels?, parents?}`. If no password is given, the server generates one and returns `{id, temporaryPassword}` once |
-| GET | `/api/students/{id}` | Profile + learning profile |
-| PATCH | `/api/students/{id}` | Edit profile and learning profile fields |
-| POST | `/api/students/{id}/archive` · `/restore` | Deactivate or reactivate (FR-AUTH-07) |
-| POST | `/api/students/{id}/reset-password` | → `{temporaryPassword}` (FR-AUTH-06) |
-| POST | `/api/students/{id}/unlock` | Clear the lockout (FR-AUTH-AC9) |
-| DELETE | `/api/students/{id}` | Permanent delete. Body `{confirmName}` must match (FR-STU-06) |
+| GET | `/api/students?q&status=active\|archived&page&pageSize` | List with search (FR-STU-03) → `{items: [{id, fullName, userName, isActive, mustChangePassword, lastLoginAt}], total}`, ordered by name. `q` matches the full name ignoring case and diacritics; `status` defaults to `active` (other values → 400 `status.unsupported`) |
+| POST | `/api/students` | Create `{fullName, userName, temporaryPassword?, email?, phone?, contactChannels?: [{type, value}], parents?: [{name, relationship?, contact?, notes?}]}` → 201 `{id, temporaryPassword}`, shown once. No password → the server generates 12 characters. Field codes (400 `validation.failed`): `userName` `userName.invalid` (3–40 `[a-z0-9._-]` after trim + lowercase) or `students.username_taken` (case-insensitive); `temporaryPassword` `password.*`; `fullName` `fullName.required`/`fullName.too_long` (≤ 120); `email` `email.invalid`; `phone` `phone.too_long` (≤ 40); `contactChannels.invalid` (≤ 20, type ≤ 40, value ≤ 200); `parents.invalid` (≤ 10, name ≤ 120, relationship ≤ 60, contact ≤ 200, notes ≤ 2,000). The account starts with `mustChangePassword` |
+| GET | `/api/students/{id}` | → `{id, fullName, userName, email, phone, contactChannels, parents, isActive, mustChangePassword, isLockedOut, lastLoginAt, createdAt, version}`. Learning profile fields join in M2 |
+| PATCH | `/api/students/{id}` | `{version, fullName?, email?, phone?, contactChannels?, parents?}` → the updated student. A missing/null field is unchanged; `""` or `[]` clears it. Same field codes as create; no `version` → 400 `version.required`; stale `version` → 409 `concurrency.conflict` |
+| POST | `/api/students/{id}/archive` · `/restore` | Deactivate or reactivate (FR-AUTH-07) → 204. Archive ends open sessions; restore keeps `mustChangePassword` |
+| POST | `/api/students/{id}/reset-password` | → `{temporaryPassword}` once (FR-AUTH-06). Sets `mustChangePassword`, clears any lockout, ends open sessions |
+| POST | `/api/students/{id}/unlock` | Clear the lockout (FR-AUTH-AC9) → 204 |
+| DELETE | `/api/students/{id}` | Permanent delete → 204. Body `{confirmName}` must equal the full name (trimmed, Unicode-normalized), else 400 `students.confirm_name_mismatch` (FR-STU-06) |
+
+An unknown ID, or the tutor's own ID, is 404 on every `{id}` route. Each account action writes an audit event (`student.created`, `student.password_reset`, `student.archived`, `student.restored`, `student.unlocked`, `student.deleted`; IDs only).
 | GET | `/api/students/{id}/overview` | Workspace header: next session, open tasks, goals summary, pinned notes |
 
 ### Goals, metrics, notes

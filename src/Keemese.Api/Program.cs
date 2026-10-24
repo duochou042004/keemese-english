@@ -2,7 +2,9 @@ using Keemese.Api.Infrastructure.Data;
 using Keemese.Api.Infrastructure.Health;
 using Keemese.Api.Infrastructure.Security;
 using Keemese.Api.Modules.Identity;
+using Keemese.Api.Modules.Identity.Contracts;
 using Keemese.Api.Modules.Identity.Domain;
+using Keemese.Api.Modules.Students;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.DataProtection.Repositories;
@@ -82,6 +84,8 @@ builder.Services.AddAuthorizationBuilder().AddKeemesePolicies();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IdentityService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<StudentsService>();
 
 // Trust X-Forwarded-* only from the configured proxies (comma-separated); none configured = trust nobody.
 builder.Services.AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>((options, config) =>
@@ -160,6 +164,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapIdentityEndpoints();
+app.MapStudentsEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") }).AllowAnonymous();
