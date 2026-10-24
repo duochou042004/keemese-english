@@ -18,6 +18,8 @@ import { Route as SIndexRouteImport } from './routes/s/index'
 import { Route as SAccountRouteImport } from './routes/s/account'
 import { Route as TIndexRouteImport } from './routes/t/index'
 import { Route as TSettingsRouteImport } from './routes/t/settings'
+import { Route as TStudentsIndexRouteImport } from './routes/t/students/index'
+import { Route as TStudentsNewRouteImport } from './routes/t/students/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +66,16 @@ const TSettingsRoute = TSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => TRoute,
 } as any)
+const TStudentsIndexRoute = TStudentsIndexRouteImport.update({
+  id: '/students/',
+  path: '/students/',
+  getParentRoute: () => TRoute,
+} as any)
+const TStudentsNewRoute = TStudentsNewRouteImport.update({
+  id: '/students/new',
+  path: '/students/new',
+  getParentRoute: () => TRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +87,8 @@ export interface FileRoutesByFullPath {
   '/t/settings': typeof TSettingsRoute
   '/s/': typeof SIndexRoute
   '/t/': typeof TIndexRoute
+  '/t/students/new': typeof TStudentsNewRoute
+  '/t/students/': typeof TStudentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,6 +98,8 @@ export interface FileRoutesByTo {
   '/t/settings': typeof TSettingsRoute
   '/s': typeof SIndexRoute
   '/t': typeof TIndexRoute
+  '/t/students/new': typeof TStudentsNewRoute
+  '/t/students': typeof TStudentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +112,8 @@ export interface FileRoutesById {
   '/t/settings': typeof TSettingsRoute
   '/s/': typeof SIndexRoute
   '/t/': typeof TIndexRoute
+  '/t/students/new': typeof TStudentsNewRoute
+  '/t/students/': typeof TStudentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,6 +127,8 @@ export interface FileRouteTypes {
     | '/t/settings'
     | '/s/'
     | '/t/'
+    | '/t/students/new'
+    | '/t/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,6 +138,8 @@ export interface FileRouteTypes {
     | '/t/settings'
     | '/s'
     | '/t'
+    | '/t/students/new'
+    | '/t/students'
   id:
     | '__root__'
     | '/'
@@ -129,6 +151,8 @@ export interface FileRouteTypes {
     | '/t/settings'
     | '/s/'
     | '/t/'
+    | '/t/students/new'
+    | '/t/students/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,6 +228,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TSettingsRouteImport
       parentRoute: typeof TRoute
     }
+    '/t/students/': {
+      id: '/t/students/'
+      path: '/students'
+      fullPath: '/t/students/'
+      preLoaderRoute: typeof TStudentsIndexRouteImport
+      parentRoute: typeof TRoute
+    }
+    '/t/students/new': {
+      id: '/t/students/new'
+      path: '/students/new'
+      fullPath: '/t/students/new'
+      preLoaderRoute: typeof TStudentsNewRouteImport
+      parentRoute: typeof TRoute
+    }
   }
 }
 
@@ -222,11 +260,15 @@ const SRouteWithChildren = SRoute._addFileChildren(SRouteChildren)
 interface TRouteChildren {
   TSettingsRoute: typeof TSettingsRoute
   TIndexRoute: typeof TIndexRoute
+  TStudentsNewRoute: typeof TStudentsNewRoute
+  TStudentsIndexRoute: typeof TStudentsIndexRoute
 }
 
 const TRouteChildren: TRouteChildren = {
   TSettingsRoute: TSettingsRoute,
   TIndexRoute: TIndexRoute,
+  TStudentsNewRoute: TStudentsNewRoute,
+  TStudentsIndexRoute: TStudentsIndexRoute,
 }
 
 const TRouteWithChildren = TRoute._addFileChildren(TRouteChildren)

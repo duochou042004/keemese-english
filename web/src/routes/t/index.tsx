@@ -10,15 +10,13 @@ export const Route = createFileRoute('/t/')({ component: Today })
 function Today() {
   const { t, i18n } = useTranslation()
   const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(new Date())
-  // shortcut: a plain string until T-108 adds the route (J2); then link to it type-checked.
-  const addStudent: string = '/t/students/new'
   return (
     <>
       <PageHeader
         title={t('today.title')}
         description={date}
         action={
-          <Link to={addStudent} className={buttonVariants()}>
+          <Link to="/t/students/new" className={buttonVariants()}>
             {t('today.addStudent')}
           </Link>
         }

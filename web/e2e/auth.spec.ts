@@ -1,50 +1,14 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import en from '../src/locales/en/common.json' with { type: 'json' }
 import enErrors from '../src/locales/en/errors.json' with { type: 'json' }
 import vi from '../src/locales/vi/common.json' with { type: 'json' }
 import { expectAccessible } from './fixtures/axe'
 import { createStudent, newPassword, tutor } from './fixtures/seed'
+import { changePassword, expectNav, openFromAccountMenu, signIn } from './fixtures/ui'
 
 // E2E-AUTH (docs/frontend/ux-journeys.md#journey--e2e-mapping). Serial: the student is created by the tutor
 // whose password the first test changes. Four logins in total, under the 5-per-minute-per-IP limit (T1).
 test.describe.configure({ mode: 'serial' })
-
-type Ui = typeof en
-let tutorPassword = tutor.bootstrapPassword
-
-async function signIn(page: Page, userName: string, password: string, ui: Ui = en) {
-  await page.getByLabel(ui.login.username, { exact: true }).fill(userName)
-  await page.getByLabel(ui.login.password, { exact: true }).fill(password)
-  await page.getByRole('button', { name: ui.login.submit }).click()
-}
-
-// The avatar button is named "<prefix>: <display name>"; Playwright matches the prefix as a substring.
-const accountMenu = (page: Page, ui: Ui) =>
-  page.getByRole('button', { name: ui.shell.accountMenu.split('{{')[0] })
-
-async function openFromAccountMenu(page: Page, ui: Ui, item: string) {
-  await accountMenu(page, ui).click()
-  await page.getByRole('menuitem', { name: item }).click()
-}
-
-/** OD-09: only shipped items are in the nav, and the current one is marked. */
-async function expectNav(page: Page, ui: Ui, shown: string[], hidden: string[], current: string) {
-  const nav = page.getByRole('navigation', { name: ui.nav.label })
-  for (const name of shown) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible()
-  for (const name of hidden)
-    await expect(nav.getByRole('link', { name, exact: true })).toHaveCount(0)
-  await expect(nav.getByRole('link', { name: current, exact: true })).toHaveAttribute(
-    'aria-current',
-    'page',
-  )
-}
-
-async function changePassword(page: Page, current: string, next: string, ui: Ui) {
-  await page.getByLabel(ui.changePassword.current, { exact: true }).fill(current)
-  await page.getByLabel(ui.changePassword.new, { exact: true }).fill(next)
-  await page.getByLabel(ui.changePassword.confirm, { exact: true }).fill(next)
-  await page.getByRole('button', { name: ui.changePassword.submit }).click()
-}
 
 test('tutor: bootstrap login, forced change, Today shell, language saved in settings, logout, back stays out @smoke', async ({
   page,
@@ -60,10 +24,8 @@ test('tutor: bootstrap login, forced change, Today shell, language saved in sett
   await expect(page.getByRole('heading', { name: vi.changePassword.forcedTitle })).toBeVisible()
   await expectAccessible(page)
 
-  const next = newPassword()
-  await changePassword(page, tutor.bootstrapPassword, next, vi)
+  await changePassword(page, tutor.bootstrapPassword, tutor.password, vi)
   await expect(page).toHaveURL(/\/t$/)
-  tutorPassword = next
   await expect(page.getByRole('heading', { level: 1, name: vi.today.title })).toBeVisible()
   await expect(page.getByRole('link', { name: vi.today.addStudent })).toBeVisible()
   await expect(page.getByText(vi.today.sessionsEmpty)).toBeVisible()
@@ -98,7 +60,7 @@ test('tutor: bootstrap login, forced change, Today shell, language saved in sett
 test('student: created via the API, login, forced change, Home shell, account page, kept out of /t @smoke', async ({
   page,
 }) => {
-  const student = await createStudent(tutorPassword, 'Trần Gia Bảo')
+  const student = await createStudent('Trần Gia Bảo')
   await page.goto('/login')
   await expectAccessible(page)
   await signIn(page, student.userName, student.temporaryPassword)

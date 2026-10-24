@@ -42,11 +42,11 @@
   ],
   "current_phase": "P2",
   "current_task": {
-    "id": "T-107",
-    "title": "AppShell (tutor and student) and the Today / Home shells",
-    "status": "done",
-    "branch": "feature/m1-appshell (merged via PR #20, 8ed413c; branch deleted)",
-    "packet": "docs/delivery/tasks/T-107-appshell-and-dashboard-shells.md"
+    "id": "T-108",
+    "title": "Student list and Add student (J2)",
+    "status": "in_review",
+    "branch": "feature/m1-students-ui",
+    "packet": "docs/delivery/tasks/T-108-students-list-and-add-student.md"
   },
   "repository": {
     "branches": {
@@ -801,6 +801,46 @@
         "E2E",
         "gitleaks (relied on the orchestrator)",
         "Backend suites (no backend change)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-108",
+      "level": "L3",
+      "tool": "claude-code",
+      "commands": [
+        "docker run node:24-alpine: npm ci, lint (+ Prettier), typecheck, test, build",
+        "npm run e2e:reset (fresh keemese-e2e stack, throwaway env exported in the shell, no .env) then npm run e2e (Windows Chromium), on fa8f22d",
+        "second fresh stack: npx playwright test students (E2E-J2 alone, bootstrap path of ensureTutor)",
+        "scratchpad Playwright script on a third fresh stack: list empty/filled, form collapsed/expanded, success panel at 1440/1024/768/390 x vi/en, scrollWidth - clientWidth",
+        "node --test hooks and scripts; node scripts/check-docs.mjs; docker run zricethezav/gitleaks:v8.24.3 git --log-opts=develop..HEAD"
+      ],
+      "result": "pass",
+      "summary": "Web: lint + Prettier clean, tsc clean, build ok (routeTree.gen.ts regenerated and committed), vitest 106/106 (+29: username suggestion x7 incl. NFD input, đ and the 40-char cap; next suggestion x4; generated password alphabet/length/uniqueness; bilingual Copy message vi then en with the login URL; form: generated password + both groups collapsed (STU-AC1), required fields block the call and focus Full name, suggestion follows the name until edited, Regenerate + Copy, students.username_taken inline + Use nguyen.minhanh2 (STU-AC2), API field error opens its collapsed group, channel value needs a type, unknown error → alert with input kept, required-only body with nulls, success panel focus + one-time details + Copy message text + only Done/Open workspace (STU-AC4), channels/parents sent; list: rows link to the workspace, Load more past 50, first-student empty state with Add, no-match status, error with Retry + traceId, debounced q into the URL, status filter, q changed in the URL is shown and not written back). E2E 4/4 on a fresh stack (E2E-AUTH 3 + E2E-J2): tutor reaches a usable account in 2 interactions (Add student, Create), groups collapsed, success heading focused, only Done/Open workspace, Copy message read from the clipboard holds vi + en text and the login URL, search \"tran gia bao\" finds Trần Gia Bảo via ?q=, the password is gone from the list page, the same name again → students.username_taken inline + Use tran.giabao2, the new student signs in with the copied password and is forced to change it → /s; axe serious/critical = 0 on /t/students, /t/students/new (collapsed), the success panel, the list after search and the taken-username form. E2E-J2 alone on a fresh stack: 1/1. Visual QA: 40 captures, horizontal overflow 0 in all (students-empty, students-list, student-new, student-new-expanded, student-created × vi/en × 4 widths), saved in docs/delivery/evidence/m1/, local only (git-ignored; invented data: Nguyễn Thị Phương Thảo, Trần Gia Bảo, Lê Thu Hà, Nguyễn Minh Anh, Phạm Hoàng Yến). Hooks 13/13, scripts 4/4, check-docs 0 broken. gitleaks: 2 generic-api-key hits on invented temporaryPassword literals in students.test.tsx (fa8f22d) → replaced by a generated value in the next commit",
+      "not_run": [
+        "E2E on the final commit locally (the reviewer fixes after fa8f22d: status param, channel-type rule, URL re-sync; e2e-smoke runs E2E-J2 on the PR)",
+        "Firefox/WebKit (release workflow)",
+        "Podman",
+        "Local Windows vitest/vite (Application Control blocks rolldown; Linux container used)",
+        ".NET build and suites (no backend change)",
+        "CI (runs on the PR)",
+        "Workspace links (T-109 route; they reach the 404 page until then)"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "task": "T-108",
+      "level": "L3",
+      "tool": "claude-code reviewer subagent",
+      "commands": [
+        "npm ci, lint, typecheck, test, build (node:24-alpine, own node_modules volume) on fa8f22d"
+      ],
+      "result": "approve",
+      "summary": "Every packet AC mapped to code and tests; vitest 104/104, build ok with routeTree.gen.ts unchanged; client limits match AccountService/StudentsService; known decisions (string workspace links until T-109, uniqueness on submit, vi+en message, @smoke tag, own X-Forwarded-For, derived tutor password, no useMutation) accepted. Non-blocking, all fixed after fa8f22d: search box did not re-read q from the URL (now re-synced, tested); duplicate React keys in the paging test; a channel value without a type reached the API (now a field error, tested); typing wrote status=active into the URL (now omitted like the filter button); evidence not recorded (done)",
+      "not_run": [
+        "E2E",
+        "Screenshots",
+        "CI"
       ]
     }
   ],
