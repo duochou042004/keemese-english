@@ -1,7 +1,7 @@
 # T-105: Generated API types, the CI freshness check, and the auth-aware fetch wrapper
 
 - Milestone: M1 · Ladder level: L4 (`web/src/api/**`, CI) · Depends on: T-102 merged (can run in parallel with T-103 in its own worktree; disjoint files) · Branch: `feature/m1-api-types` · **Session budget: 1 session (≤ ~200k tokens of work); split if larger**
-- Status: in_review (feature/m1-api-types; evidence in progress.json)
+- Status: done (merged via PR #16, 23cc0cc)
 
 ## Objective
 The SPA's API types are generated from the API's OpenAPI document, CI fails when they are stale, and `apiFetch` sends the antiforgery header and handles 401 the way ADR-0004 and the IA describe.

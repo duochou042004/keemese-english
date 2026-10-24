@@ -1,24 +1,26 @@
-# Next session: T-105, generated API types, CI freshness check, auth-aware fetch wrapper
+# Next session: T-106, login, forced password change, session guards, Playwright + axe, e2e-smoke
 
 You are continuing work on keemese-english, a private 1:1 tutoring workspace (one tutor, the students that tutor creates).
-Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-105-api-types-and-fetch-wrapper.md. Do not rely on chat history.
+Your session briefing (SessionStart hook) shows the live repository state. Then read AGENTS.md, progress.json and the packet docs/delivery/tasks/T-106-login-flow-and-e2e-harness.md. Do not rely on chat history.
 
 ## State (verified 2026-10-24)
-- M0 closed. T-101 (PR #8), T-102 (PR #10), T-103 (PR #12) and T-104 (PR #14, 4f549e9) are merged into `develop`; push CI on develop green (all 5 jobs). Evidence is in progress.json.
-- T-104 left: `/api/students/**` (Tutor policy: list/search, create, get, patch with `version`, archive/restore, reset-password, unlock, delete with `confirmName`), Identity's `IAccountService` contract, `AuthorizationSuiteTests` + `IsolationSuiteTests` (both discover endpoints; 0 `/api/me` routes in M1), test builders in `tests/Keemese.IntegrationTests/Given.cs` (`Given.Student(...)`, `AsReadyTutor()` once per app, `AsStudent(...)`, `FromNewIp()`). Tutor DTOs are `TutorStudentDto` / `TutorStudentListItemDto`. Contract details are in docs/architecture/api.md#students-students--identity.
-- T-104 follow-ups (not in T-105): a T6 reflection test over student DTOs and an isolation-suite "count > 0" assertion with the first `/api/me` route (M2); a concurrent-create test for the username race.
-- gitleaks flags invented password literals assigned to `*Password` names (generic-api-key). Avoid such literals or add the reviewed fingerprint to `.gitleaksignore` (precedent T-102, T-104).
-- Windows: a local Application Control policy randomly blocks the Debug `Keemese.Api.dll`; run .NET tests with `-c Release`.
+- M0 closed. T-101..T-104 and T-105 (PR #16, 23cc0cc) are merged into `develop`. Evidence is in progress.json.
+- T-105 left: `web/src/api/openapi.json` (written by `dotnet build` through `Microsoft.Extensions.ApiDescription.Server`) and the generated `schema.d.ts` (`npm run api:types --prefix web`); never hand-edit either. After changing an endpoint or DTO: build, `api:types`, commit both. CI `backend` fails "API types are up to date" otherwise. New endpoints need `.Produces<T>()` or the document has no response type (docs/testing/ci.md#api-types-t-105).
+- `web/src/api/client.ts`: `apiFetch` (XSRF header on unsafe methods, JSON `body`, ProblemDetails → `ApiError.code`) and a typed `api(method, path, { params, query, body })`. A 401 (except login/me) calls the handler registered in `web/src/main.tsx` (clears the query cache, navigates to `/login?redirect=`). `web/src/lib/redirect.ts`: `safeRedirect(target, role)` for the login page.
+- `openapi-typescript` 7.13.0 needs an npm `overrides` for its `typescript ^5.x` peer (TS 6.0.3 pinned); recheck on updates.
+- gitleaks flags invented password literals assigned to `*Password` names. Avoid them or add the reviewed fingerprint to `.gitleaksignore`.
+- Windows: a local Application Control policy blocks native binaries at random (Debug/Release test exes, rolldown's `.node` for vitest). Run checks in Linux containers when blocked: web `MSYS_NO_PATHCONV=1 docker run --rm -v "D:/keemese-english:/repo" -v keemese-web-nm:/repo/web/node_modules -w /repo/web node:24-alpine sh -c "npm ci && npm run lint && npm run typecheck && npm test && npm run build"`; .NET in `mcr.microsoft.com/dotnet/sdk:10.0` on a copied tree (exclude bin/obj/node_modules), Testcontainers via `-v /var/run/docker.sock:/var/run/docker.sock -e TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal --add-host host.docker.internal:host-gateway`.
+- The guard hook blocked a subagent's `docker run --rm …` as a recursive delete (reported to the owner).
 
 ## Before starting
-1. Check `pending_owner_actions` in progress.json (threat-model T19 follow-up, branch protection, Dependabot security updates, OD-01/02/04/07/08).
-2. Merges: docs/agents/operating-model.md#merge-delegation only. T-105 changes CI and `web/src/api/**` (L4, antiforgery handling): ask before merging.
+1. Check `pending_owner_actions` in progress.json.
+2. Merges: docs/agents/operating-model.md#merge-delegation only. T-106 is authentication UI + CI (L4): ask before merging.
 
 ## The one next task
-T-105 on `feature/m1-api-types` from `develop`. Follow the packet exactly: option 1 (`Microsoft.Extensions.ApiDescription.Server`, build-time only, approved 2026-10-23) and `openapi-typescript` (ADR-0016); skip startup migration/bootstrap when the document generator runs; the CI step "API types are up to date"; `apiFetch` XSRF header, JSON bodies, 401 handler; `safeRedirect`. Then reviewer + security-reviewer, evidence in progress.json, PR, and ask the Lead Coordinator to merge.
+T-106 on `feature/m1-login-flow` from `develop`. Follow the packet: login page (React Hook Form + Zod + `@hookform/resolvers`, approved), forced change-password, guards replacing `requireSession`, logout, Playwright + axe, the `e2e-smoke` job. Then reviewer + security-reviewer, evidence in progress.json, PR, and ask the Lead Coordinator to merge.
 
 ## Verify before building on it
-`dotnet build -warnaserror` → 0/0, `dotnet test tests/Keemese.UnitTests -c Release` → 27 pass, `dotnet test tests/Keemese.IntegrationTests -c Release` → 37 pass (Docker; background), `npm ci --prefix web && npm run lint --prefix web && npm test --prefix web` → 13 pass (last run 2026-10-23), `node --test ".claude/hooks/*.test.mjs"` → 13, `node --test "scripts/*.test.mjs"` → 4.
+`dotnet build -warnaserror` → 0/0, unit 27, integration 37, web vitest 44 (Linux container, 2026-10-24), `node --test ".claude/hooks/*.test.mjs"` → 13, `node --test "scripts/*.test.mjs"` → 4.
 
 ## Stop conditions
-Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-105 in review with evidence recorded → ask for merge approval. Stop.
+Context ≥ 320k (HANDOFF) → handoff per docs/agents/handoff.md. T-106 in review with evidence recorded → ask for merge approval. Stop.
