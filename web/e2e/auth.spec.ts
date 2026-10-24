@@ -78,7 +78,7 @@ test('student: created via the API, login, forced change, /s, kept out of /t @sm
 test('a wrong password shows the generic error @smoke', async ({ page }) => {
   await page.goto('/login')
   await signIn(page, tutor.userName, 'not the right one')
-  await expect(page.getByRole('alert')).toHaveText('deliberately wrong text')
+  await expect(page.getByRole('alert')).toHaveText(enErrors.auth.invalid_credentials)
   await expect(page).toHaveURL(/\/login$/)
   await expectAccessible(page)
 })
